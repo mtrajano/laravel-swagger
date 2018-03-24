@@ -11,7 +11,8 @@ class GenerateSwaggerDoc extends Command
      *
      * @var string
      */
-    protected $signature = 'laravel-swagger:generate';
+    protected $signature = 'laravel-swagger:generate
+                            {--format=json : The format of the output, current options are json and yaml}';
 
     /**
      * The console command description.
@@ -31,6 +32,10 @@ class GenerateSwaggerDoc extends Command
 
         $docs = (new Generator($config))->generate();
 
-        echo json_encode($docs, JSON_PRETTY_PRINT) . "\n";
+        $formattedDocs = (new FormatterManager($docs))
+            ->setFormat($this->option('format'))
+            ->format();
+
+        $this->line($formattedDocs);
     }
 }

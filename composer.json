@@ -16,6 +16,9 @@
             "Mtrajano\\LaravelSwagger\\": "src/"
         }
     },
+    "suggest": {
+        "ext-yaml": "Required to use the YAML output option"
+    },
     "extra": {
         "laravel": {
             "providers": [
