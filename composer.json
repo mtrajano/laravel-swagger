@@ -1,0 +1,26 @@
+{
+    "name": "mtrajano/laravel-swagger",
+    "description": "Auto generates the swagger documentation for a laravel project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mauricio Trajano",
+            "email": "mauriciot1993@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": ">=5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mtrajano\\LaravelSwagger\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mtrajano\\LaravelSwagger\\SwaggerServiceProvider"
+            ]
+        }
+    }
+}
