@@ -13,6 +13,14 @@ class Generator
 
     protected $docs;
 
+    protected $uri;
+
+    protected $originalUri;
+
+    protected $method;
+
+    protected $action;
+
     public function __construct($config)
     {
         $this->config = $config;
@@ -23,16 +31,19 @@ class Generator
         $this->docs = $this->getBaseInfo();
 
         foreach ($this->getAppRoutes() as $route) {
-            $uri = $this->getRouteUri($route);
+            $this->originalUri = $uri = $this->getRouteUri($route);
+            $this->uri = strip_optional_char($uri);
+            $this->action = $route->getAction('uses');
             $methods = $route->methods();
-            $action = $route->getAction('uses');
 
-            if (!isset($this->docs['paths'][$uri])) {
-                $this->docs['paths'][$uri] = [];
+            if (!isset($this->docs['paths'][$this->uri])) {
+                $this->docs['paths'][$this->uri] = [];
             }
 
             foreach ($methods as $method) {
-                $this->generatePath($uri, $method, $action);
+                $this->method = strtolower($method);
+
+                $this->generatePath();
             }
         }
 
@@ -70,11 +81,12 @@ class Generator
         return $uri;
     }
 
-    protected function generatePath($uri, $method, $action)
+    protected function generatePath()
     {
-        $method = strtolower($method);
-        $this->docs['paths'][$uri][$method] = [
-            'description' => strtoupper($method) . ' ' . $uri,
+        $methodDescription = strtoupper($this->method);
+
+        $this->docs['paths'][$this->uri][$this->method] = [
+            'description' => "$methodDescription {$this->uri}",
             'responses' => [
                 '200' => [
                     'description' => 'OK'
@@ -82,16 +94,14 @@ class Generator
             ],
         ];
 
-        if ($rules = $this->getFormRules($action)) {
-            $this->docs['paths'][$uri][$method]['parameters'] = $this->getActionParameters($method, $rules);
-        }
+        $this->addActionParameters();
     }
 
-    protected function getFormRules($action)
+    protected function getFormRules()
     {
-        if (!is_string($action)) return false;
+        if (!is_string($this->action)) return false;
 
-        $parsedAction = Str::parseCallback($action);
+        $parsedAction = Str::parseCallback($this->action);
 
         $parameters = (new ReflectionMethod($parsedAction[0], $parsedAction[1]))->getParameters();
 
@@ -104,50 +114,33 @@ class Generator
         }
     }
 
-    protected function getActionParameters($method, $rules)
+    protected function addActionParameters()
     {
-        $params = [];
+        $rules = $this->getFormRules() ?: [];
 
-        foreach  ($rules as $param => $rule) {
-            $paramRules = explode('|', $rule);
+        $parameters = (new Parameters\PathParameterGenerator($this->method, $this->originalUri, $rules))->getParameters();
 
-            $params[] = [
-                'in' => $this->getParamLocation($method),
-                'name' => $param,
-                'type' => $this->getParamType($paramRules),
-                'required' => $this->isParamRequired($paramRules),
-                'description' => '',
-            ];
+        if (!empty($rules)) {
+            $parameterGenerator = $this->getParameterGenerator($rules);
+
+            $parameters = array_merge($parameters, $parameterGenerator->getParameters());
+
         }
 
-        return $params;
-    }
-
-    protected function getParamLocation($method)
-    {
-        return in_array($method, ['get', 'head', 'delete']) ?
-            'query':
-            'body';
-    }
-
-    protected function getParamType(array $paramRules)
-    {
-        if (in_array('integer', $paramRules)) {
-            return 'integer';
-        } else if (in_array('numeric', $paramRules)) {
-            return 'number';
-        } else if (in_array('boolean', $paramRules)) {
-            return 'boolean';
-        } else if (in_array('array', $paramRules)) {
-            return 'array';
-        } else {
-            //date, ip, email, etc..
-            return 'string';
+        if (!empty($parameters)) {
+            $this->docs['paths'][$this->uri][$this->method]['parameters'] = $parameters;
         }
     }
 
-    protected function isParamRequired(array $paramRules)
+    protected function getParameterGenerator($rules)
     {
-        return in_array('required', $paramRules);
+        switch($this->method) {
+            case 'post':
+            case 'put':
+            case 'patch':
+                return new Parameters\BodyParameterGenerator($this->method, $this->originalUri, $rules);
+            default:
+                return new Parameters\QueryParameterGenerator($this->method, $this->originalUri, $rules);
+        }
     }
 }
