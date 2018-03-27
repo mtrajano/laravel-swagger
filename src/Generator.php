@@ -67,7 +67,7 @@ class Generator
 
     protected function getAppRoutes()
     {
-        return app('routes')->get();
+        return app('router')->getRoutes();
     }
 
     protected function getRouteUri(Route $route)
@@ -97,6 +97,23 @@ class Generator
         $this->addActionParameters();
     }
 
+    protected function addActionParameters()
+    {
+        $rules = $this->getFormRules() ?: [];
+
+        $parameters = (new Parameters\PathParameterGenerator($this->method, $this->originalUri, $rules))->getParameters();
+
+        if (!empty($rules)) {
+            $parameterGenerator = $this->getParameterGenerator($rules);
+
+            $parameters = array_merge($parameters, $parameterGenerator->getParameters());
+        }
+
+        if (!empty($parameters)) {
+            $this->docs['paths'][$this->uri][$this->method]['parameters'] = $parameters;
+        }
+    }
+
     protected function getFormRules()
     {
         if (!is_string($this->action)) return false;
@@ -111,24 +128,6 @@ class Generator
             if (is_subclass_of($class, FormRequest::class)) {
                 return (new $class)->rules();
             }
-        }
-    }
-
-    protected function addActionParameters()
-    {
-        $rules = $this->getFormRules() ?: [];
-
-        $parameters = (new Parameters\PathParameterGenerator($this->method, $this->originalUri, $rules))->getParameters();
-
-        if (!empty($rules)) {
-            $parameterGenerator = $this->getParameterGenerator($rules);
-
-            $parameters = array_merge($parameters, $parameterGenerator->getParameters());
-
-        }
-
-        if (!empty($parameters)) {
-            $this->docs['paths'][$this->uri][$this->method]['parameters'] = $parameters;
         }
     }
 

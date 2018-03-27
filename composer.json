@@ -8,8 +8,9 @@
             "email": "mauriciot1993@gmail.com"
         }
     ],
-    "require": {
-        "laravel/framework": ">=5.0"
+    "require-dev": {
+        "orchestra/testbench": "~3.0",
+        "phpunit/phpunit": "6.*"
     },
     "autoload": {
         "files": [
@@ -17,6 +18,11 @@
         ],
         "psr-4": {
             "Mtrajano\\LaravelSwagger\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mtrajano\\LaravelSwagger\\Tests\\": "tests/"
         }
     },
     "suggest": {
