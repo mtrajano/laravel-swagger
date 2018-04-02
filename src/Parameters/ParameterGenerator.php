@@ -41,4 +41,13 @@ abstract class ParameterGenerator
     {
         return in_array('required', $paramRules);
     }
+
+    protected function splitRules($rules)
+    {
+        if (is_string($rules)) {
+            return explode('|', $rules);
+        } else {
+            return $rules;
+        }
+    }
 }

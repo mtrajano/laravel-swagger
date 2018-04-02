@@ -19,7 +19,7 @@ class BodyParameterGenerator extends ParameterGenerator
         ];
 
         foreach  ($this->rules as $param => $rule) {
-            $paramRules = explode('|', $rule);
+            $paramRules = $this->splitRules($rule);
 
             if ($this->isParamRequired($paramRules)) {
                 $required[] = $param;

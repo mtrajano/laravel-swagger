@@ -9,7 +9,7 @@ class QueryParameterGenerator extends ParameterGenerator
         $params = [];
 
         foreach  ($this->rules as $param => $rule) {
-            $paramRules = explode('|', $rule);
+            $paramRules = $this->splitRules($rule);
 
             $params[] = [
                 'in' => $this->getParamLocation(),
