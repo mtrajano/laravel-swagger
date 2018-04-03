@@ -2,6 +2,7 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\Parameters;
 
+use Illuminate\Validation\Rule;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 use Mtrajano\LaravelSwagger\Parameters\QueryParameterGenerator;
 
@@ -58,6 +59,23 @@ class QueryParameterGeneratorTest extends TestCase
             'name' => 'account_type',
             'type' => 'integer',
             'enum' => [1,2],
+        ], $queryParameters[0]);
+    }
+
+    public function testEnumRuleObjet()
+    {
+        $queryParameters = $this->getQueryParameters([
+            'account_type' => [
+                'integer',
+                Rule::in(1,2),
+                'in_array:foo'
+            ],
+        ]);
+
+        $this->assertArraySubset([
+            'name' => 'account_type',
+            'type' => 'integer',
+            'enum' => ["\"1\"","\"2\""], //using Rule::in parameters are cast to string
         ], $queryParameters[0]);
     }
 
