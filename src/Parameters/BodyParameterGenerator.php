@@ -20,14 +20,21 @@ class BodyParameterGenerator extends ParameterGenerator
 
         foreach  ($this->rules as $param => $rule) {
             $paramRules = $this->splitRules($rule);
+            $enums = $this->getEnumValues($paramRules);
 
             if ($this->isParamRequired($paramRules)) {
                 $required[] = $param;
             }
 
-            $properties[$param] = [
+            $propObj = [
                 'type' => $this->getParamType($paramRules)
             ];
+
+            if (!empty($enums)) {
+                $propObj['enum'] = $enums;
+            }
+
+            $properties[$param] = $propObj;
         }
 
         if (!empty($required)) {

@@ -50,4 +50,28 @@ abstract class ParameterGenerator
             return $rules;
         }
     }
+
+    protected function getEnumValues(array $paramRules)
+    {
+        $in = $this->getInParameter($paramRules);
+
+        if (!$in) {
+            return [];
+        }
+
+        list($param, $vals) = explode(':', $in);
+
+        return explode(',', $vals);
+    }
+
+    private function getInParameter(array $paramRules)
+    {
+        foreach ($paramRules as $rule) {
+            if (starts_with($rule, 'in:')) {
+                return $rule;
+            }
+        }
+
+        return false;
+    }
 }

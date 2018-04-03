@@ -62,6 +62,20 @@ class BodyParameterGeneratorTest extends TestCase
         $this->assertArrayNotHasKey('required', $bodyParameters['schema']);
     }
 
+    public function testEnumInBody()
+    {
+        $bodyParameters = $this->getBodyParameters([
+            'account_type' => 'integer|in:1,2|in_array:foo',
+        ]);
+
+        $this->assertEquals([
+            'account_type' => [
+                'type' => 'integer',
+                'enum' => [1,2],
+            ]
+        ], $bodyParameters['schema']['properties']);
+    }
+
     private function getBodyParameters(array $rules)
     {
         $bodyParameters = (new BodyParameterGenerator('post', '/', $rules))->getParameters();

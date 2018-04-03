@@ -7,7 +7,6 @@ use Mtrajano\LaravelSwagger\Parameters\QueryParameterGenerator;
 
 class QueryParameterGeneratorTest extends TestCase
 {
-
     public function testRequiredParameter()
     {
         $queryParameters = $this->getQueryParameters([
@@ -46,6 +45,19 @@ class QueryParameterGeneratorTest extends TestCase
             'name' => 'email',
             'type' => 'string',
             'required' => false,
+        ], $queryParameters[0]);
+    }
+
+    public function testEnumInQuery()
+    {
+        $queryParameters = $this->getQueryParameters([
+            'account_type' => 'integer|in:1,2|in_array:foo',
+        ]);
+
+        $this->assertArraySubset([
+            'name' => 'account_type',
+            'type' => 'integer',
+            'enum' => [1,2],
         ], $queryParameters[0]);
     }
 
