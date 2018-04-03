@@ -13,7 +13,8 @@ class TestCase extends OrchestraTestCase
 
     protected function getEnvironmentSetUp($app)
     {
-        $app['router']->get('/users', 'Mtrajano\\LaravelSwagger\\Tests\\Controllers\\UserController@index');
-        $app['router']->get('/users/{id}', 'Mtrajano\\LaravelSwagger\\Tests\\Controllers\\UserController@show');
+        $app['router']->get('/users', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@index');
+        $app['router']->get('/users/{id}', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@show');
+        $app['router']->post('/users', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@store');
     }
 }

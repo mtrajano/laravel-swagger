@@ -50,8 +50,14 @@ class GeneratorTest extends TestCase
     public function testPathData($paths)
     {
         $this->assertArrayHasKey('get', $paths['/users']);
+        $this->assertArrayHasKey('post', $paths['/users']);
 
         $this->assertArrayHasKey('description', $paths['/users']['get']);
         $this->assertArrayHasKey('responses', $paths['/users']['get']);
+        $this->assertArrayNotHasKey('parameters', $paths['/users']['get']);
+
+        $this->assertArrayHasKey('description', $paths['/users']['post']);
+        $this->assertArrayHasKey('responses', $paths['/users']['post']);
+        $this->assertArrayHasKey('parameters', $paths['/users']['post']);
     }
 }
