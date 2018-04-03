@@ -2,8 +2,15 @@
 
 namespace Mtrajano\LaravelSwagger\Parameters;
 
-class PathParameterGenerator extends ParameterGenerator
+class PathParameterGenerator implements ParameterGenerator
 {
+    protected $uri;
+
+    public function __construct($uri)
+    {
+        $this->uri = $uri;
+    }
+
     public function getParameters()
     {
         $params = [];

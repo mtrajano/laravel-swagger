@@ -101,7 +101,7 @@ class Generator
     {
         $rules = $this->getFormRules() ?: [];
 
-        $parameters = (new Parameters\PathParameterGenerator($this->method, $this->originalUri, $rules))->getParameters();
+        $parameters = (new Parameters\PathParameterGenerator($this->originalUri))->getParameters();
 
         if (!empty($rules)) {
             $parameterGenerator = $this->getParameterGenerator($rules);
@@ -137,9 +137,9 @@ class Generator
             case 'post':
             case 'put':
             case 'patch':
-                return new Parameters\BodyParameterGenerator($this->method, $this->originalUri, $rules);
+                return new Parameters\BodyParameterGenerator($rules);
             default:
-                return new Parameters\QueryParameterGenerator($this->method, $this->originalUri, $rules);
+                return new Parameters\QueryParameterGenerator($rules);
         }
     }
 }

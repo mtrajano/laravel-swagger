@@ -81,6 +81,6 @@ class QueryParameterGeneratorTest extends TestCase
 
     private function getQueryParameters(array $rules)
     {
-        return (new QueryParameterGenerator('get', '/', $rules))->getParameters();
+        return (new QueryParameterGenerator($rules))->getParameters();
     }
 }

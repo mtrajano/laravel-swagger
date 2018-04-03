@@ -51,6 +51,6 @@ class PathParameterGeneratorTest extends TestCase
 
     private function getPathParameters($uri)
     {
-        return (new PathParameterGenerator('get', $uri, []))->getParameters();
+        return (new PathParameterGenerator($uri))->getParameters();
     }
 }

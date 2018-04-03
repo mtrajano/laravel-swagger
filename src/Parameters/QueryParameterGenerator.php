@@ -2,8 +2,17 @@
 
 namespace Mtrajano\LaravelSwagger\Parameters;
 
-class QueryParameterGenerator extends ParameterGenerator
+class QueryParameterGenerator implements ParameterGenerator
 {
+    use Concerns\GeneratesFromRules;
+
+    protected $rules;
+
+    public function __construct($rules)
+    {
+        $this->rules = $rules;
+    }
+
     public function getParameters()
     {
         $params = [];

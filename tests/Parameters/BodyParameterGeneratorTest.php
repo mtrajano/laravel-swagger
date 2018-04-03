@@ -78,7 +78,7 @@ class BodyParameterGeneratorTest extends TestCase
 
     private function getBodyParameters(array $rules)
     {
-        $bodyParameters = (new BodyParameterGenerator('post', '/', $rules))->getParameters();
+        $bodyParameters = (new BodyParameterGenerator($rules))->getParameters();
 
         return current($bodyParameters);
     }
