@@ -6,13 +6,17 @@ use Mtrajano\LaravelSwagger\Generator;
 
 class GeneratorTest extends TestCase
 {
+    protected $config;
+
     protected $generator;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->generator = new Generator(config('laravel-swagger'));
+        $this->generator = new Generator(
+            $this->config = config('laravel-swagger')
+        );
     }
 
     public function testBaseInfo()
@@ -59,5 +63,36 @@ class GeneratorTest extends TestCase
         $this->assertArrayHasKey('description', $paths['/users']['post']);
         $this->assertArrayHasKey('responses', $paths['/users']['post']);
         $this->assertArrayHasKey('parameters', $paths['/users']['post']);
+    }
+
+    public function testOptionalData()
+    {
+        $optionalData = [
+            'schemes' => [
+                'http',
+                'https',
+            ],
+
+            'consumes' => [
+                'application/json',
+            ],
+
+            'produces' => [
+                'application/json',
+            ],
+        ];
+
+        $config = array_merge($this->config, $optionalData);
+
+        $docs = (new Generator($config))->generate();
+
+        $this->assertArrayHasKey('schemes', $docs);
+        $this->assertArrayHasKey('consumes', $docs);
+        $this->assertArrayHasKey('produces', $docs);
+
+        $this->assertContains('http', $docs['schemes']);
+        $this->assertContains('https', $docs['schemes']);
+        $this->assertContains('application/json', $docs['consumes']);
+        $this->assertContains('application/json', $docs['produces']);
     }
 }

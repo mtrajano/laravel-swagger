@@ -52,7 +52,7 @@ class Generator
 
     protected function getBaseInfo()
     {
-        return [
+        $baseInfo = [
             'swagger' => '2.0',
             'info' => [
                 'title' => $this->config['title'],
@@ -61,8 +61,23 @@ class Generator
             ],
             'host' => $this->config['host'],
             'basePath' => $this->config['basePath'],
-            'paths' => [],
         ];
+
+        if (!empty($this->config['schemes'])) {
+            $baseInfo['schemes'] = $this->config['schemes'];
+        }
+
+        if (!empty($this->config['consumes'])) {
+            $baseInfo['consumes'] = $this->config['consumes'];
+        }
+
+        if (!empty($this->config['produces'])) {
+            $baseInfo['produces'] = $this->config['produces'];
+        }
+
+        $baseInfo['paths'] = [];
+
+        return $baseInfo;
     }
 
     protected function getAppRoutes()
