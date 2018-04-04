@@ -34,4 +34,17 @@ return [
     'produces' => [
         // 'application/json',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ignore methods
+    |--------------------------------------------------------------------------
+    |
+    | Methods in the following array will be ignored in the paths array
+    |
+    */
+
+    'ignoredMethods' => [
+        'head',
+    ],
 ];

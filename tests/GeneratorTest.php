@@ -54,6 +54,7 @@ class GeneratorTest extends TestCase
     public function testPathData($paths)
     {
         $this->assertArrayHasKey('get', $paths['/users']);
+        $this->assertArrayNotHasKey('head', $paths['/users']);
         $this->assertArrayHasKey('post', $paths['/users']);
 
         $this->assertArrayHasKey('description', $paths['/users']['get']);
@@ -63,6 +64,15 @@ class GeneratorTest extends TestCase
         $this->assertArrayHasKey('description', $paths['/users']['post']);
         $this->assertArrayHasKey('responses', $paths['/users']['post']);
         $this->assertArrayHasKey('parameters', $paths['/users']['post']);
+    }
+
+    public function testOverwriteIgnoreMethods()
+    {
+        $this->config['ignoredMethods'] = [];
+
+        $docs = (new Generator($this->config))->generate();
+
+        $this->assertArrayHasKey('head', $docs['paths']['/users']);
     }
 
     public function testOptionalData()

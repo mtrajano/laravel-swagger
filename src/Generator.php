@@ -43,6 +43,8 @@ class Generator
             foreach ($methods as $method) {
                 $this->method = strtolower($method);
 
+                if (in_array($this->method, $this->config['ignoredMethods'])) continue;
+
                 $this->generatePath();
             }
         }
