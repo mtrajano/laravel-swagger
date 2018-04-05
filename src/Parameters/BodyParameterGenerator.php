@@ -27,7 +27,7 @@ class BodyParameterGenerator implements ParameterGenerator
             ],
         ];
 
-        foreach  ($this->rules as $param => $rule) {
+        foreach ($this->rules as $param => $rule) {
             $paramRules = $this->splitRules($rule);
             $enums = $this->getEnumValues($paramRules);
 

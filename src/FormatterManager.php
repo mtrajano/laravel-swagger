@@ -26,7 +26,7 @@ class FormatterManager
 
     protected function getFormatter($format)
     {
-        switch($format) {
+        switch ($format) {
             case 'json':
                 return new Formatters\JsonFormatter($this->docs);
             case 'yaml':

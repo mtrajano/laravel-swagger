@@ -34,6 +34,16 @@ trait GeneratesFromRules
         return in_array('required', $paramRules);
     }
 
+    protected function isArrayParameter($param)
+    {
+        return str_contains($param, '*');
+    }
+
+    protected function getArrayKey($param)
+    {
+        return current(explode('.', $param));
+    }
+
     protected function getEnumValues(array $paramRules)
     {
         $in = $this->getInParameter($paramRules);

@@ -150,7 +150,7 @@ class Generator
 
     protected function getParameterGenerator($rules)
     {
-        switch($this->method) {
+        switch ($this->method) {
             case 'post':
             case 'put':
             case 'patch':

@@ -79,6 +79,55 @@ class QueryParameterGeneratorTest extends TestCase
         ], $queryParameters[0]);
     }
 
+    public function testArrayTypeDefaultsToString()
+    {
+        $queryParameters = $this->getQueryParameters([
+            'values' => 'array',
+        ]);
+
+        $this->assertArraySubset([
+            'name' => 'values',
+            'type' => 'array',
+            'required' => false,
+            'items' => [
+                'type' => 'string',
+            ],
+        ], $queryParameters[0]);
+    }
+
+    public function testArrayValidationSyntax()
+    {
+        $queryParameters = $this->getQueryParameters([
+            'values.*' => 'integer',
+        ]);
+
+        $this->assertArraySubset([
+            'name' => 'values',
+            'type' => 'array',
+            'required' => false,
+            'items' => [
+                'type' => 'integer',
+            ],
+        ], $queryParameters[0]);
+    }
+
+    public function testArrayValidationSyntaxWithRequiredArray()
+    {
+        $queryParameters = $this->getQueryParameters([
+            'values.*' => 'integer',
+            'values' => 'required',
+        ]);
+
+        $this->assertArraySubset([
+            'name' => 'values',
+            'type' => 'array',
+            'required' => true,
+            'items' => [
+                'type' => 'integer',
+            ],
+        ], $queryParameters[0]);
+    }
+
     private function getQueryParameters(array $rules)
     {
         return (new QueryParameterGenerator($rules))->getParameters();
