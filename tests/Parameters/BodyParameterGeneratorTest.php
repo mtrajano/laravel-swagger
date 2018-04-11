@@ -101,6 +101,57 @@ class BodyParameterGeneratorTest extends TestCase
         ], $bodyParameters['schema']['properties']);
     }
 
+    public function testObjectInArraySyntax()
+    {
+        $bodyParameters = $this->getBodyParameters([
+            'points' => 'array',
+            'points.*.x' => 'numeric',
+            'points.*.y' => 'numeric',
+        ]);
+
+        $this->assertEquals([
+            'points' => [
+                'type' => 'array',
+                'items' => [
+                    [
+                        'type' => 'object',
+                        'properties' => [
+                            'x' => [
+                                'type' => 'number'
+                            ],
+                            'y' => [
+                                'type' => 'number'
+                            ],
+                        ]
+                    ]
+                ]
+            ]
+        ], $bodyParameters['schema']['properties']);
+    }
+
+    public function testSingleObjectSyntax()
+    {
+        $bodyParameters = $this->getBodyParameters([
+            'point' => '',
+            'point.x' => 'numeric',
+            'point.y' => 'numeric',
+        ]);
+
+        $this->assertEquals([
+            'point' => [
+                'type' => 'object',
+                'properties' => [
+                    'x' => [
+                        'type' => 'number'
+                    ],
+                    'y' => [
+                        'type' => 'number'
+                    ],
+                ]
+            ]
+        ], $bodyParameters['schema']['properties']);
+    }
+
     private function getBodyParameters(array $rules)
     {
         $bodyParameters = (new BodyParameterGenerator($rules))->getParameters();

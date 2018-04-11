@@ -66,23 +66,23 @@ class BodyParameterGenerator implements ParameterGenerator
             $type = $this->getParamType($rules);
         }
 
-        $propObj = [
-            'type' => $type
-        ];
-
-        if ($enums = $this->getEnumValues($rules)) {
-            $propObj['enum'] = $enums;
-        }
-
         if ($name === '*') {
             $name = 0;
         }
 
-        $properties[$name] = $propObj;
+        if (!isset($properties[$name])) {
+            $propObj = $this->getNewPropObj($type, $rules);
+
+            $properties[$name] = $propObj;
+        } else {
+            //overwrite previous type in case it wasn't given before
+            $properties[$name]['type'] = $type;
+        }
 
         if ($type === 'array') {
-            $properties[$name]['items'] = [];
             $this->addToProperties($properties[$name]['items'], $nameTokens, $rules);
+        } else if ($type === 'object') {
+            $this->addToProperties($properties[$name]['properties'], $nameTokens, $rules);
         }
     }
 
@@ -93,5 +93,24 @@ class BodyParameterGenerator implements ParameterGenerator
         } else {
             return 'object';
         }
+    }
+
+    protected function getNewPropObj($type, $rules)
+    {
+        $propObj = [
+            'type' => $type
+        ];
+
+        if ($enums = $this->getEnumValues($rules)) {
+            $propObj['enum'] = $enums;
+        }
+
+        if ($type === 'array') {
+            $propObj['items'] = [];
+        } else if ($type === 'object') {
+            $propObj['properties'] = [];
+        }
+
+        return $propObj;
     }
 }
