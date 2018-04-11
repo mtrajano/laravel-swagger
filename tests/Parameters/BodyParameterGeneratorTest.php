@@ -76,6 +76,31 @@ class BodyParameterGeneratorTest extends TestCase
         ], $bodyParameters['schema']['properties']);
     }
 
+    public function testArraySyntax()
+    {
+        $bodyParameters = $this->getBodyParameters([
+            'matrix' => 'array',
+            'matrix.*' => 'array',
+            'matrix.*.*' => 'integer',
+        ]);
+
+        $this->assertEquals([
+            'matrix' => [
+                'type' => 'array',
+                'items' => [
+                    [
+                        'type' => 'array',
+                        'items' => [
+                            [
+                                'type' => 'integer'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ], $bodyParameters['schema']['properties']);
+    }
+
     private function getBodyParameters(array $rules)
     {
         $bodyParameters = (new BodyParameterGenerator($rules))->getParameters();
