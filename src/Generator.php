@@ -11,6 +11,8 @@ class Generator
 {
     protected $config;
 
+    protected $routeFilter;
+
     protected $docs;
 
     protected $uri;
@@ -21,9 +23,10 @@ class Generator
 
     protected $action;
 
-    public function __construct($config)
+    public function __construct($config, $routeFilter = null)
     {
         $this->config = $config;
+        $this->routeFilter = $routeFilter;
     }
 
     public function generate()
@@ -33,6 +36,11 @@ class Generator
         foreach ($this->getAppRoutes() as $route) {
             $this->originalUri = $uri = $this->getRouteUri($route);
             $this->uri = strip_optional_char($uri);
+
+            if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->uri)) {
+                continue;
+            }
+
             $this->action = $route->getAction('uses');
             $methods = $route->methods();
 
