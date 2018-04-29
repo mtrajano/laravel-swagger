@@ -43,6 +43,8 @@ class GeneratorTest extends TestCase
         $this->assertEquals([
             '/users',
             '/users/{id}',
+            '/api',
+            '/api/store',
         ], array_keys($docs['paths']));
 
         return $docs['paths'];
@@ -104,5 +106,35 @@ class GeneratorTest extends TestCase
         $this->assertContains('https', $docs['schemes']);
         $this->assertContains('application/json', $docs['consumes']);
         $this->assertContains('application/json', $docs['produces']);
+    }
+
+    /**
+     * @param string|null $routeFilter
+     * @param array $expectedRoutes
+     * 
+     * @dataProvider filtersRoutesProvider
+     */
+    public function testFiltersRoutes($routeFilter, $expectedRoutes)
+    {
+        $this->generator = new Generator(
+            $this->config = config('laravel-swagger'),
+            $routeFilter
+        );
+
+        $docs = $this->generator->generate();
+
+        $this->assertEquals($expectedRoutes, array_keys($docs['paths']));
+    }
+
+    /**
+     * @return array
+     */
+    public function filtersRoutesProvider()
+    {
+        return [
+            'No Filter' => [null, ['/users', '/users/{id}', '/api', '/api/store']],
+            '/api Filter' => ['/api', ['/api', '/api/store']],
+            '/=nonexistant Filter' => ['/nonexistant', []],
+        ];
     }
 }

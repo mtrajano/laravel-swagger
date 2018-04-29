@@ -12,7 +12,8 @@ class GenerateSwaggerDoc extends Command
      * @var string
      */
     protected $signature = 'laravel-swagger:generate
-                            {--format=json : The format of the output, current options are json and yaml}';
+                            {--format=json : The format of the output, current options are json and yaml}
+                            {--filter= : Filter to a specific route prefix, such as /api or /v2/api}';
 
     /**
      * The console command description.
@@ -30,7 +31,7 @@ class GenerateSwaggerDoc extends Command
     {
         $config = config('laravel-swagger');
 
-        $docs = (new Generator($config))->generate();
+        $docs = (new Generator($config, $this->option('filter') ?: null))->generate();
 
         $formattedDocs = (new FormatterManager($docs))
             ->setFormat($this->option('format'))
