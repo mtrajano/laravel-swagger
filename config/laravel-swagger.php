@@ -47,4 +47,16 @@ return [
     'ignoredMethods' => [
         'head',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Include descriptions
+    |--------------------------------------------------------------------------
+    |
+    | If true will parse the action method docBlock for any lines that are not
+    | part of an annotation and will add it as the route's description
+    |
+    */
+
+    'parseDescriptions' => true,
 ];

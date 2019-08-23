@@ -1,6 +1,6 @@
 # Laravel Swagger
 
-This package scans your laravel project's routes and auto generates a Swagger 2.0 documentation for you. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. It will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if you route contains them.
+This package scans your laravel project's routes and auto generates a Swagger 2.0 documentation for you. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. It will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if you route contains them. Finally, this package will also scan any documentation you have in your action methods and add it as description to that path, along with any appropriate annotations such as @deprecated.
 
 ## Installation
 
@@ -30,6 +30,11 @@ Say you have a route `/api/users/{id}` that maps to `UserController@show`
 
 Your sample controller might look like this:
 ```php
+/**
+ * Return all the details of a user
+ *
+ * @deprecated
+ */
 class UserController extends Controller
 {
     public function show(UserShowRequest $request, $id)
@@ -68,7 +73,9 @@ Running `php artisan laravel-swagger:generate > swagger.json` will generate the 
     "paths": {
         "\/api\/user\/{id}": {
             "get": {
-                "description": "GET \/api\/user\/{id}",
+                "summary": "GET \/api\/user\/{id}",
+                "description": "Return all the details of a user",
+                "deprecated": true
                 "responses": {
                     "200": {
                         "description": "OK"
