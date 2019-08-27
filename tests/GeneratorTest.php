@@ -19,7 +19,7 @@ class GeneratorTest extends TestCase
         );
     }
 
-    public function testBaseInfo()
+    public function testRequiredBaseInfo()
     {
         $docs = $this->generator->generate();
 
@@ -35,8 +35,40 @@ class GeneratorTest extends TestCase
         return $docs;
     }
 
+    public function testRequiredBaseInfoData()
+    {
+        $config = array_merge($this->config, [
+            'title' => 'My awesome site!',
+            'description' => 'This is my awesome site, please enjoy it',
+            'appVersion' => '1.0.0',
+            'host' => 'https://example.com',
+            'basePath' => '/api',
+            'schemes' => [
+                'https',
+            ],
+            'consumes' => [
+                'application/json',
+            ],
+            'produces' => [
+                'application/json',
+            ],
+        ]);
+
+        $docs = (new Generator($config))->generate();
+
+        $this->assertEquals('2.0', $docs['swagger']);
+        $this->assertEquals('My awesome site!', $docs['info']['title']);
+        $this->assertEquals('This is my awesome site, please enjoy it', $docs['info']['description']);
+        $this->assertEquals('1.0.0', $docs['info']['version']);
+        $this->assertEquals('https://example.com', $docs['host']);
+        $this->assertEquals('/api', $docs['basePath']);
+        $this->assertEquals(['https'], $docs['schemes']);
+        $this->assertEquals(['application/json'], $docs['consumes']);
+        $this->assertEquals(['application/json'], $docs['produces']);
+    }
+
     /**
-     * @depends testBaseInfo
+     * @depends testRequiredBaseInfo
      */
     public function testHasPaths($docs)
     {
@@ -72,9 +104,7 @@ class GeneratorTest extends TestCase
     {
 
         $expectedPostDescription = <<<EOD
-Store a new user in the application
 Data is validated [see description here](https://example.com) so no bad data can be passed.
-
 Please read the documentation for more information
 EOD;
 
@@ -84,21 +114,21 @@ EOD;
         $this->assertArrayHasKey('deprecated', $paths['/users']['get']);
         $this->assertArrayNotHasKey('parameters', $paths['/users']['get']);
 
-        $this->assertEquals('GET /users', $paths['/users']['get']['summary']);
+        $this->assertEquals('Get a list of of users in the application', $paths['/users']['get']['summary']);
         $this->assertEquals(false, $paths['/users']['get']['deprecated']);
-        $this->assertEquals('Get a list of of users in the application', $paths['/users']['get']['description']);
+        $this->assertEquals('', $paths['/users']['get']['description']);
 
-        $this->assertEquals('POST /users', $paths['/users']['post']['summary']);
+        $this->assertEquals('Store a new user in the application', $paths['/users']['post']['summary']);
         $this->assertEquals(true, $paths['/users']['post']['deprecated']);
         $this->assertEquals($expectedPostDescription, $paths['/users']['post']['description']);
 
-        $this->assertEquals('GET /users/{id}', $paths['/users/{id}']['get']['summary']);
+        $this->assertEquals('', $paths['/users/{id}']['get']['summary']);
         $this->assertEquals(false, $paths['/users/{id}']['get']['deprecated']);
-        $this->assertEquals("", $paths['/users/{id}']['get']['description']);
+        $this->assertEquals('', $paths['/users/{id}']['get']['description']);
 
-        $this->assertEquals('GET /users/details', $paths['/users/details']['get']['summary']);
+        $this->assertEquals('', $paths['/users/details']['get']['summary']);
         $this->assertEquals(true, $paths['/users/details']['get']['deprecated']);
-        $this->assertEquals("", $paths['/users/details']['get']['description']);
+        $this->assertEquals('', $paths['/users/details']['get']['description']);
     }
 
     public function testOverwriteIgnoreMethods()
@@ -110,13 +140,15 @@ EOD;
         $this->assertArrayHasKey('head', $docs['paths']['/users']);
     }
 
-    public function testParseDescriptionFalse()
+    public function testParseDocBlockFalse()
     {
-        $this->config['parseDescriptions'] = false;
+        $this->config['parseDocBlock'] = false;
 
         $docs = (new Generator($this->config))->generate();
 
-        $this->assertEquals("", $docs['paths']['/users']['post']['description']);
+        $this->assertEquals('', $docs['paths']['/users']['post']['summary']);
+        $this->assertEquals(false, $docs['paths']['/users']['post']['deprecated']);
+        $this->assertEquals('', $docs['paths']['/users']['post']['description']);
     }
 
     public function testOptionalData()

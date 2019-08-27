@@ -21,8 +21,8 @@ class UserController extends Controller
 
     /**
      * Store a new user in the application
-     * Data is validated [see description here](https://example.com) so no bad data can be passed.
      *
+     * Data is validated [see description here](https://example.com) so no bad data can be passed.
      * Please read the documentation for more information
      *
      * @param UserStoreRequest $request

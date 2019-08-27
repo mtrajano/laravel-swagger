@@ -6,6 +6,7 @@ use ReflectionMethod;
 use Illuminate\Support\Str;
 use Illuminate\Routing\Route;
 use Illuminate\Foundation\Http\FormRequest;
+use phpDocumentor\Reflection\DocBlockFactory;
 
 class Generator
 {
@@ -27,6 +28,7 @@ class Generator
     {
         $this->config = $config;
         $this->routeFilter = $routeFilter;
+        $this->docParser = DocBlockFactory::createInstance();
     }
 
     public function generate()
@@ -112,10 +114,10 @@ class Generator
         $actionInstance = $this->action ? $this->getActionClassInstance($this->action) : null;
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: "") : "";
 
-        list($isDeprecated, $description) = $this->parseActionDocBlock($docBlock);
+        list($isDeprecated, $summary, $description) = $this->parseActionDocBlock($docBlock);
 
         $this->docs['paths'][$this->uri][$this->method] = [
-            'summary' => "$requestMethod {$this->uri}",
+            'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
             'responses' => [
@@ -181,72 +183,21 @@ class Generator
 
     private function parseActionDocBlock(string $docBlock)
     {
-        $isDeprecated = !!preg_match('/@deprecated/', $docBlock);
-
-        preg_match('/\/\*\s*(.+?)\s*\*\//sm', $docBlock, $matches);
-        $commentWithoutTrailingCharacters = isset($matches[1]) ? $matches[1] : "";
-
-        if (!$this->config['parseDescriptions']) {
-            $commentWithoutTrailingCharacters = "";
+        if (empty($docBlock) || !$this->config['parseDocBlock']) {
+            return [false, "", ""];
         }
 
-        if (empty($commentWithoutTrailingCharacters)) {
-            return [$isDeprecated, $commentWithoutTrailingCharacters];
+        try {
+            $parsedComment = $this->docParser->create($docBlock);
+
+            $isDeprecated = $parsedComment->hasTag('deprecated');
+
+            $summary = $parsedComment->getSummary();
+            $description = (string) $parsedComment->getDescription();
+
+            return [$isDeprecated, $summary, $description];
+        } catch(\Exception $e) {
+            return [false, "", ""];
         }
-
-        $lines = explode("\n", $commentWithoutTrailingCharacters);
-        $lines = array_map('trim', $lines);
-
-        $description = $this->buildDescription($lines);
-
-        return [$isDeprecated, $description];
-    }
-
-    private function buildDescription(array $matches)
-    {
-        $commentLines = $this->getNonAnnotationLines($matches);
-        $commentLines = $this->trimLines($commentLines);
-        $commentLines = $this->trimAroundComment($commentLines);
-
-        return implode("\n", $commentLines);
-    }
-
-    private function getNonAnnotationLines(array $lines)
-    {
-        return array_filter($lines, function($line) {
-            return !preg_match('/^\*+\s*@/', $line);
-        });
-    }
-
-    private function trimLines(array $comments)
-    {
-        $comments = array_map(function($line) {
-            preg_match('/^\**(.*)/', $line, $matches);
-
-            return isset($matches[1]) ? $matches[1] : "\n";
-        }, $comments);
-
-        return array_map('trim', $comments);
-    }
-
-    private function trimAroundComment(array $lines)
-    {
-        foreach ($lines as $key => $value) {
-            if (trim($value)) {
-                break;
-            }
-
-            unset($lines[$key]);
-        }
-
-        foreach (array_reverse($lines, true) as $key => $value) {
-            if (trim($value)) {
-                break;
-            }
-
-            unset($lines[$key]);
-        }
-
-        return array_values($lines);
     }
 }

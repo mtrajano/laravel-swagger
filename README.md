@@ -1,6 +1,8 @@
 # Laravel Swagger
 
-This package scans your laravel project's routes and auto generates a Swagger 2.0 documentation for you. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. It will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if you route contains them. Finally, this package will also scan any documentation you have in your action methods and add it as description to that path, along with any appropriate annotations such as @deprecated.
+This package scans your laravel project's routes and auto generates a Swagger 2.0 documentation for you. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. It will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if your route contains them. Finally, this package will also scan any documentation you have in your action methods and add it as summary and description to that path, along with any appropriate annotations such as @deprecated.
+
+One thing to note is this library leans on being explicit. It will choose to include keys even if they have a default. For example it chooses to say a route has a deprecated value of false rather than leaving it out. I believe this makes reading the documentation easier by not leaving important information out. The file can be easily cleaned up afterwards if the user chooses to leave out the defaults.
 
 ## Installation
 
@@ -32,6 +34,9 @@ Your sample controller might look like this:
 ```php
 /**
  * Return all the details of a user
+ *
+ * Returns the user's first name, last name and address
+ * Please see the documentation [here](https://example.com/users) for more information
  *
  * @deprecated
  */
@@ -73,8 +78,9 @@ Running `php artisan laravel-swagger:generate > swagger.json` will generate the 
     "paths": {
         "\/api\/user\/{id}": {
             "get": {
-                "summary": "GET \/api\/user\/{id}",
-                "description": "Return all the details of a user",
+                "summary": "Return all the details of a user",
+                "description": "Returns the user's first name, last name and address
+ Please see the documentation [here](https://example.com/users) for more information",
                 "deprecated": true
                 "responses": {
                     "200": {

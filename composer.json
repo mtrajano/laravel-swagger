@@ -34,5 +34,8 @@
                 "Mtrajano\\LaravelSwagger\\SwaggerServiceProvider"
             ]
         }
+    },
+    "require": {
+        "phpdocumentor/reflection-docblock": "^4.3"
     }
 }
