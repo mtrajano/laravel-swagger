@@ -43,7 +43,7 @@ class Generator
                 continue;
             }
 
-            $this->action = $route->getAction('uses');
+            $this->action = $route->getAction()['uses'];
             $methods = $route->methods();
 
             if (!isset($this->docs['paths'][$this->uri])) {
