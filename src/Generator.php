@@ -110,8 +110,7 @@ class Generator
 
     protected function generatePath()
     {
-        $requestMethod = strtoupper($this->method);
-        $actionInstance = $this->action ? $this->getActionClassInstance($this->action) : null;
+        $actionInstance = is_string($this->action) ? $this->getActionClassInstance($this->action) : null;
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: "") : "";
 
         list($isDeprecated, $summary, $description) = $this->parseActionDocBlock($docBlock);

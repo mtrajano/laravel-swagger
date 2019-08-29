@@ -76,6 +76,7 @@ class GeneratorTest extends TestCase
             '/users',
             '/users/{id}',
             '/users/details',
+            '/users/ping',
             '/api',
             '/api/store',
         ], array_keys($docs['paths']));
@@ -206,7 +207,7 @@ EOD;
     public function filtersRoutesProvider()
     {
         return [
-            'No Filter' => [null, ['/users', '/users/{id}', '/users/details', '/api', '/api/store']],
+            'No Filter' => [null, ['/users', '/users/{id}', '/users/details', '/users/ping', '/api', '/api/store']],
             '/api Filter' => ['/api', ['/api', '/api/store']],
             '/=nonexistant Filter' => ['/nonexistant', []],
         ];
