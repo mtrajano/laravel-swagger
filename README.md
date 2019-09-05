@@ -12,7 +12,7 @@ If you are running a version of Laravel < 5.5 also make sure you add `Mtrajano\L
 
 This will register the artisan command that will be available to you.
 
-You can also override the default config provided by the application by running `php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"` in your projects root and change the configuration in the new `config/laravel-swagger.php` file created.
+You can also override the default config provided by the application by running `php artisan vendor:publish --provider "Mtrajano\LaravelSwagger\SwaggerServiceProvider"` in your projects root and change the configuration in the new `config/laravel-swagger.php` file created.
 
 ## Usage
 
