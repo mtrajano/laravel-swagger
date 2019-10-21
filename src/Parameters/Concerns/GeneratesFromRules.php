@@ -2,6 +2,8 @@
 
 namespace Mtrajano\LaravelSwagger\Parameters\Concerns;
 
+use Illuminate\Support\Str;
+
 trait GeneratesFromRules
 {
     protected function splitRules($rules)
@@ -36,7 +38,7 @@ trait GeneratesFromRules
 
     protected function isArrayParameter($param)
     {
-        return str_contains($param, '*');
+        return Str::contains($param, '*');
     }
 
     protected function getArrayKey($param)
@@ -60,7 +62,7 @@ trait GeneratesFromRules
     private function getInParameter(array $paramRules)
     {
         foreach ($paramRules as $rule) {
-            if (starts_with($rule, 'in:')) {
+            if (Str::startsWith($rule, 'in:')) {
                 return $rule;
             }
         }

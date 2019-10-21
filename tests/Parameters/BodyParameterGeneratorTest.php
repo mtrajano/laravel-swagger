@@ -14,7 +14,8 @@ class BodyParameterGeneratorTest extends TestCase
         $this->assertArrayHasKey('in', $bodyParameters);
         $this->assertArrayHasKey('name', $bodyParameters);
         $this->assertArrayHasKey('schema', $bodyParameters);
-        $this->assertArraySubset(['type' => 'object'], $bodyParameters['schema']);
+        $this->assertArrayHasKey('type', $bodyParameters['schema']);
+        $this->assertSame('object', $bodyParameters['schema']['type']);
     }
 
     public function testRequiredParameters()

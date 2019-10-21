@@ -11,35 +11,27 @@ class PathParameterGeneratorTest extends TestCase
     {
         $pathParameters = $this->getPathParameters('/users/{id}');
 
-        $this->assertArraySubset([
-            'in' => 'path',
-            'name' => 'id',
-            'required' => true,
-        ], $pathParameters[0]);
+        $this->assertSame('path', $pathParameters[0]['in']);
+        $this->assertSame('id', $pathParameters[0]['name']);
+        $this->assertSame(true, $pathParameters[0]['required']);
     }
 
     public function testOptionalParameter()
     {
         $pathParameters = $this->getPathParameters('/users/{id?}');
 
-        $this->assertArraySubset([
-            'required' => false,
-        ], $pathParameters[0]);
+        $this->assertSame(false, $pathParameters[0]['required']);
     }
 
     public function testMultipleParameters()
     {
         $pathParameters = $this->getPathParameters('/users/{username}/{id?}');
 
-        $this->assertArraySubset([
-            'name' => 'username',
-            'required' => true,
-        ], $pathParameters[0]);
+        $this->assertSame('username', $pathParameters[0]['name']);
+        $this->assertSame(true, $pathParameters[0]['required']);
 
-        $this->assertArraySubset([
-            'name' => 'id',
-            'required' => false,
-        ], $pathParameters[1]);
+        $this->assertSame('id', $pathParameters[1]['name']);
+        $this->assertSame(false, $pathParameters[1]['required']);
     }
 
     public function testEmptyParameters()

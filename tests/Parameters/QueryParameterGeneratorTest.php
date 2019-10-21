@@ -14,12 +14,10 @@ class QueryParameterGeneratorTest extends TestCase
             'id' => 'integer|required',
         ]);
 
-        $this->assertArraySubset([
-            'in' => 'query',
-            'type' => 'integer',
-            'name' => 'id',
-            'required' => true,
-        ], $queryParameters[0]);
+        $this->assertSame('query', $queryParameters[0]['in']);
+        $this->assertSame('integer', $queryParameters[0]['type']);
+        $this->assertSame('id', $queryParameters[0]['name']);
+        $this->assertSame(true, $queryParameters[0]['required']);
     }
 
     public function testRulesAsArray()
@@ -28,12 +26,10 @@ class QueryParameterGeneratorTest extends TestCase
             'id' => ['integer', 'required'],
         ]);
 
-        $this->assertArraySubset([
-            'in' => 'query',
-            'type' => 'integer',
-            'name' => 'id',
-            'required' => true,
-        ], $queryParameters[0]);
+        $this->assertSame('query', $queryParameters[0]['in']);
+        $this->assertSame('integer', $queryParameters[0]['type']);
+        $this->assertSame('id', $queryParameters[0]['name']);
+        $this->assertSame(true, $queryParameters[0]['required']);
     }
 
     public function testOptionalParameter()
@@ -42,11 +38,9 @@ class QueryParameterGeneratorTest extends TestCase
             'email' => 'email',
         ]);
 
-        $this->assertArraySubset([
-            'name' => 'email',
-            'type' => 'string',
-            'required' => false,
-        ], $queryParameters[0]);
+        $this->assertSame('string', $queryParameters[0]['type']);
+        $this->assertSame('email', $queryParameters[0]['name']);
+        $this->assertSame(false, $queryParameters[0]['required']);
     }
 
     public function testEnumInQuery()
@@ -55,11 +49,9 @@ class QueryParameterGeneratorTest extends TestCase
             'account_type' => 'integer|in:1,2|in_array:foo',
         ]);
 
-        $this->assertArraySubset([
-            'name' => 'account_type',
-            'type' => 'integer',
-            'enum' => [1,2],
-        ], $queryParameters[0]);
+        $this->assertSame('integer', $queryParameters[0]['type']);
+        $this->assertSame('account_type', $queryParameters[0]['name']);
+        $this->assertSame(['1','2'], $queryParameters[0]['enum']);
     }
 
     public function testEnumRuleObjet()
@@ -72,11 +64,9 @@ class QueryParameterGeneratorTest extends TestCase
             ],
         ]);
 
-        $this->assertArraySubset([
-            'name' => 'account_type',
-            'type' => 'integer',
-            'enum' => ["\"1\"","\"2\""], //using Rule::in parameters are cast to string
-        ], $queryParameters[0]);
+        $this->assertSame('integer', $queryParameters[0]['type']);
+        $this->assertSame('account_type', $queryParameters[0]['name']);
+        $this->assertSame(['"1"','"2"'], $queryParameters[0]['enum']); //using Rule::in parameters are cast to string
     }
 
     public function testArrayTypeDefaultsToString()
@@ -85,14 +75,10 @@ class QueryParameterGeneratorTest extends TestCase
             'values' => 'array',
         ]);
 
-        $this->assertArraySubset([
-            'name' => 'values',
-            'type' => 'array',
-            'required' => false,
-            'items' => [
-                'type' => 'string',
-            ],
-        ], $queryParameters[0]);
+        $this->assertSame('array', $queryParameters[0]['type']);
+        $this->assertSame('values', $queryParameters[0]['name']);
+        $this->assertSame(['type' => 'string'], $queryParameters[0]['items']);
+        $this->assertSame(false, $queryParameters[0]['required']);
     }
 
     public function testArrayValidationSyntax()
@@ -101,14 +87,10 @@ class QueryParameterGeneratorTest extends TestCase
             'values.*' => 'integer',
         ]);
 
-        $this->assertArraySubset([
-            'name' => 'values',
-            'type' => 'array',
-            'required' => false,
-            'items' => [
-                'type' => 'integer',
-            ],
-        ], $queryParameters[0]);
+        $this->assertSame('array', $queryParameters[0]['type']);
+        $this->assertSame('values', $queryParameters[0]['name']);
+        $this->assertSame(['type' => 'integer'], $queryParameters[0]['items']);
+        $this->assertSame(false, $queryParameters[0]['required']);
     }
 
     public function testArrayValidationSyntaxWithRequiredArray()
@@ -118,14 +100,10 @@ class QueryParameterGeneratorTest extends TestCase
             'values' => 'required',
         ]);
 
-        $this->assertArraySubset([
-            'name' => 'values',
-            'type' => 'array',
-            'required' => true,
-            'items' => [
-                'type' => 'integer',
-            ],
-        ], $queryParameters[0]);
+        $this->assertSame('array', $queryParameters[0]['type']);
+        $this->assertSame('values', $queryParameters[0]['name']);
+        $this->assertSame(['type' => 'integer'], $queryParameters[0]['items']);
+        $this->assertSame(true, $queryParameters[0]['required']);
     }
 
     private function getQueryParameters(array $rules)
