@@ -19,11 +19,11 @@ trait GeneratesFromRules
     {
         if (in_array('integer', $paramRules)) {
             return 'integer';
-        } else if (in_array('numeric', $paramRules)) {
+        } elseif (in_array('numeric', $paramRules)) {
             return 'number';
-        } else if (in_array('boolean', $paramRules)) {
+        } elseif (in_array('boolean', $paramRules)) {
             return 'boolean';
-        } else if (in_array('array', $paramRules)) {
+        } elseif (in_array('array', $paramRules)) {
             return 'array';
         } else {
             //date, ip, email, etc..
@@ -62,7 +62,7 @@ trait GeneratesFromRules
     private function getInParameter(array $paramRules)
     {
         foreach ($paramRules as $rule) {
-            if (Str::startsWith($rule, 'in:')) {
+            if (is_string($rule) && Str::startsWith($rule, 'in:')) {
                 return $rule;
             }
         }
