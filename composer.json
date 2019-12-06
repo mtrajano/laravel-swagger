@@ -1,6 +1,6 @@
 {
     "name": "ivan770/laravel-swagger",
-    "description": "Auto generates the swagger documentation for a laravel project",
+    "description": "Auto generates the swagger documentation for a Laravel project",
     "license": "MIT",
     "authors": [
         {
