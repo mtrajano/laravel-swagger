@@ -146,7 +146,7 @@ class Generator
     protected function getModelName()
     {
         $match = [];
-        preg_match('/{(.*)}/', $this->uri, $match);
+        preg_match('/{(\w*)}/', $this->uri, $match);
         return ucfirst($match[1] ?? 'Generic');
     }
 
