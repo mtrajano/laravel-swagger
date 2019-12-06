@@ -1,1 +1,7 @@
 vendor/
+/.idea/.gitignore
+/.idea/laravel-swagger.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/php.xml
+/.idea/vcs.xml

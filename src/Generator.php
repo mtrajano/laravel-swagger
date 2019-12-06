@@ -126,6 +126,7 @@ class Generator
             ],
         ];
 
+        $this->addTagParameters();
         $this->addActionParameters();
     }
 
@@ -144,6 +145,18 @@ class Generator
         if (!empty($parameters)) {
             $this->docs['paths'][$this->uri][$this->method]['parameters'] = $parameters;
         }
+    }
+
+    protected function getModelName()
+    {
+        $match = [];
+        preg_match('/{(.*)}/', $this->uri, $match);
+        return ucfirst($match[1] ?? 'Generic');
+    }
+
+    protected function addTagParameters()
+    {
+        $this->docs['paths'][$this->uri][$this->method]['tags'] = [$this->getModelName()];
     }
 
     protected function getFormRules()
