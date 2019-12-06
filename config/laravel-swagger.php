@@ -73,6 +73,6 @@ return [
     */
 
     'baseResponses' => [
-        200 => 'OK'
+        200 => ['description' => 'OK']
     ],
 ];
