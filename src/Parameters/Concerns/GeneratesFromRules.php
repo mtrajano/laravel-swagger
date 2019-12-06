@@ -19,11 +19,11 @@ trait GeneratesFromRules
     {
         if (in_array('integer', $paramRules)) {
             return 'integer';
-        } elseif (in_array('numeric', $paramRules)) {
+        } else if (in_array('numeric', $paramRules)) {
             return 'number';
-        } elseif (in_array('boolean', $paramRules)) {
+        } else if (in_array('boolean', $paramRules)) {
             return 'boolean';
-        } elseif (in_array('array', $paramRules)) {
+        } else if (in_array('array', $paramRules)) {
             return 'array';
         } else {
             //date, ip, email, etc..
