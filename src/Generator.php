@@ -188,7 +188,7 @@ class Generator
         foreach($rawResponses as $response) {
             $split = explode(' ', $response->getDescription(), 2);
             $statusCode = $split[0];
-            $responses[$statusCode] = $split[1];
+            $responses[$statusCode] = ['description' => $split[1]];
         }
 
         return $responses + $this->config['baseResponses'];
