@@ -113,17 +113,13 @@ class Generator
         $actionInstance = is_string($this->action) ? $this->getActionClassInstance($this->action) : null;
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: "") : "";
 
-        list($isDeprecated, $summary, $description) = $this->parseActionDocBlock($docBlock);
+        list($isDeprecated, $summary, $description, $responses) = $this->parseActionDocBlock($docBlock);
 
         $this->docs['paths'][$this->uri][$this->method] = [
             'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
-            'responses' => [
-                '200' => [
-                    'description' => 'OK'
-                ]
-            ],
+            'responses' => $responses,
         ];
 
         $this->addTagParameters();
@@ -186,6 +182,23 @@ class Generator
         }
     }
 
+    protected function processResponses(array $rawResponses)
+    {
+        $responses = [];
+        foreach($rawResponses as $response) {
+            $split = explode(' ', $response->getDescription(), 2);
+            $statusCode = $split[0];
+            $responses[$statusCode] = $split[1];
+        }
+
+        return $responses + $this->config['baseResponses'];
+    }
+
+    protected function getDefaultValues()
+    {
+        return [false, "", "", $this->config['baseResponses']];
+    }
+
     private function getActionClassInstance(string $action)
     {
         list($class, $method) = Str::parseCallback($action);
@@ -196,7 +209,7 @@ class Generator
     private function parseActionDocBlock(string $docBlock)
     {
         if (empty($docBlock) || !$this->config['parseDocBlock']) {
-            return [false, "", ""];
+            return $this->getDefaultValues();
         }
 
         try {
@@ -207,9 +220,11 @@ class Generator
             $summary = $parsedComment->getSummary();
             $description = (string) $parsedComment->getDescription();
 
-            return [$isDeprecated, $summary, $description];
+            $responses = $this->processResponses($parsedComment->getTagsByName('response'));
+
+            return [$isDeprecated, $summary, $description, $responses];
         } catch(\Exception $e) {
-            return [false, "", ""];
+            return $this->getDefaultValues();
         }
     }
 }

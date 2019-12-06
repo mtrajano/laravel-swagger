@@ -62,4 +62,17 @@ return [
     */
 
     'parseDocBlock' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ignore methods
+    |--------------------------------------------------------------------------
+    |
+    | Methods in the following array will be ignored in the paths array
+    |
+    */
+
+    'baseResponses' => [
+        200 => 'OK'
+    ],
 ];
