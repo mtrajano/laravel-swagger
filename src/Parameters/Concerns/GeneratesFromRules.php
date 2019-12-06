@@ -62,7 +62,7 @@ trait GeneratesFromRules
     private function getInParameter(array $paramRules)
     {
         foreach ($paramRules as $rule) {
-            if (is_string($rule) && Str::startsWith($rule, 'in:')) {
+            if ((is_string($rule) || method_exists($rule , '__toString')) && Str::startsWith($rule, 'in:')) {
                 return $rule;
             }
         }
