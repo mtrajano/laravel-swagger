@@ -13,7 +13,8 @@ class GenerateSwaggerDoc extends Command
      */
     protected $signature = 'laravel-swagger:generate
                             {--format=json : The format of the output, current options are json and yaml}
-                            {--filter= : Filter to a specific route prefix, such as /api or /v2/api}';
+                            {--f|filter= : Filter to a specific route prefix, such as /api or /v2/api}
+                            {--o|output= : Output file to write the contents to, defaults to stdout}';
 
     /**
      * The console command description.
@@ -30,13 +31,19 @@ class GenerateSwaggerDoc extends Command
     public function handle()
     {
         $config = config('laravel-swagger');
+        $filter = $this->option('filter') ?: null;
+        $file = $this->option('output') ?: null;
 
-        $docs = (new Generator($config, $this->option('filter') ?: null))->generate();
+        $docs = (new Generator($config, $filter))->generate();
 
         $formattedDocs = (new FormatterManager($docs))
             ->setFormat($this->option('format'))
             ->format();
 
-        $this->line($formattedDocs);
+        if ($file) {
+            file_put_contents($file, $formattedDocs);
+        } else {
+            $this->line($formattedDocs);
+        }
     }
 }
