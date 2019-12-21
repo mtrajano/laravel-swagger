@@ -81,7 +81,7 @@ class BodyParameterGenerator implements ParameterGenerator
 
         if ($type === 'array') {
             $this->addToProperties($properties[$name]['items'], $nameTokens, $rules);
-        } else if ($type === 'object') {
+        } elseif ($type === 'object') {
             $this->addToProperties($properties[$name]['properties'], $nameTokens, $rules);
         }
     }
@@ -98,7 +98,7 @@ class BodyParameterGenerator implements ParameterGenerator
     protected function getNewPropObj($type, $rules)
     {
         $propObj = [
-            'type' => $type
+            'type' => $type,
         ];
 
         if ($enums = $this->getEnumValues($rules)) {
@@ -107,7 +107,7 @@ class BodyParameterGenerator implements ParameterGenerator
 
         if ($type === 'array') {
             $propObj['items'] = [];
-        } else if ($type === 'object') {
+        } elseif ($type === 'object') {
             $propObj['properties'] = [];
         }
 

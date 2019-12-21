@@ -3,9 +3,9 @@
 namespace Mtrajano\LaravelSwagger\Tests\Parameters;
 
 use Illuminate\Validation\Rule;
-use Mtrajano\LaravelSwagger\Tests\TestCase;
 use Mtrajano\LaravelSwagger\Parameters\BodyParameterGenerator;
 use Mtrajano\LaravelSwagger\Tests\Stubs\Rules\Uppercase as UppercaseRule;
+use Mtrajano\LaravelSwagger\Tests\TestCase;
 
 class BodyParameterGeneratorTest extends TestCase
 {
@@ -74,8 +74,8 @@ class BodyParameterGeneratorTest extends TestCase
         $this->assertEquals([
             'account_type' => [
                 'type' => 'integer',
-                'enum' => [1,2],
-            ]
+                'enum' => [1, 2],
+            ],
         ], $bodyParameters['schema']['properties']);
     }
 
@@ -95,12 +95,12 @@ class BodyParameterGeneratorTest extends TestCase
                         'type' => 'array',
                         'items' => [
                             [
-                                'type' => 'integer'
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                'type' => 'integer',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ], $bodyParameters['schema']['properties']);
     }
 
@@ -120,15 +120,15 @@ class BodyParameterGeneratorTest extends TestCase
                         'type' => 'object',
                         'properties' => [
                             'x' => [
-                                'type' => 'number'
+                                'type' => 'number',
                             ],
                             'y' => [
-                                'type' => 'number'
+                                'type' => 'number',
                             ],
-                        ]
-                    ]
-                ]
-            ]
+                        ],
+                    ],
+                ],
+            ],
         ], $bodyParameters['schema']['properties']);
     }
 
@@ -145,51 +145,47 @@ class BodyParameterGeneratorTest extends TestCase
                 'type' => 'object',
                 'properties' => [
                     'x' => [
-                        'type' => 'number'
+                        'type' => 'number',
                     ],
                     'y' => [
-                        'type' => 'number'
+                        'type' => 'number',
                     ],
-                ]
-            ]
+                ],
+            ],
         ], $bodyParameters['schema']['properties']);
     }
 
     public function testResolvesRuleEnum()
     {
-
         $bodyParameters = $this->getBodyParameters([
             'type' => [
-                Rule::in(1,2,3),
+                Rule::in(1, 2, 3),
                 'integer',
-            ]
+            ],
         ]);
 
         $this->assertEquals([
             'type' => [
                 'type' => 'integer',
-                'enum' => ['"1"','"2"','"3"'], //using Rule::in parameters are cast to string
-            ]
+                'enum' => ['"1"', '"2"', '"3"'], //using Rule::in parameters are cast to string
+            ],
         ], $bodyParameters['schema']['properties']);
-
     }
 
     public function testIgnoresRuleObject()
     {
-
         $bodyParameters = $this->getBodyParameters([
             'name' => [
                 'string',
-                new UppercaseRule
+                new UppercaseRule,
             ],
         ]);
 
         $this->assertEquals([
             'name' => [
                 'type' => 'string',
-            ]
+            ],
         ], $bodyParameters['schema']['properties']);
-
     }
 
     public function testIgnoresClosureRules()
@@ -199,7 +195,7 @@ class BodyParameterGeneratorTest extends TestCase
                 'string',
                 function ($attribute, $value, $fail) {
                     if ($value === 'foo') {
-                        $fail($attribute.' is invalid.');
+                        $fail($attribute . ' is invalid.');
                     }
                 },
             ],
@@ -208,7 +204,7 @@ class BodyParameterGeneratorTest extends TestCase
         $this->assertEquals([
             'name' => [
                 'type' => 'string',
-            ]
+            ],
         ], $bodyParameters['schema']['properties']);
     }
 

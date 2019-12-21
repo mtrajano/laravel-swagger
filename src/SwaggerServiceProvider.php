@@ -19,7 +19,7 @@ class SwaggerServiceProvider extends ServiceProvider
             ]);
         }
 
-        $source = __DIR__.'/../config/laravel-swagger.php';
+        $source = __DIR__ . '/../config/laravel-swagger.php';
 
         $this->publishes([
             $source => config_path('laravel-swagger.php'),
