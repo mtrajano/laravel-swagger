@@ -2,11 +2,11 @@
 
 namespace Mtrajano\LaravelSwagger;
 
-use ReflectionMethod;
-use Illuminate\Support\Str;
-use Illuminate\Routing\Route;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Str;
 use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionMethod;
 
 class Generator
 {
@@ -53,7 +53,9 @@ class Generator
             foreach ($methods as $method) {
                 $this->method = strtolower($method);
 
-                if (in_array($this->method, $this->config['ignoredMethods'])) continue;
+                if (in_array($this->method, $this->config['ignoredMethods'])) {
+                    continue;
+                }
 
                 $this->generatePath();
             }
@@ -111,9 +113,9 @@ class Generator
     protected function generatePath()
     {
         $actionInstance = is_string($this->action) ? $this->getActionClassInstance($this->action) : null;
-        $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: "") : "";
+        $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
 
-        list($isDeprecated, $summary, $description) = $this->parseActionDocBlock($docBlock);
+        [$isDeprecated, $summary, $description] = $this->parseActionDocBlock($docBlock);
 
         $this->docs['paths'][$this->uri][$this->method] = [
             'summary' => $summary,
@@ -121,8 +123,8 @@ class Generator
             'deprecated' => $isDeprecated,
             'responses' => [
                 '200' => [
-                    'description' => 'OK'
-                ]
+                    'description' => 'OK',
+                ],
             ],
         ];
 
@@ -148,7 +150,9 @@ class Generator
 
     protected function getFormRules()
     {
-        if (!is_string($this->action)) return false;
+        if (!is_string($this->action)) {
+            return false;
+        }
 
         $parameters = $this->getActionClassInstance($this->action)->getParameters();
 
@@ -175,7 +179,7 @@ class Generator
 
     private function getActionClassInstance(string $action)
     {
-        list($class, $method) = Str::parseCallback($action);
+        [$class, $method] = Str::parseCallback($action);
 
         return new ReflectionMethod($class, $method);
     }
@@ -183,7 +187,7 @@ class Generator
     private function parseActionDocBlock(string $docBlock)
     {
         if (empty($docBlock) || !$this->config['parseDocBlock']) {
-            return [false, "", ""];
+            return [false, '', ''];
         }
 
         try {
@@ -195,8 +199,8 @@ class Generator
             $description = (string) $parsedComment->getDescription();
 
             return [$isDeprecated, $summary, $description];
-        } catch(\Exception $e) {
-            return [false, "", ""];
+        } catch (\Exception $e) {
+            return [false, '', ''];
         }
     }
 }

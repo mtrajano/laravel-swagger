@@ -17,7 +17,7 @@ class TestCase extends OrchestraTestCase
         $app['router']->get('/users/{id}', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@show');
         $app['router']->post('/users', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@store');
         $app['router']->get('/users/details', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@details');
-        $app['router']->get('/users/ping', function() {
+        $app['router']->get('/users/ping', function () {
             return 'pong';
         });
         $app['router']->get('/api', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\ApiController@index');

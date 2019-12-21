@@ -3,8 +3,8 @@
 namespace Mtrajano\LaravelSwagger\Tests\Parameters;
 
 use Illuminate\Validation\Rule;
-use Mtrajano\LaravelSwagger\Tests\TestCase;
 use Mtrajano\LaravelSwagger\Parameters\QueryParameterGenerator;
+use Mtrajano\LaravelSwagger\Tests\TestCase;
 
 class QueryParameterGeneratorTest extends TestCase
 {
@@ -51,7 +51,7 @@ class QueryParameterGeneratorTest extends TestCase
 
         $this->assertSame('integer', $queryParameters[0]['type']);
         $this->assertSame('account_type', $queryParameters[0]['name']);
-        $this->assertSame(['1','2'], $queryParameters[0]['enum']);
+        $this->assertSame(['1', '2'], $queryParameters[0]['enum']);
     }
 
     public function testEnumRuleObjet()
@@ -59,14 +59,14 @@ class QueryParameterGeneratorTest extends TestCase
         $queryParameters = $this->getQueryParameters([
             'account_type' => [
                 'integer',
-                Rule::in(1,2),
-                'in_array:foo'
+                Rule::in(1, 2),
+                'in_array:foo',
             ],
         ]);
 
         $this->assertSame('integer', $queryParameters[0]['type']);
         $this->assertSame('account_type', $queryParameters[0]['name']);
-        $this->assertSame(['"1"','"2"'], $queryParameters[0]['enum']); //using Rule::in parameters are cast to string
+        $this->assertSame(['"1"', '"2"'], $queryParameters[0]['enum']); //using Rule::in parameters are cast to string
     }
 
     public function testArrayTypeDefaultsToString()

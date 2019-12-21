@@ -18,7 +18,7 @@ class PathParameterGenerator implements ParameterGenerator
         $params = [];
         $pathVariables = $this->getAllVariablesFromUri();
 
-        foreach  ($pathVariables as $variable) {
+        foreach ($pathVariables as $variable) {
             $params[] = [
                 'in' => $this->getParamLocation(),
                 'name' => strip_optional_char($variable),

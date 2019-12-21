@@ -103,8 +103,7 @@ class GeneratorTest extends TestCase
      */
     public function testRouteData($paths)
     {
-
-        $expectedPostDescription = <<<EOD
+        $expectedPostDescription = <<<'EOD'
 Data is validated [see description here](https://example.com) so no bad data can be passed.
 Please read the documentation for more information
 EOD;
