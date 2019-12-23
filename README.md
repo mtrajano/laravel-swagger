@@ -1,6 +1,14 @@
 # Laravel Swagger
 
-This package scans your laravel project's routes and auto generates a Swagger 2.0 documentation for you. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. It will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if your route contains them. Finally, this package will also scan any documentation you have in your action methods and add it as summary and description to that path, along with any appropriate annotations such as @deprecated.
+Laravel Swagger scans your Laravel project's endpoints and auto generates a Swagger 2.0 documentation for you.
+
+[![Build Status](https://travis-ci.org/mtrajano/laravel-swagger.svg?branch=master)](https://travis-ci.org/mtrajano/laravel-swagger)
+[![Latest Stable Version](https://poser.pugx.org/mtrajano/laravel-swagger/v/stable)](https://packagist.org/packages/mtrajano/laravel-swagger)
+[![License](https://poser.pugx.org/mtrajano/laravel-swagger/license)](https://packagist.org/packages/mtrajano/laravel-swagger)
+
+## About
+
+Laravel Swagger works based on recommended practices by Laravel. It will parse your routes and generate a path object for each one. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. For the parameters, it will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if your route contains them. Finally, this package will also scan any documentation you have in your action methods and add it as summary and description to that path, along with any appropriate annotations such as @deprecated.
 
 One thing to note is this library leans on being explicit. It will choose to include keys even if they have a default. For example it chooses to say a route has a deprecated value of false rather than leaving it out. I believe this makes reading the documentation easier by not leaving important information out. The file can be easily cleaned up afterwards if the user chooses to leave out the defaults.
 
