@@ -220,6 +220,15 @@ EOD;
         $this->assertEquals('', $paths['/users/details']['get']['description']);
     }
 
+    /**
+     * @depends testHasPaths
+     */
+    public function testRouteScopes($paths)
+    {
+        $this->assertEquals(['user-read'], $paths['/users']['get']['security'][Generator::SECURITY_DEFINITION_NAME]);
+        $this->assertEquals(['user-write', 'user-read'], $paths['/users']['post']['security'][Generator::SECURITY_DEFINITION_NAME]);
+    }
+
     public function testOverwriteIgnoreMethods()
     {
         $docs = $this->getDocsWithNewConfig(['ignoredMethods' => []]);
