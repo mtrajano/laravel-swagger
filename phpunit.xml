@@ -17,4 +17,7 @@
             <directory suffix=".php">./src</directory>
         </whitelist>
     </filter>
+    <php>
+        <env name="APP_URL" value="https://example.com" />
+    </php>
 </phpunit>

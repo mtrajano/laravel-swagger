@@ -3,6 +3,7 @@
 namespace Mtrajano\LaravelSwagger\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use Laravel\Passport\Passport;
 
 class TestCase extends OrchestraTestCase
 {
@@ -22,5 +23,12 @@ class TestCase extends OrchestraTestCase
         });
         $app['router']->get('/api', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\ApiController@index');
         $app['router']->put('/api/store', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\ApiController@store');
+
+        Passport::routes();
+
+        Passport::tokensCan([
+            'user-read' => 'Read user information such as email, name and phone number',
+            'user-write' => 'Update user information',
+        ]);
     }
 }

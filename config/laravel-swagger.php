@@ -62,4 +62,24 @@ return [
     */
 
     'parseDocBlock' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security
+    |--------------------------------------------------------------------------
+    |
+    | If your application uses Laravel's Passport package with the recommended
+    | settings, Laravel Swagger will attempt to parse your settings and
+    | automatically generate the securityDefinitions along with the operation
+    | object's security parameter, you may turn off this behavior with parseSecurity.
+    |
+    | Possible values for flow: ["implicit", "password", "application", "accessCode"]
+    | See https://medium.com/@darutk/diagrams-and-movies-of-all-the-oauth-2-0-flows-194f3c3ade85
+    | for more information.
+    |
+    */
+
+    'parseSecurity' => true,
+
+    'authFlow' => 'accessCode'
 ];

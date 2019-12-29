@@ -10,18 +10,15 @@ use ReflectionMethod;
 
 class Generator
 {
+    const OAUTH_TOKEN_PATH = '/oauth/token';
+    const OAUTH_AUTHORIZE_PATH = '/oauth/authorize';
+
     protected $config;
-
     protected $routeFilter;
-
     protected $docs;
-
     protected $uri;
-
     protected $originalUri;
-
     protected $method;
-
     protected $action;
 
     public function __construct($config, $routeFilter = null)
@@ -39,8 +36,12 @@ class Generator
             $this->originalUri = $uri = $this->getRouteUri($route);
             $this->uri = strip_optional_char($uri);
 
-            if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->uri)) {
+            if ($this->routeFilter && $this->isFilteredRoute()) {
                 continue;
+            }
+
+            if ($this->config['parseSecurity'] && $this->isOauthRoute()) {
+                $this->docs['securityDefinitions'] = $this->generateSecurityDefinitions();
             }
 
             $this->action = $route->getAction()['uses'];
@@ -108,6 +109,33 @@ class Generator
         }
 
         return $uri;
+    }
+
+    protected function generateSecurityDefinitions()
+    {
+        $authFlow = $this->config['authFlow'];
+
+        $this->validateAuthFlow($authFlow);
+
+        $securityDefinition = [
+            'OAuth2' => [
+                'type' => 'oauth2',
+                'flow' => $authFlow,
+            ]
+        ];
+
+
+        if (in_array($authFlow, ['implicit', 'accessCode'])) {
+            $securityDefinition['OAuth2']['authorizationUrl'] = $this->getEndpoint(self::OAUTH_AUTHORIZE_PATH);
+        }
+
+        if (in_array($authFlow, ['password', 'application', 'accessCode'])) {
+            $securityDefinition['OAuth2']['tokenUrl'] = $this->getEndpoint(self::OAUTH_TOKEN_PATH);
+        }
+
+        $securityDefinition['OAuth2']['scopes'] = $this->generateOauthScopes();
+
+        return $securityDefinition;
     }
 
     protected function generatePath()
@@ -201,6 +229,39 @@ class Generator
             return [$isDeprecated, $summary, $description];
         } catch (\Exception $e) {
             return [false, '', ''];
+        }
+    }
+
+    private function isFilteredRoute()
+    {
+        return !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->uri);
+    }
+
+    private function isOauthRoute()
+    {
+        return $this->uri === self::OAUTH_TOKEN_PATH || $this->uri === self::OAUTH_AUTHORIZE_PATH;
+    }
+
+    private function getEndpoint(string $path)
+    {
+        return rtrim($this->config['host'], '/') . $path;
+    }
+
+    private function generateOauthScopes()
+    {
+        if (!class_exists('\Laravel\Passport\Passport')) {
+            return [];
+        }
+
+        $scopes = \Laravel\Passport\Passport::scopes()->toArray();
+
+        return array_combine(array_column($scopes, 'id'), array_column($scopes, 'description'));
+    }
+
+    private function validateAuthFlow(string $flow)
+    {
+        if (!in_array($flow, ['password', 'application', 'implicit', 'accessCode'])) {
+            throw new LaravelSwaggerException('Invalid OAuth flow passed');
         }
     }
 }
