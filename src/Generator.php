@@ -4,8 +4,8 @@ namespace Mtrajano\LaravelSwagger;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Routing\Route;
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
 
@@ -132,9 +132,8 @@ class Generator
             self::SECURITY_DEFINITION_NAME => [
                 'type' => 'oauth2',
                 'flow' => $authFlow,
-            ]
+            ],
         ];
-
 
         if (in_array($authFlow, ['implicit', 'accessCode'])) {
             $securityDefinition[self::SECURITY_DEFINITION_NAME]['authorizationUrl'] = $this->getEndpoint(self::OAUTH_AUTHORIZE_PATH);
@@ -196,7 +195,7 @@ class Generator
         foreach ($this->middleware as $middleware) {
             if ($middleware['name'] === 'scope' || $middleware['name'] === 'scopes') {
                 $this->docs['paths'][$this->uri][$this->method]['security'] = [
-                    self::SECURITY_DEFINITION_NAME => $middleware['parameters']
+                    self::SECURITY_DEFINITION_NAME => $middleware['parameters'],
                 ];
             }
         }
@@ -264,7 +263,7 @@ class Generator
     }
 
     /**
-     * Assumes routes have been created using Passport::routes()
+     * Assumes routes have been created using Passport::routes().
      */
     private function hasOauthRoutes()
     {
@@ -306,7 +305,7 @@ class Generator
     {
         $middleware = Arr::wrap($middleware);
 
-        return array_map(function($mw) {
+        return array_map(function ($mw) {
             $tokens = explode(':', $mw, 2);
             $name = $tokens[0];
             $parameters = isset($tokens[1]) ? explode(',', $tokens[1]) : [];
