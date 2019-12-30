@@ -2,8 +2,9 @@
 
 namespace Mtrajano\LaravelSwagger\Tests;
 
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Laravel\Passport\Passport;
+use Mtrajano\LaravelSwagger\Tests\Stubs\Middleware\RandomMiddleware;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase
 {
@@ -25,7 +26,8 @@ class TestCase extends OrchestraTestCase
             });
         });
 
-        $app['router']->get('/api', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\ApiController@index');
+        $app['router']->get('/api', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\ApiController@index')
+            ->middleware(RandomMiddleware::class);
         $app['router']->put('/api/store', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\ApiController@store');
 
         Passport::routes();

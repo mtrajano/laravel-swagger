@@ -3,9 +3,7 @@
 namespace Mtrajano\LaravelSwagger;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
 
@@ -18,11 +16,8 @@ class Generator
     protected $config;
     protected $routeFilter;
     protected $docs;
-    protected $uri;
-    protected $originalUri;
+    protected $route;
     protected $method;
-    protected $action;
-    protected $middleware;
     protected $docParser;
     protected $hasSecurityDefinitions;
 
@@ -44,26 +39,18 @@ class Generator
         }
 
         foreach ($this->getAppRoutes() as $route) {
-            $this->originalUri = $uri = $this->getRouteUri($route);
-            $this->uri = strip_optional_char($uri);
+            $this->route = $route;
 
             if ($this->routeFilter && $this->isFilteredRoute()) {
                 continue;
             }
 
-            $middleware = isset($route->getAction()['middleware']) ? $route->getAction()['middleware'] : [];
-
-            $this->action = $route->getAction()['uses'];
-            $this->middleware = $this->formatMiddleware($middleware);
-
-            $methods = $route->methods();
-
-            if (!isset($this->docs['paths'][$this->uri])) {
-                $this->docs['paths'][$this->uri] = [];
+            if (!isset($this->docs['paths'][$this->route->uri()])) {
+                $this->docs['paths'][$this->route->uri()] = [];
             }
 
-            foreach ($methods as $method) {
-                $this->method = strtolower($method);
+            foreach ($route->methods() as $method) {
+                $this->method = $method;
 
                 if (in_array($this->method, $this->config['ignoredMethods'])) {
                     continue;
@@ -108,18 +95,9 @@ class Generator
 
     protected function getAppRoutes()
     {
-        return app('router')->getRoutes();
-    }
-
-    protected function getRouteUri(Route $route)
-    {
-        $uri = $route->uri();
-
-        if (!Str::startsWith($uri, '/')) {
-            $uri = '/' . $uri;
-        }
-
-        return $uri;
+        return array_map(function ($route) {
+            return new DataObjects\Route($route);
+        }, app('router')->getRoutes()->getRoutes());
     }
 
     protected function generateSecurityDefinitions()
@@ -151,12 +129,12 @@ class Generator
 
     protected function generatePath()
     {
-        $actionInstance = is_string($this->action) ? $this->getActionClassInstance($this->action) : null;
+        $actionInstance = is_string($this->route->action()) ? $this->getActionClassInstance($this->route->action()) : null;
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
 
         [$isDeprecated, $summary, $description] = $this->parseActionDocBlock($docBlock);
 
-        $this->docs['paths'][$this->uri][$this->method] = [
+        $this->docs['paths'][$this->route->uri()][$this->method] = [
             'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
@@ -178,7 +156,7 @@ class Generator
     {
         $rules = $this->getFormRules() ?: [];
 
-        $parameters = (new Parameters\PathParameterGenerator($this->originalUri))->getParameters();
+        $parameters = (new Parameters\PathParameterGenerator($this->route->originalUri()))->getParameters();
 
         if (!empty($rules)) {
             $parameterGenerator = $this->getParameterGenerator($rules);
@@ -187,16 +165,16 @@ class Generator
         }
 
         if (!empty($parameters)) {
-            $this->docs['paths'][$this->uri][$this->method]['parameters'] = $parameters;
+            $this->docs['paths'][$this->route->uri()][$this->method]['parameters'] = $parameters;
         }
     }
 
     protected function addActionScopes()
     {
-        foreach ($this->middleware as $middleware) {
-            if ($middleware['name'] === 'scope' || $middleware['name'] === 'scopes') {
-                $this->docs['paths'][$this->uri][$this->method]['security'] = [
-                    self::SECURITY_DEFINITION_NAME => $middleware['parameters']
+        foreach ($this->route->middleware() as $middleware) {
+            if ($middleware->name() === 'scope' || $middleware->name() === 'scopes') {
+                $this->docs['paths'][$this->route->uri()][$this->method]['security'] = [
+                    self::SECURITY_DEFINITION_NAME => $middleware->parameters()
                 ];
             }
         }
@@ -204,11 +182,11 @@ class Generator
 
     protected function getFormRules()
     {
-        if (!is_string($this->action)) {
+        if (!is_string($this->route->action())) {
             return false;
         }
 
-        $parameters = $this->getActionClassInstance($this->action)->getParameters();
+        $parameters = $this->getActionClassInstance($this->route->action())->getParameters();
 
         foreach ($parameters as $parameter) {
             $class = (string) $parameter->getClass();
@@ -260,7 +238,7 @@ class Generator
 
     private function isFilteredRoute()
     {
-        return !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->uri);
+        return !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->route->uri());
     }
 
     /**
@@ -269,7 +247,7 @@ class Generator
     private function hasOauthRoutes()
     {
         foreach ($this->getAppRoutes() as $route) {
-            $uri = $this->getRouteUri($route);
+            $uri = $route->uri();
 
             if ($uri === self::OAUTH_TOKEN_PATH || $uri === self::OAUTH_AUTHORIZE_PATH) {
                 return true;
@@ -300,18 +278,5 @@ class Generator
         if (!in_array($flow, ['password', 'application', 'implicit', 'accessCode'])) {
             throw new LaravelSwaggerException('Invalid OAuth flow passed');
         }
-    }
-
-    private function formatMiddleware($middleware)
-    {
-        $middleware = Arr::wrap($middleware);
-
-        return array_map(function($mw) {
-            $tokens = explode(':', $mw, 2);
-            $name = $tokens[0];
-            $parameters = isset($tokens[1]) ? explode(',', $tokens[1]) : [];
-
-            return compact('name', 'parameters');
-        }, $middleware);
     }
 }
