@@ -81,5 +81,5 @@ return [
 
     'parseSecurity' => true,
 
-    'authFlow' => 'accessCode'
+    'authFlow' => 'accessCode',
 ];

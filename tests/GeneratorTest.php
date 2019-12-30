@@ -88,7 +88,7 @@ class GeneratorTest extends TestCase
     public function testSecurityDefinitionsAccessCodeFlow()
     {
         $docs = $this->getDocsWithNewConfig([
-            'authFlow' => 'accessCode'
+            'authFlow' => 'accessCode',
         ]);
 
         $this->assertArrayHasKey('securityDefinitions', $docs);
@@ -106,7 +106,7 @@ class GeneratorTest extends TestCase
     public function testSecurityDefinitionsImplicitFlow()
     {
         $docs = $this->getDocsWithNewConfig([
-            'authFlow' => 'implicit'
+            'authFlow' => 'implicit',
         ]);
 
         $securityDefinition = $docs['securityDefinitions']['OAuth2'];
@@ -120,7 +120,7 @@ class GeneratorTest extends TestCase
     public function testSecurityDefinitionsPasswordFlow()
     {
         $docs = $this->getDocsWithNewConfig([
-            'authFlow' => 'password'
+            'authFlow' => 'password',
         ]);
 
         $securityDefinition = $docs['securityDefinitions']['OAuth2'];
@@ -134,7 +134,7 @@ class GeneratorTest extends TestCase
     public function testSecurityDefinitionsApplicationFlow()
     {
         $docs = $this->getDocsWithNewConfig([
-            'authFlow' => 'application'
+            'authFlow' => 'application',
         ]);
 
         $securityDefinition = $docs['securityDefinitions']['OAuth2'];
@@ -159,7 +159,7 @@ class GeneratorTest extends TestCase
         $this->expectException(LaravelSwaggerException::class);
 
         $this->getDocsWithNewConfig([
-            'authFlow' => 'invalidFlow'
+            'authFlow' => 'invalidFlow',
         ]);
     }
 
