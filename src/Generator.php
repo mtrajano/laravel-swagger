@@ -171,7 +171,7 @@ class Generator
     protected function addActionScopes()
     {
         foreach ($this->route->middleware() as $middleware) {
-            if ($middleware->name() === 'scope' || $middleware->name() === 'scopes') {
+            if ($this->isPassportScopeMiddleware($middleware)) {
                 $this->docs['paths'][$this->route->uri()][$this->method]['security'] = [
                     self::SECURITY_DEFINITION_NAME => $middleware->parameters(),
                 ];
@@ -277,5 +277,20 @@ class Generator
         if (!in_array($flow, ['password', 'application', 'implicit', 'accessCode'])) {
             throw new LaravelSwaggerException('Invalid OAuth flow passed');
         }
+    }
+
+    private function isPassportScopeMiddleware(DataObjects\Middleware $middleware)
+    {
+        $resolver = $this->getMiddlewareResolver($middleware->name());
+
+        return $resolver === 'Laravel\Passport\Http\Middleware\CheckScopes' ||
+               $resolver === 'Laravel\Passport\Http\Middleware\CheckForAnyScope';
+    }
+
+    private function getMiddlewareResolver(string $middleware)
+    {
+        $middlewareMap = app('router')->getMiddleware();
+
+        return $middlewareMap[$middleware] ?? null;
     }
 }

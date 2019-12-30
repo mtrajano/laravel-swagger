@@ -32,6 +32,9 @@ class TestCase extends OrchestraTestCase
 
         Passport::routes();
 
+        $app['router']->aliasMiddleware('scopes', \Laravel\Passport\Http\Middleware\CheckScopes::class);
+        $app['router']->aliasMiddleware('scope', \Laravel\Passport\Http\Middleware\CheckForAnyScope::class);
+
         Passport::tokensCan([
             'user-read' => 'Read user information such as email, name and phone number',
             'user-write' => 'Update user information',
