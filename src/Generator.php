@@ -110,9 +110,8 @@ class Generator
             self::SECURITY_DEFINITION_NAME => [
                 'type' => 'oauth2',
                 'flow' => $authFlow,
-            ]
+            ],
         ];
-
 
         if (in_array($authFlow, ['implicit', 'accessCode'])) {
             $securityDefinition[self::SECURITY_DEFINITION_NAME]['authorizationUrl'] = $this->getEndpoint(self::OAUTH_AUTHORIZE_PATH);
@@ -174,7 +173,7 @@ class Generator
         foreach ($this->route->middleware() as $middleware) {
             if ($middleware->name() === 'scope' || $middleware->name() === 'scopes') {
                 $this->docs['paths'][$this->route->uri()][$this->method]['security'] = [
-                    self::SECURITY_DEFINITION_NAME => $middleware->parameters()
+                    self::SECURITY_DEFINITION_NAME => $middleware->parameters(),
                 ];
             }
         }
@@ -242,7 +241,7 @@ class Generator
     }
 
     /**
-     * Assumes routes have been created using Passport::routes()
+     * Assumes routes have been created using Passport::routes().
      */
     private function hasOauthRoutes()
     {

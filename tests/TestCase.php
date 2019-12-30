@@ -15,7 +15,7 @@ class TestCase extends OrchestraTestCase
 
     protected function getEnvironmentSetUp($app)
     {
-        $app['router']->middleware(['some-middleware', 'scope:user-read'])->group(function() use($app) {
+        $app['router']->middleware(['some-middleware', 'scope:user-read'])->group(function () use ($app) {
             $app['router']->get('/users', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@index');
             $app['router']->get('/users/{id}', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@show');
             $app['router']->post('/users', 'Mtrajano\\LaravelSwagger\\Tests\\Stubs\\Controllers\\UserController@store')
