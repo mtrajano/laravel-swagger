@@ -233,11 +233,13 @@ class DefinitionGenerator
      */
     private function getModelFake(): ?Model
     {
-        try {
+        return null;
+
+        /*try {
             return factory(get_class($this->model))->create();
         } catch (InvalidArgumentException $e) {
             return null;
-        }
+        }*/
     }
 
     /**
