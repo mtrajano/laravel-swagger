@@ -40,8 +40,8 @@ class DefinitionGenerator
             return [];
         }
 
-        $set = $this->setModelFromRouteAction();
-        if ($set === false) {
+        $this->setModelFromRouteAction();
+        if ($this->model === false) {
             return [];
         }
 
@@ -73,98 +73,12 @@ class DefinitionGenerator
      */
     private function setModelFromRouteAction()
     {
-        $modelName = $this->getModelNameFromMethodDocs()
-            ?? $this->getModelNameFromControllerDocs();
-
-        if (!$modelName) {
-            return false;
-        }
-
-        $modelInstance = new $modelName;
-
-        if (!$modelInstance instanceof Model) {
-            throw new RuntimeException(
-                'The @model must be an instance of ['.Model::class.']'
-            );
-        }
-
-        $this->model = $modelInstance;
-    }
-
-    /**
-     * @return string|null
-     * @throws ReflectionException
-     */
-    private function getModelNameFromMethodDocs(): ?string
-    {
-        $action = $this->route->action();
-
-        $actionInstance = is_string($action) ? $this->getActionClassInstance($action) : null;
-
-        $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
-
-        return $this->getAnnotation('@model', $docBlock);
-    }
-
-    /**
-     * @return string|null
-     * @throws ReflectionException
-     */
-    private function getModelNameFromControllerDocs(): ?string
-    {
-        $action = $this->route->action();
-
-        list($class, $method) = is_string($action)
-            ? Str::parseCallback($action)
-            : [null, null];
-
-        if (!$class) {
-            return null;
-        }
-
-        $reflection = new ReflectionClass($class);
-
-        $docBlock = $reflection->getDocComment();
-
-        return $this->getAnnotation('@model', $docBlock);
-    }
-
-    private function getModelNameFromControllerName(): ?string
-    {
-        $action = $this->route->action();
-
-        list($class, $method) = is_string($action)
-            ? Str::parseCallback($action)
-            : [null, null];
-
-        if (!$class) {
-            return null;
-        }
-
-        return Str::replaceLast('Controller', '', class_basename($class));
-    }
-
-    /**
-     * @param string $action
-     * @return ReflectionMethod
-     * @throws ReflectionException
-     */
-    private function getActionClassInstance(string $action)
-    {
-        list($class, $method) = Str::parseCallback($action);
-
-        return new ReflectionMethod($class, $method);
+        $this->model = $this->route->getModel();
     }
 
     private function canGenerate()
     {
         return $this->allowsHttpMethodGenerate();
-    }
-
-    private function getHttpMethod()
-    {
-        $methods = $this->route->methods();
-        return reset($methods);
     }
 
     private function allowsHttpMethodGenerate(): bool
@@ -198,7 +112,9 @@ class DefinitionGenerator
             $appends = $this->model->getAppends();
             // TODO: Test condition
             if (!is_array($appends)) {
-                throw new \RuntimeException('The return type of the "getAppends" method must be an array.');
+                throw new RuntimeException(
+                    'The return type of the "getAppends" method must be an array.'
+                );
             }
 
             $columns = array_merge($columns, $this->model->getAppends());
