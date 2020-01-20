@@ -163,7 +163,7 @@ class ProductController
 ### Model
 
 The model definition fields will be obtained from `table columns` returned by 
-`Schema::getColumnListing($model->gettable())` function. 
+`Schema::getColumnListing($model->getTable())` function. 
 
 If you want use the fields from `$appends` attribute, create a method `getAppends()` in your 
 model class returning the `$appends` attribute content. E.g.:
@@ -526,6 +526,8 @@ class Customer extends Model
     ];
 }
 ```
+
+Generated swagger:
 
 ```json
 {
