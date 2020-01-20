@@ -73,7 +73,7 @@ class UserShowRequest extends FormRequest
 ```
 
 Running `php artisan laravel-swagger:generate > swagger.json` will generate the following file:
-```js
+```json
 {
     "swagger": "2.0",
     "info": {
@@ -87,8 +87,7 @@ Running `php artisan laravel-swagger:generate > swagger.json` will generate the 
         "\/api\/user\/{id}": {
             "get": {
                 "summary": "Return all the details of a user",
-                "description": "Returns the user's first name, last name and address
- Please see the documentation [here](https://example.com/users) for more information",
+                "description": "Returns the user's first name, last name and address. Please see the documentation [here](https://example.com/users) for more information",
                 "deprecated": true
                 "responses": {
                     "200": {
@@ -122,5 +121,498 @@ Running `php artisan laravel-swagger:generate > swagger.json` will generate the 
             ...
         }
     }
+}
+```
+
+## Definitions
+
+You can define the annotation `@model` in your method, or a global on controller. 
+It says that the action refs the model in your response. E.g.:
+
+```php
+// Model definition on method:
+class OrderController
+{
+    /**
+     * @param int $id
+     * @model App\Order
+     */
+    public function show(int $id)
+    {
+        // ...
+    }
+}
+
+// Model definition on Controller:
+/**
+ * Class ProductController
+ * @model App\Product
+ */
+class ProductController
+{
+    /**
+     * @param int $id
+     */
+    public function show(int $id)
+    {
+        // ...
+    }
+}
+```
+
+### Model
+
+The model definition fields will be obtained from `table columns` returned by 
+`Schema::getColumnListing($model->gettable())` function. 
+
+If you want use the fields from `$appends` attribute, create a method `getAppends()` in your 
+model class returning the `$appends` attribute content. E.g.:
+
+```php
+public function getAppends(): array
+{
+    return $this->appends;
+}
+```
+
+The columns will be filtered to remove fields on `$hidden` attribute. 
+The model relationships will be added to definitions too.
+E.g.:
+
+```php
+// Tables structure:
+Schema::create('products', function (Blueprint $table) {
+    $table->bigIncrements('id');
+    $table->string('name');
+    $table->decimal('price');
+    $table->boolean('active');
+    $table->timestamp('finished_at');
+    $table->timestamps();
+});
+Schema::create('orders', function (Blueprint $table) {
+    $table->bigIncrements('id');
+    $table->decimal('value');
+    $table->unsignedBigInteger('product_id');
+    $table->foreign('product_id')
+        ->references('id')
+        ->on('products');
+    $table->timestamps();
+});
+
+// Models
+class Order extends Model
+{
+    protected $fillable = [
+        'value',
+    ];
+
+    protected $casts = [
+        'value' => 'float',
+        'formatted_value' => 'string',
+    ];
+
+    protected $appends = [
+        'formatted_value',
+    ];
+
+    public function getFormattedValueAttribute()
+    {
+        return '$ '.$this->value;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    // ** Implements this method to use fields from $appends on model definition. ** 
+    public function getAppends(): array
+    {
+        return $this->appends;
+    }
+}
+
+class Product extends Model
+{
+    protected $fillable = [
+        'name',
+        'price',
+        'active',
+    ];
+
+    protected $hidden = [
+        'active',
+    ];
+
+    protected $casts = [
+        'name' => 'string',
+        'price' => 'float',
+        'active' => 'boolean',
+    ];
+
+    protected $dates = [
+        'finished_at',
+    ];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+}
+```
+
+The structure above will return the following definitions:
+
+```json
+{
+  "Order": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "value": {
+        "type": "number",
+        "format": "float"
+      },
+      "product_id": {
+        "type": "string"
+      },
+      "customer_id": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "formatted_value": {
+        "type": "string"
+      },
+      "product": {
+        "$ref": "#/definitions/Product"
+      }
+    }
+  },
+  "Product": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "price": {
+        "type": "number",
+        "format": "float"
+      },
+      "finished_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "orders": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Order"
+        }
+      }
+    }
+  }
+}
+```
+
+The attribute `$casts` will be used to define the properties `type` and `format`. 
+If no one cast was defined, the default type `string` will be used.
+
+## Responses
+
+The responses will be defined based on routes http methods, `@throws` annotations and `auth` middleware. E.g.:
+
+```php
+// Routes
+Route::get('/customers', 'CustomerController@index')
+    ->name('customers.index')
+    ->middleware('auth:jwt');
+
+Route::get('/customers', 'CustomerController@store')
+    ->name('customers.store');
+
+Route::put('/customers/{id}', 'CustomerController@update')
+    ->name('customers.update');
+
+// Controller
+/**
+ * Class CustomerController
+ * @model App\Customer
+ */
+class CustomerController extends Controller
+{
+    public function index()
+    {
+
+    }
+
+    public function store(UpdateCustomerRequest $request)
+    {
+
+    }
+
+    /**
+     * @param int $id
+     * @param UpdateCustomerRequest $request
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \Illuminate\Auth\AuthenticationException
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function update(int $id, UpdateCustomerRequest $request)
+    {
+        // ...
+    }
+}
+```
+
+The definitions above will generate the following responses:
+
+Get All Customers:
+
+```json
+{
+  "responses": {
+     "200": {
+       "description": "OK",
+       "schema": {
+         "type": "array",
+         "items": {
+           "$ref": "#/definitions/Customer"
+         }
+       }
+     },
+     "401": {
+       "description": "Unauthenticated"
+     }
+  }
+}
+```
+
+Store a Customer:
+
+```json
+{
+  "responses": {
+     "201": {
+       "description": "Created",
+       "schema": {
+         "$ref": "#/definitions/Customer"
+       }
+     },
+     "422": {
+       "description": "Validation errors"
+     }
+  }
+}
+```
+
+Update Customer:
+
+```json
+{
+  "responses": {
+    "204": {
+      "description": "No Content"
+    },
+    "422": {
+      "description": "Validation errors"
+    },
+    "404": {
+      "description": "Model not found"
+    },
+    "401": {
+      "description": "Unauthenticated"
+    },
+    "403": {
+      "description": "Forbidden"
+    }
+  }
+}
+```
+
+## Complete Example
+
+Routes:
+
+```php
+Route::post('/customers', 'CustomerController@store')->name('customers.store');
+Route::put('/customers/{id}', 'CustomerController@update')->name('customers.update');
+```
+
+Controller:
+
+```php
+/**
+ * Class CustomerController
+ * @model App\Customer
+ */
+class CustomerController extends Controller
+{
+    /**
+     * Store new customer.
+     *
+     * @param UpdateCustomerRequest $request
+     */
+    public function store(UpdateCustomerRequest $request)
+    {
+        // Store customer...
+    }
+
+    /**
+     * Update customer data.
+     *
+     * Find customer by id and update it from data received from request.
+     *
+     * @param int $id
+     * @param UpdateCustomerRequest $request
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \Illuminate\Auth\AuthenticationException
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function update(int $id, UpdateCustomerRequest $request)
+    {
+        // Update customer...
+    }
+}
+```
+
+Migrations:
+
+```php
+Schema::create('customers', function (Blueprint $table) {
+    $table->bigIncrements('id');
+    $table->string('name');
+    $table->string('email');
+    $table->timestamps();
+});
+```
+
+Models:
+
+```php
+class Customer extends Model
+{
+    protected $fillable = [
+        'name',
+        'email',
+    ];
+
+    protected $casts = [
+        'name' => 'string',
+        'email' => 'string',
+    ];
+}
+```
+
+```json
+{
+  "swagger": "2.0",
+  "info": {
+    "title": null,
+    "description": "",
+    "version": "1.0.0"
+  },
+  "host": "https://example.com",
+  "basePath": "/",
+  "paths": {
+    "/customers": {
+      "post": {
+        "summary": "Store new customer.",
+        "description": "",
+        "deprecated": false,
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/Customer"
+            }
+          },
+          "422": {
+            "description": "Validation errors"
+          }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "put": {
+        "summary": "Update customer data.",
+        "description": "Find customer by id and update it from data received from request.",
+        "deprecated": false,
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "422": {
+            "description": "Validation errors"
+          },
+          "404": {
+            "description": "Model not found"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Customer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
 }
 ```
