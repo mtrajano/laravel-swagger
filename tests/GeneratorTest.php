@@ -37,6 +37,14 @@ class GeneratorTest extends TestCase
         $this->generator = new Generator(
             $this->config = config('laravel-swagger')
         );
+
+        $this->loadMigrationsFrom(__DIR__.'/Stubs/database/migrations');
+
+        $this->loadLaravelMigrations(['--database' => 'laravel-swagger']);
+
+        $this->artisan('migrate');
+
+        $this->withFactories(__DIR__.'/Stubs/database/factories');
     }
 
     public function testRequiredBaseInfo()

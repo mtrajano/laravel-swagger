@@ -4,6 +4,8 @@ namespace Mtrajano\LaravelSwagger;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
+use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
 
@@ -32,6 +34,7 @@ class Generator
     public function generate()
     {
         $this->docs = $this->getBaseInfo();
+        $this->docs['definitions'] = [];
 
         if ($this->config['parseSecurity'] && $this->hasOauthRoutes()) {
             $this->docs['securityDefinitions'] = $this->generateSecurityDefinitions();
@@ -137,12 +140,11 @@ class Generator
             'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
-            'responses' => [
-                '200' => [
-                    'description' => 'OK',
-                ],
-            ],
         ];
+
+        $this->addActionDefinitions();
+
+        $this->addActionResponses();
 
         $this->addActionParameters();
 
@@ -292,5 +294,19 @@ class Generator
         $middlewareMap = app('router')->getMiddleware();
 
         return $middlewareMap[$middleware] ?? null;
+    }
+
+    private function addActionResponses()
+    {
+        $responses = (new ResponseGenerator($this->route))->generate();
+
+        $this->docs['paths'][$this->route->uri()][$this->method]['responses'] = $responses;
+    }
+
+    private function addActionDefinitions()
+    {
+        $this->docs['definitions'] += (
+            new DefinitionGenerator($this->route)
+        )->generate();
     }
 }
