@@ -3,15 +3,10 @@
 namespace Mtrajano\LaravelSwagger\Definitions;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use InvalidArgumentException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
-use ReflectionClass;
 use ReflectionException;
-use ReflectionMethod;
-use ReflectionParameter;
 use RuntimeException;
 
 class DefinitionGenerator
@@ -226,21 +221,10 @@ class DefinitionGenerator
         return class_basename($this->model);
     }
 
-    private function getAnnotation(string $annotationName, string $docBlock)
-    {
-        preg_match_all('#@(.*?)\n#s', $docBlock, $annotations);
-
-        foreach (reset($annotations) as $annotation) {
-            if (Str::startsWith($annotation, $annotationName)) {
-                return trim(Str::replaceFirst($annotationName, '', $annotation));
-            }
-        }
-
-        return null;
-    }
-
     /**
      * Create an instance of the model with fake data or return null.
+     * WARNING: Disabled until solve database connection problem to don't
+     *          create data on production database.
      *
      * @return Model|null
      * @todo Check problem creating registries on production database:
@@ -259,7 +243,6 @@ class DefinitionGenerator
     /**
      * Identify all relationships for a given model
      *
-     * @todo Create unit test fot this method.
      * @param Model $model Model
      * @param string $heritage A flag that indicates whether parent and/or child relationships should be included
      * @return  array
@@ -267,61 +250,7 @@ class DefinitionGenerator
      */
     public function getAllRelations(Model $model = null, $heritage = 'all')
     {
-        $modelName = get_class($model);
-        $types = ['children' => 'Has', 'parents' => 'Belongs', 'all' => ''];
-        $heritage = in_array($heritage, array_keys($types)) ? $heritage : 'all';
-
-        $reflectionClass = new ReflectionClass($model);
-        $traits = $reflectionClass->getTraits(); // Use this to omit trait methods
-        $traitMethodNames = [];
-        foreach ($traits as $name => $trait) {
-            $traitMethods = $trait->getMethods();
-            foreach ($traitMethods as $traitMethod) {
-                $traitMethodNames[] = $traitMethod->getName();
-            }
-        }
-
-        // Checking the return value actually requires executing the method.  So use this to avoid infinite recursion.
-        $currentMethod = collect(explode('::', __METHOD__))->last();
-        $filter = $types[$heritage];
-        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);  // The method must be public
-
-        $methods = collect($methods)
-            ->filter(function (ReflectionMethod $method) use ($modelName, $traitMethodNames, $currentMethod) {
-                $methodName = $method->getName();
-                if (!in_array($methodName, $traitMethodNames) // The method must not originate in a trait
-                    && strpos($methodName, '__') !== 0        // It must not be a magic method
-                    && $method->class === $modelName          // It must be in the self scope and not inherited
-                    && !$method->isStatic()                   // It must be in the this scope and not static
-                    && $methodName != $currentMethod          // It must not be an override of this one
-                ) {
-                    $parameters = (new ReflectionMethod($modelName, $methodName))->getParameters();
-                    return collect($parameters)->filter(function (ReflectionParameter $parameter) {
-                        return !$parameter->isOptional(); // The method must have no required parameters
-                    })->isEmpty(); // If required parameters exist, this will be false and omit this method
-                }
-                return false;
-            })
-            ->map(function (ReflectionMethod $method) use ($model, $filter) {
-                $methodName = $method->getName();
-                /** @var Relation|mixed $relation */
-                $relation = $model->$methodName();  //Must return a Relation child. This is why we only want to do this once
-                if (is_subclass_of($relation, Relation::class)) {
-                    $type = (new ReflectionClass($relation))->getShortName();  //If relation is of the desired heritage
-                    if (!$filter || strpos($type, $filter) === 0) {
-                        return [
-                            'method' => $methodName,
-                            'related_model' => $relation->getRelated(),
-                            'relation' => get_class($relation),
-                        ];
-                    }
-                }
-                return null;
-            })
-            ->filter() // Remove elements reflecting methods that do not have the desired return type
-            ->toArray();
-
-        return $methods;
+        return get_all_model_relations($model, $heritage);
     }
 
     private function generateFromCurrentModel()
@@ -336,6 +265,7 @@ class DefinitionGenerator
                 'properties' => $this->getDefinitionProperties(),
             ],
         ];
+        return true;
     }
 
     /**
