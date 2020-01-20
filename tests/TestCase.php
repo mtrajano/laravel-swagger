@@ -15,6 +15,13 @@ class TestCase extends OrchestraTestCase
 
     protected function getEnvironmentSetUp($app)
     {
+        // Setup default database to use sqlite :memory:
+        $app['config']->set('database.default', 'laravel-swagger');
+        $app['config']->set('database.connections.laravel-swagger', [
+            'driver'   => 'sqlite',
+            'database' => ':memory:',
+        ]);
+
         $app['router']->middleware(['some-middleware', 'scope:user-read'])->group(function () use ($app) {
             $app['router']->get('/users', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\UserController@index');
             $app['router']->get('/users/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\UserController@show');

@@ -8,6 +8,14 @@ use Illuminate\Routing\Controller;
 class OrderController extends Controller
 {
     /**
+     * @model \Mtrajano\LaravelSwagger\Tests\Stubs\Models\Order
+     */
+    public function index()
+    {
+
+    }
+
+    /**
      * @param Request $request
      */
     public function store(Request $request)
