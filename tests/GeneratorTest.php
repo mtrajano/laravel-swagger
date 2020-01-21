@@ -28,6 +28,8 @@ class GeneratorTest extends TestCase
         '/oauth/scopes',
         '/oauth/personal-access-tokens',
         '/oauth/personal-access-tokens/{token_id}',
+        '/docs',
+        '/docs/asset/{asset}',
     ];
 
     public function setUp() : void

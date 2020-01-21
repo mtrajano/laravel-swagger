@@ -82,4 +82,16 @@ return [
     'parseSecurity' => true,
 
     'authFlow' => 'accessCode',
+
+    'routes' => [
+        'docs' => [
+            'path' => '/docs',
+
+            'name' => 'swagger.docs',
+
+            'middleware' => [],
+        ],
+    ],
+
+    'file_path' => env('SWAGGER_FILE_PATH', public_path('swagger.json')),
 ];
