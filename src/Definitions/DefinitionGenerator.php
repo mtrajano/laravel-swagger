@@ -3,8 +3,10 @@
 namespace Mtrajano\LaravelSwagger\Definitions;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use ReflectionException;
 use RuntimeException;
@@ -149,13 +151,15 @@ class DefinitionGenerator
      */
     private function getModelFake(): ?Model
     {
-        return null;
+        try {
+            DB::beginTransaction();
 
-        /*try {
             return factory(get_class($this->model))->create();
         } catch (InvalidArgumentException $e) {
             return null;
-        }*/
+        } finally {
+            DB::rollBack();
+        }
     }
 
     /**

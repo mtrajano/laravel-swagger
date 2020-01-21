@@ -313,9 +313,7 @@ class DefinitionGeneratorTest extends TestCase
                 );
             }
 
-            /*
-             TODO: Wait solution for method: DefinitionGenerator::getModelFake()
-             if ($example) {
+            if ($example) {
                 $this->assertArrayHasKey(
                     'example',
                     $this->definitions[$definition]['properties'][$property]
@@ -323,7 +321,7 @@ class DefinitionGeneratorTest extends TestCase
                 $this->assertNotNull(
                     $this->definitions[$definition]['properties'][$property]['example']
                 );
-            }*/
+            }
         }
         return $this;
     }

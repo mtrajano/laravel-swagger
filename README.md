@@ -175,6 +175,9 @@ public function getAppends(): array
 }
 ```
 
+If exists a [factory](https://laravel.com/docs/master/database-testing#writing-factories) defined to Models, will be
+generated fake data and added to `example` field on properties.
+
 The columns will be filtered to remove fields on `$hidden` attribute. 
 The model relationships will be added to definitions too.
 E.g.:
@@ -272,11 +275,13 @@ The structure above will return the following definitions:
     "type": "object",
     "properties": {
       "id": {
-        "type": "integer"
+        "type": "integer",
+        "example": "1"
       },
       "value": {
         "type": "number",
-        "format": "float"
+        "format": "float",
+        "example": "16.54"
       },
       "product_id": {
         "type": "string"
