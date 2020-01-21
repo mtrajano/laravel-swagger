@@ -190,7 +190,12 @@ class Generator
         $parameters = $this->getActionClassInstance($this->route->action())->getParameters();
 
         foreach ($parameters as $parameter) {
-            $class = (string) $parameter->getClass();
+            $reflectionClass = $parameter->getClass();
+            if (!$reflectionClass) {
+                continue;
+            }
+
+            $class = $reflectionClass->getName();
 
             if (is_subclass_of($class, FormRequest::class)) {
                 return (new $class)->rules();
