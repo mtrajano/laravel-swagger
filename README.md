@@ -8,9 +8,25 @@ Laravel Swagger scans your Laravel project's endpoints and auto generates a Swag
 
 ## About
 
-Laravel Swagger works based on recommended practices by Laravel. It will parse your routes and generate a path object for each one. If you inject Form Request classes in your controller's actions as request validation, it will also generate the parameters for each request that has them. For the parameters, it will take into account wether the request is a GET/HEAD/DELETE or a POST/PUT/PATCH request and make its best guess as to the type of parameter object it should generate. It will also generate the path parameters if your route contains them. Finally, this package will also scan any documentation you have in your action methods and add it as summary and description to that path, along with any appropriate annotations such as @deprecated.
+Laravel Swagger works based on recommended practices by Laravel. 
+It will parse your routes and generate a path object for each one. 
+If you inject Form Request classes in your controller's actions as request validation, 
+it will also generate the parameters for each request that has them. 
+For the parameters, it will take into account wether the request is a GET/HEAD/DELETE 
+or a POST/PUT/PATCH request and make its best guess as to the type of parameter object 
+it should generate. It will also generate the path parameters if your route contains them. 
+Finally, this package will also scan any documentation you have in your action methods and 
+add it as summary and description to that path, along with any appropriate annotations such 
+as @deprecated.
 
-One thing to note is this library leans on being explicit. It will choose to include keys even if they have a default. For example it chooses to say a route has a deprecated value of false rather than leaving it out. I believe this makes reading the documentation easier by not leaving important information out. The file can be easily cleaned up afterwards if the user chooses to leave out the defaults.
+One thing to note is this library leans on being explicit. 
+It will choose to include keys even if they have a default. 
+For example it chooses to say a route has a deprecated value of false rather than leaving it out. 
+I believe this makes reading the documentation easier by not leaving important information out. 
+The file can be easily cleaned up afterwards if the user chooses to leave out the defaults.
+
+Will be available automatically a route to check your docs. 
+Just access the route `/docs` after generate the docs to show Swagger UI view. 
 
 ## Installation
 
@@ -24,15 +40,29 @@ You can also override the default config provided by the application by running 
 
 ## Usage
 
-Generating the swagger documentation is easy, simply run `php artisan laravel-swagger:generate` in your project root. Keep in mind the command will simply print out the output in your console. If you want the docs saved in a file you can reroute the output like so: `php artisan laravel-swagger:generate > swagger.json`
+Generating the swagger documentation is easy, simply run `php artisan laravel-swagger:generate` in your project root.
 
-If you wish to generate docs for a subset of your routes, you can pass a filter using `--filter`, for example: `php artisan laravel-swagger:generate --filter="/api"`
+The command will generate the swagger docs to API default version defined on `config/laravel-swagger.php` file.
+
+To generate the docs for all versions you can run `php artisan laravel-swagger:generate --all-versions`.
+
+You can still generate the docs to specific version passing the parameter `--version=`. E.g.:
+
+```shell script
+php artisan laravel-swagger:generate --version=2.0.0
+``` 
 
 By default, laravel-swagger prints out the documentation in json format, if you want it in YAML format you can override the format using the `--format` flag. Make sure to have the yaml extension installed if you choose to do so.
 
-Format options are:<br>
-`json`<br>
-`yaml`
+Format options are:
+- `json`
+- `yaml`
+
+If you changes the default format on docs generation, you must change the format in `file_path` in `config/laravel-swagger.php`.
+
+After generate the docs access the route `/docs` to see the API docs. 
+The default version of the API will be shown, but you can choose the version on screen
+or passing the version on route path. E.g.: `/docs/2.0.0`. 
 
 ## Example
 
@@ -64,7 +94,7 @@ class UserShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'fields' => 'array'
+            'fields' => 'array',
             'show_relationships' => 'boolean|required'
         ];
     }
