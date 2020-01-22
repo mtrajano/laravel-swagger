@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get(config('laravel-swagger.routes.docs.path'), [
-    'as' => config('laravel-swagger.routes.docs.name'),
-    'middleware' => config('laravel-swagger.routes.docs.middleware', []),
+Route::get(config('laravel-swagger.route.path'), [
+    'as' => config('laravel-swagger.route.name'),
+    'middleware' => config('laravel-swagger.route.middleware', []),
     'uses' => '\Mtrajano\LaravelSwagger\Http\Controllers\SwaggerDocsController@index',
 ]);
 

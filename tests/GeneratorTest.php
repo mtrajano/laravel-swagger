@@ -4,6 +4,7 @@ namespace Mtrajano\LaravelSwagger\Tests;
 
 use Mtrajano\LaravelSwagger\Generator;
 use Mtrajano\LaravelSwagger\LaravelSwaggerException;
+use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 
 class GeneratorTest extends TestCase
 {
@@ -28,17 +29,16 @@ class GeneratorTest extends TestCase
         '/oauth/scopes',
         '/oauth/personal-access-tokens',
         '/oauth/personal-access-tokens/{token_id}',
-        '/docs',
-        '/docs/asset/{asset}',
     ];
 
     public function setUp() : void
     {
         parent::setUp();
 
-        $this->generator = new Generator(
-            $this->config = config('laravel-swagger')
-        );
+        $swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
+        $this->config = $swaggerDocsManager->getDefaultVersionConfig();
+
+        $this->generator = new Generator($this->config);
 
         $this->loadMigrationsFrom(__DIR__.'/Stubs/database/migrations');
 
