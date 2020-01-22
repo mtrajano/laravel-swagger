@@ -72,7 +72,7 @@
 <script>
     window.onload = function() {
         // Build a system
-        const ui = SwaggerUIBundle({
+        window.ui = SwaggerUIBundle({
             dom_id: '#swagger-ui',
 
             url: "{!! $filePath !!}",
@@ -95,9 +95,7 @@
             ],
 
             layout: "StandaloneLayout"
-        })
-
-        window.ui = ui
+        });
     }
 </script>
 </body>

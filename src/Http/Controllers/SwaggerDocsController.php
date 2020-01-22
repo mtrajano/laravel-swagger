@@ -23,14 +23,17 @@ class SwaggerDocsController extends Controller
      * @param string|null $version
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(string $version = null)
+    public function __invoke(string $version = null)
     {
         $version = $version ?? $this->swaggerDocsManager->getDefaultVersionKey();
+
+        $apiVersions = $this->swaggerDocsManager->getRoutesWithVersions();
 
         $versionConfig = $this->swaggerDocsManager->findVersionConfig($version);
 
         $filePath = config('app.url').'/'.$versionConfig['file_path'];
 
-        return view('laravel-swagger::index')->with('filePath', $filePath);
+        return view('laravel-swagger::index')
+            ->with(compact('filePath', 'apiVersions'));
     }
 }

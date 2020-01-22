@@ -80,4 +80,24 @@ class SwaggerDocsManager
     {
         return $this->config['defaultVersion'];
     }
+
+    /**
+     * @return array
+     */
+    public function getRoutesWithVersions(): array
+    {
+        $versions = array_column($this->getAllVersionsConfigs(), 'appVersion');
+
+        $routesWithVersions = [];
+        foreach ($versions as $key => $version) {
+            $route = route(
+                config('laravel-swagger.route.name'),
+                $version,
+                false
+            );
+            $routesWithVersions[$route] = $version;
+        }
+
+        return $routesWithVersions;
+    }
 }

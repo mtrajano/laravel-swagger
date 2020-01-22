@@ -40,6 +40,12 @@ You can also override the default config provided by the application by running 
 
 ## Usage
 
+To definitions generations works you will need migrate your database tables. So make sure execute migration before generate docs:
+
+```shell script
+php artisan migrate
+``` 
+
 Generating the swagger documentation is easy, simply run `php artisan laravel-swagger:generate` in your project root.
 
 The command will generate the swagger docs to API default version defined on `config/laravel-swagger.php` file.

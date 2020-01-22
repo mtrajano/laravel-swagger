@@ -11,7 +11,7 @@ use RuntimeException;
 
 class SwaggerAssetController extends Controller
 {
-    public function index($asset)
+    public function __invoke($asset)
     {
         try {
             $path = laravel_swagger_ui_dist_path($asset);
