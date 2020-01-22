@@ -12,7 +12,8 @@
         "php": ">=7.2",
         "orchestra/testbench": "~4.0",
         "phpunit/phpunit": "8.3.*",
-        "laravel/passport": "^8.0"
+        "laravel/passport": "^8.0",
+        "ext-json": "*"
     },
     "autoload": {
         "files": [

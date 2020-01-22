@@ -4,6 +4,7 @@ namespace Mtrajano\LaravelSwagger;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use phpDocumentor\Reflection\DocBlockFactory;
@@ -43,10 +44,6 @@ class Generator
 
         foreach ($this->getAppRoutes() as $route) {
             $this->route = $route;
-
-            if ($this->routeFilter && $this->isFilteredRoute()) {
-                continue;
-            }
 
             if (!isset($this->docs['paths'][$this->route->uri()])) {
                 $this->docs['paths'][$this->route->uri()] = [];
@@ -98,9 +95,36 @@ class Generator
 
     protected function getAppRoutes()
     {
+        $allRoutes = $this->getAllAppRoutes();
+
+        $routes = array_filter($allRoutes, function (Route $route) {
+            return !in_array($route->getName(), $this->config['ignoredRoutes']);
+        });
+
+        if ($this->routeFilter) {
+            $routes = array_filter($routes, function (Route $route) {
+                return preg_match(
+                    '/^' . // Starts with prefix
+                    preg_quote($this->routeFilter, '/') .
+                    '/',
+                    $route->uri()
+                );
+            });
+        }
+
+        return $routes;
+    }
+
+    /**
+     * @return Route[]
+     */
+    protected function getAllAppRoutes()
+    {
+        $routes = app('router')->getRoutes()->getRoutes();
+
         return array_map(function ($route) {
             return new DataObjects\Route($route);
-        }, app('router')->getRoutes()->getRoutes());
+        }, $routes);
     }
 
     protected function generateSecurityDefinitions()
@@ -252,7 +276,7 @@ class Generator
      */
     private function hasOauthRoutes()
     {
-        foreach ($this->getAppRoutes() as $route) {
+        foreach ($this->getAllAppRoutes() as $route) {
             $uri = $route->uri();
 
             if ($uri === self::OAUTH_TOKEN_PATH || $uri === self::OAUTH_AUTHORIZE_PATH) {
