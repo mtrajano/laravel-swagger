@@ -43,6 +43,7 @@ class DefinitionGeneratorTest extends TestCase
         $app['router']
             ->post('/orders/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\OrderController@show')
             ->name('orders.show');
+
         $app['router']
             ->get('products', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\ProductController@index')
             ->name('products.index');
@@ -52,8 +53,11 @@ class DefinitionGeneratorTest extends TestCase
         $app['router']
             ->get('products/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\ProductController@show')
             ->name('products.show');
-    }
 
+        $app['router']
+            ->get('customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@update')
+            ->name('customers.update');
+    }
 
     public function provideNotAllowedHttpMethods()
     {
@@ -221,6 +225,60 @@ class DefinitionGeneratorTest extends TestCase
             });
     }
 
+    public function testReturnErrorDefinition()
+    {
+        $route = $this->newRouteByName('customers.update');
+
+        $this->generateDefinitionsForRoute($route)
+            ->assertHasDefinition('UnprocessableEntityError', function (self $test) {
+                $test
+                    ->assertPropertyDefinitions([
+                        'property' => 'message',
+                        'type' => 'string',
+                    ])
+                    ->assertPropertyDefinitions([
+                        'property' => 'errors',
+                        'value' => [
+                            'type' => 'object',
+                            'properties' => [
+                                'name' => [
+                                    'type' => 'array',
+                                    'description' => 'Errors on "name" parameter',
+                                    'items' => [
+                                        'type' => 'string',
+                                    ],
+                                ],
+                                'email' => [
+                                    'type' => 'array',
+                                    'description' => 'Errors on "email" parameter',
+                                    'items' => [
+                                        'type' => 'string',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ]);
+            })
+            ->assertHasDefinition('NotFoundError', function (self $test) {
+                $test->assertPropertyDefinitions([
+                    'property' => 'message',
+                    'type' => 'string',
+                ]);
+            })
+            ->assertHasDefinition('UnauthenticatedError', function (self $test) {
+                $test->assertPropertyDefinitions([
+                    'property' => 'message',
+                    'type' => 'string',
+                ]);
+            })
+            ->assertHasDefinition('ForbiddenError', function (self $test) {
+                $test->assertPropertyDefinitions([
+                    'property' => 'message',
+                    'type' => 'string',
+                ]);
+            });
+    }
+
     private function getLaravelRouter(): Router
     {
         return app('router');
@@ -283,11 +341,17 @@ class DefinitionGeneratorTest extends TestCase
     {
         $definition = $data['definition'] ?? $this->definition;
         $properties = (array) $data['property'];
-        $type = $data['type'];
+        $type = $data['type'] ?? null;
         $example = $data['example'] ?? true;
         $format = $data['format'] ?? null;
 
         foreach ($properties as $property) {
+            $value = $data['value'] ?? false;
+            if ($value) {
+                $this->assertEquals($value, $this->definitions[$definition]['properties'][$property]);
+                continue;
+            }
+
             $this->assertArrayHasKey(
                 $property,
                 $this->definitions[$definition]['properties'],
@@ -323,6 +387,7 @@ class DefinitionGeneratorTest extends TestCase
                 );
             }
         }
+
         return $this;
     }
 

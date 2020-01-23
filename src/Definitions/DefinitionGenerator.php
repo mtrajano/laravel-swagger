@@ -2,7 +2,10 @@
 
 namespace Mtrajano\LaravelSwagger\Definitions;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -50,6 +53,8 @@ class DefinitionGenerator
         $this->generateFromCurrentModel();
 
         $this->generateFromRelations();
+
+        $this->generateFromErrors();
 
         return array_reverse($this->definitions);
     }
@@ -145,9 +150,6 @@ class DefinitionGenerator
      *          create data on production database.
      *
      * @return Model|null
-     * @todo Check problem creating registries on production database:
-     *       - Change the connection?
-     *       - Abort?
      */
     private function getModelFake(): ?Model
     {
@@ -301,5 +303,78 @@ class DefinitionGenerator
     private function definitionExists()
     {
         return isset($this->definitions[$this->getDefinitionName()]);
+    }
+
+    /**
+     * Generate definition from errors.
+     *
+     * @throws ReflectionException
+     */
+    private function generateFromErrors()
+    {
+        $formRequest = $this->route->getFormRequestFromParams();
+        if ($formRequest) {
+            $errorsProperties = [];
+            foreach ($formRequest->rules() as $property => $rules) {
+                $errorsProperties[$property] = [
+                    'type' => 'array',
+                    'description' => "Errors on \"$property\" parameter",
+                    'items' => [
+                        'type' => 'string',
+                    ],
+                ];
+            }
+
+            $this->definitions['UnprocessableEntityError'] = [
+                'type' => 'object',
+                'required' => [
+                    'message',
+                    'errors',
+                ],
+                'properties' => [
+                    'message' => [
+                        'type' => 'string',
+                        'example' => 'The given data was invalid',
+                    ],
+                    'errors' => [
+                        'type' => 'object',
+                        'properties' => $errorsProperties
+                    ],
+                ],
+            ];
+        }
+
+        $defaultErrorDefinition = [
+            'type' => 'object',
+            'required' => [
+                'message',
+            ],
+            'properties' => [
+                'message' => [
+                    'type' => 'string',
+                    'example' => 'The given data was invalid',
+                ],
+            ]
+        ];
+
+        $exceptionsDefinition = [
+            AuthenticationException::class => [
+                'UnauthenticatedError' => $defaultErrorDefinition,
+            ],
+            ModelNotFoundException::class => [
+                'NotFoundError' => $defaultErrorDefinition,
+            ],
+            AuthorizationException::class => [
+                'ForbiddenError' => $defaultErrorDefinition,
+            ],
+        ];
+
+        $exceptions = $this->route->getThrows();
+        foreach ($exceptions as $exception) {
+            $definition = $exceptionsDefinition[trim($exception, "\ \t\n\r\0\x0B")] ?? null;
+            if ($definition) {
+                $this->definitions += $definition;
+            }
+        }
     }
 }

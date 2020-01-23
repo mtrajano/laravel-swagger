@@ -3,6 +3,7 @@
 namespace Mtrajano\LaravelSwagger\Tests\Stubs\Controllers;
 
 use Illuminate\Routing\Controller;
+use Mtrajano\LaravelSwagger\Tests\Stubs\Requests\StoreCustomerRequest;
 use Mtrajano\LaravelSwagger\Tests\Stubs\Requests\UpdateCustomerRequest;
 
 /**
@@ -20,9 +21,9 @@ class CustomerController extends Controller
     /**
      * Store new customer.
      *
-     * @param UpdateCustomerRequest $request
+     * @param StoreCustomerRequest $request
      */
-    public function store(UpdateCustomerRequest $request)
+    public function store(StoreCustomerRequest $request)
     {
 
     }

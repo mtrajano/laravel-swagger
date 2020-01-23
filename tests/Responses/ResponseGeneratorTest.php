@@ -69,6 +69,9 @@ class ResponseGeneratorTest extends TestCase
                     ],
                     '401' => [
                         'description' => 'Unauthenticated',
+                        'schema' => [
+                            '$ref' => '#/definitions/UnauthenticatedError',
+                        ],
                     ],
                 ],
             ],
@@ -83,6 +86,9 @@ class ResponseGeneratorTest extends TestCase
                     ],
                     '422' => [
                         'description' => 'Validation errors',
+                        'schema' => [
+                            '$ref' => '#/definitions/UnprocessableEntityError',
+                        ],
                     ],
                 ],
             ],
@@ -94,15 +100,27 @@ class ResponseGeneratorTest extends TestCase
                     ],
                     '422' => [
                         'description' => 'Validation errors',
+                        'schema' => [
+                            '$ref' => '#/definitions/UnprocessableEntityError',
+                        ],
                     ],
                     '404' => [
                         'description' => 'Model not found',
+                        'schema' => [
+                            '$ref' => '#/definitions/NotFoundError',
+                        ],
                     ],
                     '403' => [
                         'description' => 'Forbidden',
+                        'schema' => [
+                            '$ref' => '#/definitions/ForbiddenError',
+                        ],
                     ],
                     '401' => [
                         'description' => 'Unauthenticated',
+                        'schema' => [
+                            '$ref' => '#/definitions/UnauthenticatedError',
+                        ],
                     ],
                 ],
             ],
@@ -114,6 +132,9 @@ class ResponseGeneratorTest extends TestCase
                     ],
                     '404' => [
                         'description' => 'Model not found',
+                        'schema' => [
+                            '$ref' => '#/definitions/NotFoundError',
+                        ],
                     ],
                 ],
             ],
@@ -139,8 +160,8 @@ class ResponseGeneratorTest extends TestCase
                                 '$ref' => '#/definitions/Order',
                             ],
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
         ];
     }

@@ -33,31 +33,44 @@ class ErrorResponseGenerator
         if ($this->route->hasFormRequestOnParams()) {
             $response['422'] = [
                 'description' => 'Validation errors',
+                'schema' => [
+                    '$ref' => '#/definitions/UnprocessableEntityError',
+                ]
             ];
         }
 
-        // Check throws from DockBlock: 404, 403
+        // TODO: Duplicated. Definition Generator.
         $exceptions = $this->route->getThrows();
 
         $exceptionsResponse = [
             AuthenticationException::class => [
                 '401' => [
                     'description' => 'Unauthenticated',
+                    'schema' => [
+                        '$ref' => '#/definitions/UnauthenticatedError',
+                    ]
                 ],
             ],
             ModelNotFoundException::class => [
                 '404' => [
                     'description' => 'Model not found',
+                    'schema' => [
+                        '$ref' => '#/definitions/NotFoundError',
+                    ]
                 ],
             ],
             AuthorizationException::class => [
                 '403' => [
                     'description' => 'Forbidden',
+                    'schema' => [
+                        '$ref' => '#/definitions/ForbiddenError',
+                    ]
                 ],
             ],
         ];
 
         foreach ($exceptions as $exception) {
+            // TODO: Duplicated: DefinitionGenerator
             $responseDefinition = $exceptionsResponse[trim($exception, "\ \t\n\r\0\x0B")] ?? null;
             if ($responseDefinition) {
                 $response += $responseDefinition;
@@ -69,6 +82,9 @@ class ErrorResponseGenerator
         if ($hasAuthMiddleware) {
             $response['401'] = [
                 'description' => 'Unauthenticated',
+                'schema' => [
+                    '$ref' => '#/definitions/UnauthenticatedError',
+                ]
             ];
         }
 
