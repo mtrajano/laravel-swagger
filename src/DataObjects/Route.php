@@ -244,7 +244,7 @@ class Route
      * @return array
      * @throws ReflectionException
      */
-    public function getThrows()
+    public function getThrows(): array
     {
         $docBlock = $this->getActionDocBlock();
 
