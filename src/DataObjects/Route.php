@@ -193,8 +193,31 @@ class Route
      */
     public function hasFormRequestOnParams()
     {
+        return (bool) $this->getFormRequestClassFromParams();
+    }
+
+    /**
+     * @return FormRequest|null
+     * @throws ReflectionException
+     */
+    public function getFormRequestFromParams(): ?FormRequest
+    {
+        $class = $this->getFormRequestClassFromParams();
+        if (!$class) {
+            return null;
+        }
+
+        return new $class();
+    }
+
+    /**
+     * @return string|null
+     * @throws ReflectionException
+     */
+    public function getFormRequestClassFromParams()
+    {
         if (!is_string($this->action())) {
-            return false;
+            return null;
         }
 
         $parameters = $this->getActionClassInstance($this->action())->getParameters();
@@ -208,11 +231,11 @@ class Route
             $class = $reflectionClass->getName();
 
             if (is_subclass_of($class, FormRequest::class)) {
-                return true;
+                return $class;
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
