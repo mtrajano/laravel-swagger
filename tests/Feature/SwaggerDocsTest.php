@@ -85,20 +85,26 @@ class SwaggerDocsTest extends TestCase
             ->assertSuccessful()
             ->assertViewIs('laravel-swagger::index')
             ->assertViewHas('filePath', config('app.url').'/'.$filePath)
-            ->assertViewHas('apiVersions', $apiVersions);
+            ->assertViewHas('apiVersions', $apiVersions)
+            ->assertViewHas('currentVersion', $defaultVersion);
     }
 
     public function testGetSwaggerUi()
     {
         foreach(config('laravel-swagger.versions') as $version) {
-            $route = route(config('laravel-swagger.route.name'), $version['appVersion'], false);
+            $route = route(
+                config('laravel-swagger.route.name'),
+                $version['appVersion'],
+                false
+            );
             $this->get($route)
                 ->assertSuccessful()
                 ->assertViewIs('laravel-swagger::index')
                 ->assertViewHas(
                     'filePath',
                     config('app.url').'/'.$version['file_path']
-                );
+                )
+                ->assertViewHas('currentVersion', $version['appVersion']);
         }
     }
 }

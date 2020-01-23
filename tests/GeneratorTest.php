@@ -88,7 +88,7 @@ class GeneratorTest extends TestCase
         $this->assertEquals('My awesome site!', $docs['info']['title']);
         $this->assertEquals('This is my awesome site, please enjoy it', $docs['info']['description']);
         $this->assertEquals('1.0.0', $docs['info']['version']);
-        $this->assertEquals('https://example.com', $docs['host']);
+        $this->assertEquals('example.com', $docs['host']);
         $this->assertEquals('/api', $docs['basePath']);
         $this->assertEquals(['https'], $docs['schemes']);
         $this->assertEquals(['application/json'], $docs['consumes']);

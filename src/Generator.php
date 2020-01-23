@@ -45,8 +45,8 @@ class Generator
         foreach ($this->getAppRoutes() as $route) {
             $this->route = $route;
 
-            if (!isset($this->docs['paths'][$this->route->uri()])) {
-                $this->docs['paths'][$this->route->uri()] = [];
+            if (!isset($this->docs['paths'][$this->getRouteUri()])) {
+                $this->docs['paths'][$this->getRouteUri()] = [];
             }
 
             foreach ($route->methods() as $method) {
@@ -72,7 +72,7 @@ class Generator
                 'description' => $this->config['description'],
                 'version' => $this->config['appVersion'],
             ],
-            'host' => $this->config['host'],
+            'host' => preg_replace('/^https?:\/\//', '', $this->config['host']),
             'basePath' => $this->config['basePath'],
         ];
 
@@ -160,7 +160,9 @@ class Generator
 
         [$isDeprecated, $summary, $description] = $this->parseActionDocBlock($docBlock);
 
-        $this->docs['paths'][$this->route->uri()][$this->method] = [
+        $path = $this->getRouteUri();
+
+        $this->docs['paths'][$path][$this->method] = [
             'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
@@ -190,7 +192,7 @@ class Generator
         }
 
         if (!empty($parameters)) {
-            $this->docs['paths'][$this->route->uri()][$this->method]['parameters'] = $parameters;
+            $this->docs['paths'][$this->getRouteUri()][$this->method]['parameters'] = $parameters;
         }
     }
 
@@ -198,7 +200,7 @@ class Generator
     {
         foreach ($this->route->middleware() as $middleware) {
             if ($this->isPassportScopeMiddleware($middleware)) {
-                $this->docs['paths'][$this->route->uri()][$this->method]['security'] = [
+                $this->docs['paths'][$this->getRouteUri()][$this->method]['security'] = [
                     self::SECURITY_DEFINITION_NAME => $middleware->parameters(),
                 ];
             }
@@ -266,11 +268,6 @@ class Generator
         }
     }
 
-    private function isFilteredRoute()
-    {
-        return !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->route->uri());
-    }
-
     /**
      * Assumes routes have been created using Passport::routes().
      */
@@ -329,7 +326,7 @@ class Generator
     {
         $responses = (new ResponseGenerator($this->route))->generate();
 
-        $this->docs['paths'][$this->route->uri()][$this->method]['responses'] = $responses;
+        $this->docs['paths'][$this->getRouteUri()][$this->method]['responses'] = $responses;
     }
 
     private function addActionDefinitions()
@@ -337,5 +334,10 @@ class Generator
         $this->docs['definitions'] += (
             new DefinitionGenerator($this->route)
         )->generate();
+    }
+
+    private function getRouteUri()
+    {
+        return Str::replaceFirst($this->config['basePath'], '', $this->route->uri());
     }
 }

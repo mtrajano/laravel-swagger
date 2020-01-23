@@ -221,17 +221,13 @@ class GenerateSwaggerDocCommandTest extends TestCase
             true
         );
 
-        foreach ($swaggerDocsVersion1['paths'] as $path => $config) {
-            $this->assertStringStartsWith($version1BasePath, $path);
-        }
+        $this->assertEquals($version1BasePath, $swaggerDocsVersion1['basePath']);
 
         $swaggerDocsVersion2 = json_decode(
             file_get_contents(public_path($version2FilePath)),
             true
         );
 
-        foreach ($swaggerDocsVersion2['paths'] as $path => $config) {
-            $this->assertStringStartsWith($version2BasePath, $path);
-        }
+        $this->assertEquals($version2BasePath, $swaggerDocsVersion2['basePath']);
     }
 }

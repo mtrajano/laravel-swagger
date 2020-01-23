@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{config('l5-swagger.api.title')}}</title>
+    <title>{{ config('laravel-swagger.title') .' - '. $currentVersion }}</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ laravel_swagger_asset('swagger-ui.css') }}" >
     <link rel="icon" type="image/png" href="{{ laravel_swagger_asset('favicon-32x32.png') }}" sizes="32x32" />
@@ -25,6 +25,12 @@
         body {
             margin:0;
             background: #fafafa;
+        }
+
+        /* Change Swagger UI version style */
+        .swagger-ui .info .title small {
+            vertical-align: bottom;
+            background: #ffffff;
         }
     </style>
 </head>
@@ -65,20 +71,66 @@
     </defs>
 </svg>
 
+@if (count($apiVersions) > 1)
+    {{-- Mount the versions selector. It'll be appended to SwaggerUI version container after render layout --}}
+    <select
+        style="display: none" {{-- Set display none to don't show selector before load Swagger UI --}}
+        class="content-type"
+        id="api-versions"
+        onchange="handleChangeApiVersion()"
+    >
+        @foreach ($apiVersions as $route => $version)
+            <option
+                {{ $currentVersion === $version ? "selected" : ''}}
+                value="{{ $route }}"
+            >
+                {{ $version }}
+            </option>
+        @endforeach
+    </select>
+@endif
 <div id="swagger-ui"></div>
 
 <script src="{{ laravel_swagger_asset('swagger-ui-bundle.js') }}"> </script>
 <script src="{{ laravel_swagger_asset('swagger-ui-standalone-preset.js') }}"> </script>
 <script>
+    /**
+     * Go to selected API docs version page.
+     */
+    function handleChangeApiVersion() {
+        const select = document.getElementById('api-versions');
+
+        const route = select.options[select.selectedIndex].value;
+
+        window.location.replace(route);
+    }
+
+    /**
+     * Append api version selector to versions on Swagger UI layout.
+     */
+    function appendApiVersionSelectorToVersions() {
+        // Get version container from SwaggerUI layout...
+        const version = document
+            .getElementById('swagger-ui')
+            .getElementsByClassName('version')[0];
+
+        // Clear version pre-defined...
+        version.innerHTML = '';
+
+        const apiVersionsSelector = document.getElementById('api-versions');
+        // Remove style attribute with "display: none" from selector
+        apiVersionsSelector.removeAttribute('style');
+
+        // Append api versions selector to version container.
+        version.appendChild(apiVersionsSelector);
+    }
+
     window.onload = function() {
         // Build a system
         window.ui = SwaggerUIBundle({
             dom_id: '#swagger-ui',
 
             url: "{!! $filePath !!}",
-            operationsSorter: {!! isset($operationsSorter) ? '"' . $operationsSorter . '"' : 'null' !!},
-            configUrl: {!! isset($configUrl) ? '"' . $configUrl . '"' : 'null' !!},
-            validatorUrl: {!! isset($validatorUrl) ? '"' . $validatorUrl . '"' : 'null' !!},
 
             requestInterceptor: function() {
                 this.headers['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
@@ -94,7 +146,11 @@
                 SwaggerUIBundle.plugins.DownloadUrl
             ],
 
-            layout: "StandaloneLayout"
+            layout: "BaseLayout",
+
+            onComplete: function () {
+                appendApiVersionSelectorToVersions();
+            }
         });
     }
 </script>
