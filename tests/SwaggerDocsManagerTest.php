@@ -102,4 +102,11 @@ class SwaggerDocsManagerTest extends BaseTestCase
             $swaggerDocs->findVersionConfig('2.0.0')
         );
     }
+
+    public function testFindVersionConfigWithNotExistentConfig()
+    {
+        $swaggerDocs = new SwaggerDocsManager($this->config);
+
+        $this->assertEmpty($swaggerDocs->findVersionConfig('3.0.0'));
+    }
 }
