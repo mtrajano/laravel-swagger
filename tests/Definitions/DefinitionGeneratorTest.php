@@ -3,9 +3,16 @@
 namespace Mtrajano\LaravelSwagger\Tests\Definitions;
 
 use Closure;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Routing\Router;
+use Illuminate\Validation\ValidationException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 use RuntimeException;
 
@@ -15,10 +22,16 @@ class DefinitionGeneratorTest extends TestCase
      * @var array
      */
     private $definitions;
+
     /**
      * @var string
      */
     private $definition;
+
+    /**
+     * @var SwaggerDocsManager
+     */
+    private $swaggerDocsManager;
 
     protected function setUp(): void
     {
@@ -31,6 +44,8 @@ class DefinitionGeneratorTest extends TestCase
         $this->artisan('migrate');
 
         $this->withFactories(__DIR__.'/../Stubs/database/factories');
+
+        $this->swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
     }
 
     protected function getEnvironmentSetUp($app)
@@ -55,8 +70,17 @@ class DefinitionGeneratorTest extends TestCase
             ->name('products.show');
 
         $app['router']
-            ->get('customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@update')
+            ->get('customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@index')
+            ->name('customers.index');
+        $app['router']
+            ->post('customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@store')
+            ->name('customers.store');
+        $app['router']
+            ->put('customers/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@update')
             ->name('customers.update');
+        $app['router']
+            ->delete('customers/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@destroy')
+            ->name('customers.destroy');
     }
 
     public function provideNotAllowedHttpMethods()
@@ -225,58 +249,220 @@ class DefinitionGeneratorTest extends TestCase
             });
     }
 
-    public function testReturnErrorDefinition()
+    public function provideRouteToReturnErrorDefinition()
     {
-        $route = $this->newRouteByName('customers.update');
-
-        $this->generateDefinitionsForRoute($route)
-            ->assertHasDefinition('UnprocessableEntityError', function (self $test) {
-                $test
-                    ->assertPropertyDefinitions([
-                        'property' => 'message',
-                        'type' => 'string',
-                    ])
-                    ->assertPropertyDefinitions([
-                        'property' => 'errors',
-                        'value' => [
-                            'type' => 'object',
-                            'properties' => [
-                                'name' => [
-                                    'type' => 'array',
-                                    'description' => 'Errors on "name" parameter',
-                                    'items' => [
-                                        'type' => 'string',
+        return [
+            [
+                'customers.index',
+                [],
+            ],
+            [
+                'customers.store',
+                [
+                    'UnprocessableEntity' => [
+                        [
+                            'property' => 'message',
+                            'type' => 'string',
+                        ],
+                        [
+                            'property' => 'errors',
+                            'value' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'name' => [
+                                        'type' => 'array',
+                                        'description' => 'Errors on "name" parameter',
+                                        'items' => [
+                                            'type' => 'string',
+                                        ],
                                     ],
-                                ],
-                                'email' => [
-                                    'type' => 'array',
-                                    'description' => 'Errors on "email" parameter',
-                                    'items' => [
-                                        'type' => 'string',
+                                    'email' => [
+                                        'type' => 'array',
+                                        'description' => 'Errors on "email" parameter',
+                                        'items' => [
+                                            'type' => 'string',
+                                        ],
                                     ],
                                 ],
                             ],
+                        ]
+                    ],
+                ],
+            ],
+            [
+                'customers.update',
+                [
+                    'UnprocessableEntity' => [
+                        [
+                            'property' => 'message',
+                            'type' => 'string',
                         ],
-                    ]);
-            })
-            ->assertHasDefinition('NotFoundError', function (self $test) {
-                $test->assertPropertyDefinitions([
+                        [
+                            'property' => 'errors',
+                            'value' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'name' => [
+                                        'type' => 'array',
+                                        'description' => 'Errors on "name" parameter',
+                                        'items' => [
+                                            'type' => 'string',
+                                        ],
+                                    ],
+                                    'email' => [
+                                        'type' => 'array',
+                                        'description' => 'Errors on "email" parameter',
+                                        'items' => [
+                                            'type' => 'string',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ]
+                    ],
+                    'NotFound' => [
+                        [
+                            'property' => 'message',
+                            'type' => 'string',
+                        ],
+                    ],
+                    'Unauthenticated' => [
+                        [
+                            'property' => 'message',
+                            'type' => 'string',
+                        ],
+                    ],
+                    'Forbidden' => [
+                        [
+                            'property' => 'message',
+                            'type' => 'string',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'customers.destroy',
+                [
+                    'NotFound' => [
+                        [
+                            'property' => 'message',
+                            'type' => 'string',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider provideRouteToReturnErrorDefinition
+     *
+     * @param string $routeName
+     * @param array $definitions
+     */
+    public function testReturnErrorDefinition(string $routeName, array $definitions)
+    {
+        $route = $this->newRouteByName($routeName);
+
+        $this->generateErrorDefinitionsForRoute($route);
+
+        $this->assertCount(count($this->definitions), $definitions);
+
+        $this->assertHasDefinitions($definitions);
+    }
+
+    public function testReturnErrorDefinitionChangingConfig()
+    {
+        $route = $this->newRouteByName('customers.update');
+
+        $validationDefinitionHandler = new class(
+            $route,
+            '422'
+        ) extends DefaultDefinitionHandler {
+            protected function getDefinitionContent(): array
+            {
+                return [
+                    'type' => 'object',
+                    'required' => [
+                        'code',
+                        'field',
+                        'message',
+                    ],
+                    'properties' => [
+                        'code' => [
+                            'type' => 'string',
+                            'example' => 'A123',
+                        ],
+                        'field' => [
+                            'type' => 'string',
+                            'example' => 'email',
+                        ],
+                        'message' => [
+                            'type' => 'string',
+                            'example' => 'Invalid email'
+                        ],
+                    ],
+                ];
+            }
+        };
+
+        $newErrorDefinitions = [
+            '422' => [
+                'exception' => ValidationException::class,
+                'handler' => get_class($validationDefinitionHandler)
+            ],
+            '403' => [
+                'exception' => AuthorizationException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+            '404' => [
+                'exception' => ModelNotFoundException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+            '401' => [
+                'exception' => AuthenticationException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+        ];
+
+        config(['laravel-swagger.versions.0.errors_definitions' => $newErrorDefinitions]);
+
+        $this->generateErrorDefinitionsForRoute($route);
+
+        $this->assertHasDefinitions([
+            '422' => [
+                [
+                    'property' => 'code',
+                    'type' => 'string',
+                ],
+                [
+                    'property' => 'field',
+                    'type' => 'string'
+                ],
+                [
                     'property' => 'message',
                     'type' => 'string',
-                ]);
-            })
-            ->assertHasDefinition('UnauthenticatedError', function (self $test) {
-                $test->assertPropertyDefinitions([
+                ],
+            ],
+            '404' => [
+                [
                     'property' => 'message',
                     'type' => 'string',
-                ]);
-            })
-            ->assertHasDefinition('ForbiddenError', function (self $test) {
-                $test->assertPropertyDefinitions([
+                ],
+            ],
+            '401' => [
+                [
                     'property' => 'message',
                     'type' => 'string',
-                ]);
-            });
+                ],
+            ],
+            '403' => [
+                [
+                    'property' => 'message',
+                    'type' => 'string',
+                ],
+            ],
+        ]);
     }
 
     private function getLaravelRouter(): Router
@@ -302,7 +488,33 @@ class DefinitionGeneratorTest extends TestCase
 
     private function generateDefinitionsForRoute(Route $route)
     {
-        $this->definitions = (new DefinitionGenerator($route))->generate();
+        $defaultConfig = (new SwaggerDocsManager(config('laravel-swagger')))
+            ->getDefaultVersionConfig();
+
+        $this->definitions = (new DefinitionGenerator(
+            $route,
+            $defaultConfig['errors_definitions'])
+        )->generate();
+        return $this;
+    }
+
+    private function generateErrorDefinitionsForRoute(Route $route)
+    {
+        $this->generateDefinitionsForRoute($route);
+
+        $defaultConfig = (new SwaggerDocsManager(config('laravel-swagger')))
+            ->getDefaultVersionConfig();
+
+        $errorDefinitionsNames = array_keys($defaultConfig['errors_definitions']);
+
+        $definitions = [];
+        foreach ($this->definitions as $definition => $value) {
+            if (in_array($definition, $errorDefinitionsNames)) {
+                $definitions[$definition] = $value;
+            }
+        }
+        $this->definitions = $definitions;
+
         return $this;
     }
 
@@ -402,5 +614,16 @@ class DefinitionGeneratorTest extends TestCase
         return new Route(
             $this->getLaravelRouter()->getRoutes()->getByName($routeName)
         );
+    }
+
+    private function assertHasDefinitions(array $definitions)
+    {
+        foreach ($definitions as $definition => $propertyDefinitions) {
+            $this->assertHasDefinition($definition, function (self $test) use ($propertyDefinitions) {
+                foreach ($propertyDefinitions as $propertyDefinition) {
+                    $test->assertPropertyDefinitions($propertyDefinition);
+                }
+            });
+        }
     }
 }

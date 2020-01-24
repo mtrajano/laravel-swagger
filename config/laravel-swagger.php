@@ -1,5 +1,12 @@
 <?php
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\ValidationErrorDefinitionHandler;
+
 return [
 
     /*
@@ -149,6 +156,29 @@ return [
             |
             */
             'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1-0-0.json'),
+
+            'errors_definitions' => [
+                'UnprocessableEntity' => [
+                    'http_code' => 422,
+                    'exception' => ValidationException::class,
+                    'handler' => ValidationErrorDefinitionHandler::class
+                ],
+                'Forbidden' => [
+                    'http_code' => 403,
+                    'exception' => AuthorizationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'NotFound' => [
+                    'http_code' => 404,
+                    'exception' => ModelNotFoundException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'Unauthenticated' => [
+                    'http_code' => 401,
+                    'exception' => AuthenticationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+            ],
         ],
     ],
 ];

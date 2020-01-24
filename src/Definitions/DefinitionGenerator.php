@@ -2,15 +2,14 @@
 
 namespace Mtrajano\LaravelSwagger\Definitions;
 
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultDefinitionHandler;
 use ReflectionException;
 use RuntimeException;
 
@@ -25,14 +24,21 @@ class DefinitionGenerator
      * @var Model
      */
     private $model;
+
     /**
      * @var array
      */
     private $definitions = [];
 
-    public function __construct(Route $route)
+    /**
+     * @var array
+     */
+    private $errorsDefinitions;
+
+    public function __construct(Route $route, array $errorsDefinitions)
     {
         $this->route = $route;
+        $this->errorsDefinitions = $errorsDefinitions;
     }
 
     /**
@@ -41,22 +47,20 @@ class DefinitionGenerator
      */
     public function generate()
     {
-        if (!$this->canGenerate()) {
-            return [];
+        if ($this->canGenerateModelsDefinition()) {
+            $this->setModelFromRouteAction();
+            if ($this->model === false) {
+                return [];
+            }
+
+            $this->generateFromCurrentModel();
+
+            $this->generateFromRelations();
         }
-
-        $this->setModelFromRouteAction();
-        if ($this->model === false) {
-            return [];
-        }
-
-        $this->generateFromCurrentModel();
-
-        $this->generateFromRelations();
 
         $this->generateFromErrors();
 
-        return array_reverse($this->definitions);
+        return array_reverse($this->definitions, true);
     }
 
     private function getPropertyDefinition($column)
@@ -83,7 +87,7 @@ class DefinitionGenerator
         $this->model = $this->route->getModel();
     }
 
-    private function canGenerate()
+    private function canGenerateModelsDefinition()
     {
         return $this->allowsHttpMethodGenerate();
     }
@@ -104,9 +108,17 @@ class DefinitionGenerator
         return true;
     }
 
-    private function getModelColumns()
+    /**
+     * Get the model's columns from table.
+     *
+     * @return array
+     */
+    private function getModelColumns(): array
     {
-        return Schema::getColumnListing($this->model->getTable());
+        /** @var Builder $schema */
+        $schema = Schema::getFacadeRoot();
+
+        return $schema->getColumnListing($this->model->getTable());
     }
 
     private function getDefinitionProperties()
@@ -146,8 +158,6 @@ class DefinitionGenerator
 
     /**
      * Create an instance of the model with fake data or return null.
-     * WARNING: Disabled until solve database connection problem to don't
-     *          create data on production database.
      *
      * @return Model|null
      */
@@ -168,13 +178,13 @@ class DefinitionGenerator
      * Identify all relationships for a given model
      *
      * @param Model $model Model
-     * @param string $heritage A flag that indicates whether parent and/or child relationships should be included
      * @return  array
+     *
      * @throws ReflectionException
      */
-    public function getAllRelations(Model $model = null, $heritage = 'all')
+    public function getAllRelations(Model $model)
     {
-        return get_all_model_relations($model, $heritage);
+        return get_all_model_relations($model);
     }
 
     private function generateFromCurrentModel()
@@ -214,9 +224,7 @@ class DefinitionGenerator
             ];
         }
 
-        $defaultDefinition = [
-            'type' => 'string'
-        ];
+        $defaultDefinition = ['type' => 'string'];
 
         $laravelTypesSwaggerTypesMapping = [
             'float' => [
@@ -312,69 +320,32 @@ class DefinitionGenerator
      */
     private function generateFromErrors()
     {
-        $formRequest = $this->route->getFormRequestFromParams();
-        if ($formRequest) {
-            $errorsProperties = [];
-            foreach ($formRequest->rules() as $property => $rules) {
-                $errorsProperties[$property] = [
-                    'type' => 'array',
-                    'description' => "Errors on \"$property\" parameter",
-                    'items' => [
-                        'type' => 'string',
-                    ],
-                ];
-            }
+        $exceptions = $this->route->getExceptions();
 
-            $this->definitions['UnprocessableEntityError'] = [
-                'type' => 'object',
-                'required' => [
-                    'message',
-                    'errors',
-                ],
-                'properties' => [
-                    'message' => [
-                        'type' => 'string',
-                        'example' => 'The given data was invalid',
-                    ],
-                    'errors' => [
-                        'type' => 'object',
-                        'properties' => $errorsProperties
-                    ],
-                ],
-            ];
-        }
-
-        $defaultErrorDefinition = [
-            'type' => 'object',
-            'required' => [
-                'message',
-            ],
-            'properties' => [
-                'message' => [
-                    'type' => 'string',
-                    'example' => 'The given data was invalid',
-                ],
-            ]
-        ];
-
-        $exceptionsDefinition = [
-            AuthenticationException::class => [
-                'UnauthenticatedError' => $defaultErrorDefinition,
-            ],
-            ModelNotFoundException::class => [
-                'NotFoundError' => $defaultErrorDefinition,
-            ],
-            AuthorizationException::class => [
-                'ForbiddenError' => $defaultErrorDefinition,
-            ],
-        ];
-
-        $exceptions = $this->route->getThrows();
         foreach ($exceptions as $exception) {
-            $definition = $exceptionsDefinition[trim($exception, "\ \t\n\r\0\x0B")] ?? null;
-            if ($definition) {
-                $this->definitions += $definition;
+            $definitionHandler = $this->findExceptionDefinitionHandler($exception);
+            if (!$definitionHandler) {
+                continue;
+            }
+
+            $this->definitions += $definitionHandler->handle();
+        }
+    }
+
+    /**
+     * @param $exception
+     * @return DefaultDefinitionHandler|null
+     */
+    private function findExceptionDefinitionHandler($exception): ?DefaultDefinitionHandler
+    {
+        foreach ($this->errorsDefinitions as $ref => $errorDefinition) {
+            if ($errorDefinition['exception'] === $exception) {
+                return new $errorDefinition['handler'](
+                    $this->route, (string) $ref
+                );
             }
         }
+
+        return null;
     }
 }

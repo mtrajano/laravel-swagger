@@ -11,9 +11,15 @@ class ResponseGenerator
      */
     private $route;
 
-    public function __construct(Route $route)
+    /**
+     * @var array
+     */
+    private $errorDefinitions;
+
+    public function __construct(Route $route, array $errorDefinitions)
     {
         $this->route = $route;
+        $this->errorDefinitions = $errorDefinitions;
     }
 
     public function generate()
@@ -44,7 +50,7 @@ class ResponseGenerator
     {
         return [
             new SuccessResponseGenerator($this->route),
-            new ErrorResponseGenerator($this->route),
+            new ErrorResponseGenerator($this->route, $this->errorDefinitions),
         ];
     }
 }

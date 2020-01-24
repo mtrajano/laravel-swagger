@@ -5,7 +5,7 @@ namespace Mtrajano\LaravelSwagger\Responses;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use ReflectionException;
 
@@ -16,9 +16,34 @@ class ErrorResponseGenerator
      */
     private $route;
 
-    public function __construct(Route $route)
+    /**
+     * @var array
+     */
+    private $errorsDefinitions;
+
+    public function __construct(Route $route, array $errorsDefinitions)
     {
         $this->route = $route;
+        $this->errorsDefinitions = $errorsDefinitions;
+    }
+
+    /**
+     * Mount error response from http and description.
+     *
+     * @param int $httpCode
+     * @param string $description
+     * @return array
+     */
+    public function mountErrorResponse(int $httpCode, string $description)
+    {
+        return [
+            (string) $httpCode => [
+                'description' => $description,
+                'schema' => [
+                    '$ref' => '#/definitions/'.$this->getDefinitionNameByHttpCode($httpCode),
+                ],
+            ],
+        ];
     }
 
     /**
@@ -29,76 +54,38 @@ class ErrorResponseGenerator
     {
         $response = [];
 
-        // Check if exists FormValidator in action: 422
-        if ($this->route->hasFormRequestOnParams()) {
-            $response['422'] = [
-                'description' => 'Validation errors',
-                'schema' => [
-                    '$ref' => '#/definitions/UnprocessableEntityError',
-                ]
-            ];
-        }
-
-        // TODO: Duplicated. Definition Generator.
-        $exceptions = $this->route->getThrows();
+        $exceptions = $this->route->getExceptions();
 
         $exceptionsResponse = [
-            AuthenticationException::class => [
-                '401' => [
-                    'description' => 'Unauthenticated',
-                    'schema' => [
-                        '$ref' => '#/definitions/UnauthenticatedError',
-                    ]
-                ],
-            ],
-            ModelNotFoundException::class => [
-                '404' => [
-                    'description' => 'Model not found',
-                    'schema' => [
-                        '$ref' => '#/definitions/NotFoundError',
-                    ]
-                ],
-            ],
-            AuthorizationException::class => [
-                '403' => [
-                    'description' => 'Forbidden',
-                    'schema' => [
-                        '$ref' => '#/definitions/ForbiddenError',
-                    ]
-                ],
-            ],
+            ValidationException::class => $this->mountErrorResponse(422, 'Validation errors'),
+            AuthenticationException::class => $this->mountErrorResponse(401, 'Unauthenticated'),
+            ModelNotFoundException::class => $this->mountErrorResponse(404, 'Model not found'),
+            AuthorizationException::class => $this->mountErrorResponse(403, 'Forbidden'),
         ];
 
         foreach ($exceptions as $exception) {
-            // TODO: Duplicated: DefinitionGenerator
-            $responseDefinition = $exceptionsResponse[trim($exception, "\ \t\n\r\0\x0B")] ?? null;
+            $responseDefinition = $exceptionsResponse[$exception] ?? null;
             if ($responseDefinition) {
                 $response += $responseDefinition;
             }
         }
 
-        // Check if has auth middleware: 401
-        $hasAuthMiddleware = $this->hasAuthMiddleware();
-        if ($hasAuthMiddleware) {
-            $response['401'] = [
-                'description' => 'Unauthenticated',
-                'schema' => [
-                    '$ref' => '#/definitions/UnauthenticatedError',
-                ]
-            ];
-        }
-
         return $response;
     }
 
-    private function hasAuthMiddleware()
+    /**
+     * @param int $httpCode
+     * @return string|null
+     */
+    private function getDefinitionNameByHttpCode(int $httpCode): ?string
     {
-        foreach ($this->route->middleware() as $middleware) {
-            if (Str::contains($middleware->name(), 'auth')) {
-                return true;
+        foreach ($this->errorsDefinitions as $definitionName => $errorDefinition) {
+            if ($errorDefinition['http_code'] == $httpCode) {
+                return $definitionName;
             }
         }
 
-        return false;
+        // TODO: Throw exception ???
+        return null;
     }
 }

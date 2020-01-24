@@ -2,9 +2,16 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\Responses;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Routing\Router;
+use Illuminate\Validation\ValidationException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\ValidationErrorDefinitionHandler;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
+use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 
 class ResponseGeneratorTest extends TestCase
@@ -70,7 +77,7 @@ class ResponseGeneratorTest extends TestCase
                     '401' => [
                         'description' => 'Unauthenticated',
                         'schema' => [
-                            '$ref' => '#/definitions/UnauthenticatedError',
+                            '$ref' => '#/definitions/Unauthenticated',
                         ],
                     ],
                 ],
@@ -87,7 +94,7 @@ class ResponseGeneratorTest extends TestCase
                     '422' => [
                         'description' => 'Validation errors',
                         'schema' => [
-                            '$ref' => '#/definitions/UnprocessableEntityError',
+                            '$ref' => '#/definitions/UnprocessableEntity',
                         ],
                     ],
                 ],
@@ -101,25 +108,25 @@ class ResponseGeneratorTest extends TestCase
                     '422' => [
                         'description' => 'Validation errors',
                         'schema' => [
-                            '$ref' => '#/definitions/UnprocessableEntityError',
+                            '$ref' => '#/definitions/UnprocessableEntity',
                         ],
                     ],
                     '404' => [
                         'description' => 'Model not found',
                         'schema' => [
-                            '$ref' => '#/definitions/NotFoundError',
+                            '$ref' => '#/definitions/NotFound',
                         ],
                     ],
                     '403' => [
                         'description' => 'Forbidden',
                         'schema' => [
-                            '$ref' => '#/definitions/ForbiddenError',
+                            '$ref' => '#/definitions/Forbidden',
                         ],
                     ],
                     '401' => [
                         'description' => 'Unauthenticated',
                         'schema' => [
-                            '$ref' => '#/definitions/UnauthenticatedError',
+                            '$ref' => '#/definitions/Unauthenticated',
                         ],
                     ],
                 ],
@@ -133,7 +140,7 @@ class ResponseGeneratorTest extends TestCase
                     '404' => [
                         'description' => 'Model not found',
                         'schema' => [
-                            '$ref' => '#/definitions/NotFoundError',
+                            '$ref' => '#/definitions/NotFound',
                         ],
                     ],
                 ],
@@ -182,6 +189,71 @@ class ResponseGeneratorTest extends TestCase
         $this->assertEquals($response, $this->responses);
     }
 
+    public function testGeneratedResponsesChangingConfig()
+    {
+        $newErrorDefinitions = [
+            '422' => [
+                'http_code' => 422,
+                'exception' => ValidationException::class,
+                'handler' => ValidationErrorDefinitionHandler::class
+            ],
+            '403' => [
+                'http_code' => 403,
+                'exception' => AuthorizationException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+            '404' => [
+                'http_code' => 404,
+                'exception' => ModelNotFoundException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+            '401' => [
+                'http_code' => 401,
+                'exception' => AuthenticationException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+        ];
+
+        config(['laravel-swagger.versions.0.errors_definitions' => $newErrorDefinitions]);
+
+        $routeName = 'customers.update';
+        $response = [
+            '204' => [
+                'description' => 'No Content',
+            ],
+            '422' => [
+                'description' => 'Validation errors',
+                'schema' => [
+                    '$ref' => '#/definitions/422',
+                ],
+            ],
+            '404' => [
+                'description' => 'Model not found',
+                'schema' => [
+                    '$ref' => '#/definitions/404',
+                ],
+            ],
+            '403' => [
+                'description' => 'Forbidden',
+                'schema' => [
+                    '$ref' => '#/definitions/403',
+                ],
+            ],
+            '401' => [
+                'description' => 'Unauthenticated',
+                'schema' => [
+                    '$ref' => '#/definitions/401',
+                ],
+            ],
+        ];
+
+        $route = new Route($this->getLaravelRouter()->getRoutes()->getByName($routeName));
+
+        $this->generateResponsesFromRoute($route);
+
+        $this->assertEquals($response, $this->responses);
+    }
+
     private function getLaravelRouter(): Router
     {
         return app('router');
@@ -189,6 +261,12 @@ class ResponseGeneratorTest extends TestCase
 
     private function generateResponsesFromRoute(Route $route)
     {
-        $this->responses = (new ResponseGenerator($route))->generate();
+        $config = (
+            new SwaggerDocsManager(config('laravel-swagger'))
+        )->getDefaultVersionConfig();
+
+        $this->responses = (
+            new ResponseGenerator($route, $config['errors_definitions'])
+        )->generate();
     }
 }

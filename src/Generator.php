@@ -2,12 +2,15 @@
 
 namespace Mtrajano\LaravelSwagger;
 
+use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Laravel\Passport\Passport;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionException;
 use ReflectionMethod;
 
 class Generator
@@ -19,6 +22,10 @@ class Generator
     protected $config;
     protected $routeFilter;
     protected $docs;
+
+    /**
+     * @var Route|null
+     */
     protected $route;
     protected $method;
     protected $docParser;
@@ -32,6 +39,10 @@ class Generator
         $this->hasSecurityDefinitions = false;
     }
 
+    /**
+     * @return array
+     * @throws LaravelSwaggerException
+     */
     public function generate()
     {
         $this->docs = $this->getBaseInfo();
@@ -93,7 +104,10 @@ class Generator
         return $baseInfo;
     }
 
-    protected function getAppRoutes()
+    /**
+     * @return Route[]
+     */
+    protected function getAppRoutes(): array
     {
         $allRoutes = $this->getAllAppRoutes();
 
@@ -127,6 +141,10 @@ class Generator
         }, $routes);
     }
 
+    /**
+     * @return array
+     * @throws LaravelSwaggerException
+     */
     protected function generateSecurityDefinitions()
     {
         $authFlow = $this->config['authFlow'];
@@ -153,6 +171,9 @@ class Generator
         return $securityDefinition;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function generatePath()
     {
         $actionInstance = is_string($this->route->action()) ? $this->getActionClassInstance($this->route->action()) : null;
@@ -179,6 +200,9 @@ class Generator
         }
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function addActionParameters()
     {
         $rules = $this->getFormRules() ?: [];
@@ -207,6 +231,10 @@ class Generator
         }
     }
 
+    /**
+     * @return bool
+     * @throws ReflectionException
+     */
     protected function getFormRules()
     {
         if (!is_string($this->route->action())) {
@@ -227,6 +255,8 @@ class Generator
                 return (new $class)->rules();
             }
         }
+
+        return false;
     }
 
     protected function getParameterGenerator($rules)
@@ -241,6 +271,11 @@ class Generator
         }
     }
 
+    /**
+     * @param string $action
+     * @return ReflectionMethod
+     * @throws ReflectionException
+     */
     private function getActionClassInstance(string $action)
     {
         [$class, $method] = Str::parseCallback($action);
@@ -263,7 +298,7 @@ class Generator
             $description = (string) $parsedComment->getDescription();
 
             return [$isDeprecated, $summary, $description];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [false, '', ''];
         }
     }
@@ -295,11 +330,15 @@ class Generator
             return [];
         }
 
-        $scopes = \Laravel\Passport\Passport::scopes()->toArray();
+        $scopes = Passport::scopes()->toArray();
 
         return array_combine(array_column($scopes, 'id'), array_column($scopes, 'description'));
     }
 
+    /**
+     * @param string $flow
+     * @throws LaravelSwaggerException
+     */
     private function validateAuthFlow(string $flow)
     {
         if (!in_array($flow, ['password', 'application', 'implicit', 'accessCode'])) {
@@ -324,15 +363,20 @@ class Generator
 
     private function addActionResponses()
     {
-        $responses = (new ResponseGenerator($this->route))->generate();
+        $responses = (
+            new ResponseGenerator($this->route, $this->config['errors_definitions'])
+        )->generate();
 
         $this->docs['paths'][$this->getRouteUri()][$this->method]['responses'] = $responses;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function addActionDefinitions()
     {
         $this->docs['definitions'] += (
-            new DefinitionGenerator($this->route)
+            new DefinitionGenerator($this->route, $this->config['errors_definitions'])
         )->generate();
     }
 

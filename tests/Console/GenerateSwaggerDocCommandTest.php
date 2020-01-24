@@ -2,6 +2,12 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\Console;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\Handlers\ValidationErrorDefinitionHandler;
 use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 
@@ -33,7 +39,6 @@ class GenerateSwaggerDocCommandTest extends TestCase
         });
     }
 
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -48,44 +53,14 @@ class GenerateSwaggerDocCommandTest extends TestCase
         $version1FilePath = 'swagger-1-0-0.json';
         $version2FilePath = 'swagger-2-0-0.json';
         $versions = [
-            [
+            $this->defaultConfig([
                 'appVersion' => '1.0.0',
-                'host' => env('APP_URL'),
-                'basePath' => '/',
-                'schemes' => [],
-                'consumes' => [],
-                'produces' => [],
-                'ignoredMethods' => [
-                    'head',
-                ],
-                'ignoredRoutes' => [
-                    'laravel-swagger.docs',
-                    'laravel-swagger.asset'
-                ],
-                'parseDocBlock' => true,
-                'parseSecurity' => true,
-                'authFlow' => 'accessCode',
                 'file_path' => $version1FilePath,
-            ],
-            [
+            ]),
+            $this->defaultConfig([
                 'appVersion' => '2.0.0',
-                'host' => env('APP_URL'),
-                'basePath' => '/',
-                'schemes' => [],
-                'consumes' => [],
-                'produces' => [],
-                'ignoredMethods' => [
-                    'head',
-                ],
-                'ignoredRoutes' => [
-                    'laravel-swagger.docs',
-                    'laravel-swagger.asset'
-                ],
-                'parseDocBlock' => true,
-                'parseSecurity' => true,
-                'authFlow' => 'accessCode',
                 'file_path' => $version2FilePath,
-            ],
+            ]),
         ];
 
         config(['laravel-swagger.versions' => $versions]);
@@ -114,44 +89,13 @@ class GenerateSwaggerDocCommandTest extends TestCase
     {
         $version2FilePath = 'swagger-2-0-0.json';
         $versions = [
-            [
+            $this->defaultConfig([
                 'appVersion' => '1.0.0',
-                'host' => env('APP_URL'),
-                'basePath' => '/',
-                'schemes' => [],
-                'consumes' => [],
-                'produces' => [],
-                'ignoredMethods' => [
-                    'head',
-                ],
-                'ignoredRoutes' => [
-                    'laravel-swagger.docs',
-                    'laravel-swagger.asset'
-                ],
-                'parseDocBlock' => true,
-                'parseSecurity' => true,
-                'authFlow' => 'accessCode',
-                'file_path' => 'swagger-1-0-0.json',
-            ],
-            [
+            ]),
+            $this->defaultConfig([
                 'appVersion' => '2.0.0',
-                'host' => env('APP_URL'),
-                'basePath' => '/',
-                'schemes' => [],
-                'consumes' => [],
-                'produces' => [],
-                'ignoredMethods' => [
-                    'head',
-                ],
-                'ignoredRoutes' => [
-                    'laravel-swagger.docs',
-                    'laravel-swagger.asset'
-                ],
-                'parseDocBlock' => true,
-                'parseSecurity' => true,
-                'authFlow' => 'accessCode',
                 'file_path' => $version2FilePath,
-            ]
+            ]),
         ];
 
         config(['laravel-swagger.versions' => $versions]);
@@ -172,44 +116,16 @@ class GenerateSwaggerDocCommandTest extends TestCase
         $version1BasePath = '/v1';
         $version2BasePath = '/v2';
         $versions = [
-            [
+            $this->defaultConfig([
                 'appVersion' => '1.0.0',
-                'host' => env('APP_URL'),
                 'basePath' => $version1BasePath,
-                'schemes' => [],
-                'consumes' => [],
-                'produces' => [],
-                'ignoredMethods' => [
-                    'head',
-                ],
-                'ignoredRoutes' => [
-                    'laravel-swagger.docs',
-                    'laravel-swagger.asset'
-                ],
-                'parseDocBlock' => true,
-                'parseSecurity' => true,
-                'authFlow' => 'accessCode',
-                'file_path' => $version1FilePath,
-            ],
-            [
-                'appVersion' => '2.0.0',
-                'host' => env('APP_URL'),
-                'basePath' => $version2BasePath,
-                'schemes' => [],
-                'consumes' => [],
-                'produces' => [],
-                'ignoredMethods' => [
-                    'head',
-                ],
-                'ignoredRoutes' => [
-                    'laravel-swagger.docs',
-                    'laravel-swagger.asset'
-                ],
-                'parseDocBlock' => true,
-                'parseSecurity' => true,
-                'authFlow' => 'accessCode',
                 'file_path' => $version2FilePath,
-            ],
+            ]),
+            $this->defaultConfig([
+                'appVersion' => '2.0.0',
+                'basePath' => $version2BasePath,
+                'file_path' => $version2FilePath,
+            ]),
         ];
 
         config(['laravel-swagger.versions' => $versions]);
@@ -229,5 +145,50 @@ class GenerateSwaggerDocCommandTest extends TestCase
         );
 
         $this->assertEquals($version2BasePath, $swaggerDocsVersion2['basePath']);
+    }
+
+    private function defaultConfig(array $config = [])
+    {
+        return array_merge([
+            'appVersion' => '1.0.0',
+            'host' => env('APP_URL'),
+            'basePath' => '/',
+            'schemes' => [],
+            'consumes' => [],
+            'produces' => [],
+            'ignoredMethods' => [
+                'head',
+            ],
+            'ignoredRoutes' => [
+                'laravel-swagger.docs',
+                'laravel-swagger.asset'
+            ],
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
+            'authFlow' => 'accessCode',
+            'file_path' => 'swagger-1-0-0.json',
+            'errors_definitions' => [
+                'UnprocessableEntity' => [
+                    'http_code' => 422,
+                    'exception' => ValidationException::class,
+                    'handler' => ValidationErrorDefinitionHandler::class
+                ],
+                'Forbidden' => [
+                    'http_code' => 403,
+                    'exception' => AuthorizationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'NotFound' => [
+                    'http_code' => 404,
+                    'exception' => ModelNotFoundException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'Unauthenticated' => [
+                    'http_code' => 401,
+                    'exception' => AuthenticationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+            ],
+        ], $config);
     }
 }
