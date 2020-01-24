@@ -157,6 +157,21 @@ return [
             */
             'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1-0-0.json'),
 
+            /*
+            |------------------------------------------------------------------
+            | Errors Definitions
+            |------------------------------------------------------------------
+            |
+            | The classes that will handle with errors definitions. The array
+            | key is the name of the definition. The "http_code" will be used
+            | to link the definition with the error. The "exception" with be
+            | used to get the "handler". The definitions generator will get
+            | the exceptions from DocBlock, middlewares and actions parameters.
+            | According to exception an specific handler will be called.
+            | To return your own errors response definitions you can create a
+            | handler and define here.
+            |
+            */
             'errors_definitions' => [
                 'UnprocessableEntity' => [
                     'http_code' => 422,

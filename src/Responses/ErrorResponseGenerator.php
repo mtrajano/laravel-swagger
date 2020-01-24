@@ -33,6 +33,7 @@ class ErrorResponseGenerator
      * @param int $httpCode
      * @param string $description
      * @return array
+     * @throws ReflectionException
      */
     public function mountErrorResponse(int $httpCode, string $description)
     {
@@ -40,7 +41,7 @@ class ErrorResponseGenerator
             (string) $httpCode => [
                 'description' => $description,
                 'schema' => [
-                    '$ref' => '#/definitions/'.$this->getDefinitionNameByHttpCode($httpCode),
+                    '$ref' => '#/definitions/'.$this->getDefinitionName($httpCode),
                 ],
             ],
         ];
@@ -76,9 +77,16 @@ class ErrorResponseGenerator
     /**
      * @param int $httpCode
      * @return string|null
+     * @throws ReflectionException
      */
-    private function getDefinitionNameByHttpCode(int $httpCode): ?string
+    private function getDefinitionName(int $httpCode): ?string
     {
+        $formRequestClass = $this->route->getFormRequestClassFromParams();
+
+        if ($httpCode == 422 && $formRequestClass) {
+            return class_basename($formRequestClass);
+        }
+
         foreach ($this->errorsDefinitions as $definitionName => $errorDefinition) {
             if ($errorDefinition['http_code'] == $httpCode) {
                 return $definitionName;

@@ -94,7 +94,7 @@ class ResponseGeneratorTest extends TestCase
                     '422' => [
                         'description' => 'Validation errors',
                         'schema' => [
-                            '$ref' => '#/definitions/UnprocessableEntity',
+                            '$ref' => '#/definitions/StoreCustomerRequest',
                         ],
                     ],
                 ],
@@ -108,7 +108,7 @@ class ResponseGeneratorTest extends TestCase
                     '422' => [
                         'description' => 'Validation errors',
                         'schema' => [
-                            '$ref' => '#/definitions/UnprocessableEntity',
+                            '$ref' => '#/definitions/UpdateCustomerRequest',
                         ],
                     ],
                     '404' => [
@@ -224,7 +224,7 @@ class ResponseGeneratorTest extends TestCase
             '422' => [
                 'description' => 'Validation errors',
                 'schema' => [
-                    '$ref' => '#/definitions/422',
+                    '$ref' => '#/definitions/UpdateCustomerRequest',
                 ],
             ],
             '404' => [

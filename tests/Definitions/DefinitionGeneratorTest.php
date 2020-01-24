@@ -7,6 +7,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
@@ -259,7 +260,7 @@ class DefinitionGeneratorTest extends TestCase
             [
                 'customers.store',
                 [
-                    'UnprocessableEntity' => [
+                    'StoreCustomerRequest' => [
                         [
                             'property' => 'message',
                             'type' => 'string',
@@ -292,7 +293,7 @@ class DefinitionGeneratorTest extends TestCase
             [
                 'customers.update',
                 [
-                    'UnprocessableEntity' => [
+                    'UpdateCustomerRequest' => [
                         [
                             'property' => 'message',
                             'type' => 'string',
@@ -408,18 +409,22 @@ class DefinitionGeneratorTest extends TestCase
 
         $newErrorDefinitions = [
             '422' => [
+                'http_code' => 422,
                 'exception' => ValidationException::class,
                 'handler' => get_class($validationDefinitionHandler)
             ],
             '403' => [
+                'http_code' => 403,
                 'exception' => AuthorizationException::class,
                 'handler' => DefaultErrorDefinitionHandler::class
             ],
             '404' => [
+                'http_code' => 404,
                 'exception' => ModelNotFoundException::class,
                 'handler' => DefaultErrorDefinitionHandler::class
             ],
             '401' => [
+                'http_code' => 401,
                 'exception' => AuthenticationException::class,
                 'handler' => DefaultErrorDefinitionHandler::class
             ],
@@ -430,7 +435,7 @@ class DefinitionGeneratorTest extends TestCase
         $this->generateErrorDefinitionsForRoute($route);
 
         $this->assertHasDefinitions([
-            '422' => [
+            'UpdateCustomerRequest' => [
                 [
                     'property' => 'code',
                     'type' => 'string',
@@ -509,7 +514,9 @@ class DefinitionGeneratorTest extends TestCase
 
         $definitions = [];
         foreach ($this->definitions as $definition => $value) {
-            if (in_array($definition, $errorDefinitionsNames)) {
+            if (in_array($definition, $errorDefinitionsNames) ||
+                Str::endsWith($definition, 'Request')
+            ) {
                 $definitions[$definition] = $value;
             }
         }

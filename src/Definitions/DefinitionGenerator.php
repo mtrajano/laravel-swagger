@@ -335,14 +335,22 @@ class DefinitionGenerator
     /**
      * @param $exception
      * @return DefaultDefinitionHandler|null
+     * @throws ReflectionException
      */
     private function findExceptionDefinitionHandler($exception): ?DefaultDefinitionHandler
     {
+        $formRequestClass = $this->route->getFormRequestClassFromParams();
+        $formRequestRef = $formRequestClass
+            ? class_basename($formRequestClass)
+            : '';
+
         foreach ($this->errorsDefinitions as $ref => $errorDefinition) {
             if ($errorDefinition['exception'] === $exception) {
-                return new $errorDefinition['handler'](
-                    $this->route, (string) $ref
-                );
+                $ref = $errorDefinition['http_code'] == 422 && $formRequestClass
+                    ? $formRequestRef
+                    : (string) $ref;
+
+                return new $errorDefinition['handler']($this->route, $ref);
             }
         }
 

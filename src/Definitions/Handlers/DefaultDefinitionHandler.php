@@ -11,6 +11,7 @@ abstract class DefaultDefinitionHandler
      * @var Route
      */
     private $route;
+
     /**
      * @var string
      */
