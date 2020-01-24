@@ -3,6 +3,10 @@ FROM php:7.4.1-fpm-alpine
 RUN apk update
 RUN apk add --no-cache openssl bash
 
+RUN apk add --no-cache $PHPIZE_DEPS \
+    && pecl install xdebug-2.9.1 \
+    && docker-php-ext-enable xdebug
+
 ADD . /var/www
 RUN chown -R www-data:www-data /var/www
 
