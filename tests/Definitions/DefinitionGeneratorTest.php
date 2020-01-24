@@ -82,6 +82,19 @@ class DefinitionGeneratorTest extends TestCase
         $app['router']
             ->delete('customers/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@destroy')
             ->name('customers.destroy');
+
+        $app['router']
+            ->get('customers/invalid_appends', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@invalidAppends')
+            ->name('customers.invalid_appends');
+    }
+
+    public function testGenerateDefinitionToModelWithInvalidGetAppendsMethod()
+    {
+        $this->expectException(RuntimeException::class);
+
+        $route = $this->newRouteByName('customers.invalid_appends');
+
+        $this->generateDefinitionsForRoute($route);
     }
 
     public function provideNotAllowedHttpMethods()
@@ -109,7 +122,7 @@ class DefinitionGeneratorTest extends TestCase
             ->assertEmptyDefinitions();
     }
 
-    public function testReturnErrorTryingGenerateWhenClassOnMethodDocsIsNotModel()
+    public function testGenerateDefinitionWhenClassOnMethodDocsIsNotModel()
     {
         $this->expectException(RuntimeException::class);
 
@@ -118,7 +131,7 @@ class DefinitionGeneratorTest extends TestCase
         $this->generateDefinitionsForRoute($route);
     }
 
-    public function testReturnDefinitionWhenExistsMethodDocs()
+    public function testGenerateDefinitionWhenExistsMethodDocs()
     {
         $route = $this->newRouteByName('products.show');
 
@@ -143,7 +156,7 @@ class DefinitionGeneratorTest extends TestCase
         });
     }
 
-    public function testReturnDefinitionWhenExistsControllerDocs()
+    public function testGenerateDefinitionWhenExistsControllerDocs()
     {
         $route = $this->newRouteByName('products.store');
 
@@ -168,7 +181,7 @@ class DefinitionGeneratorTest extends TestCase
         });
     }
 
-    public function testReturnEmptyDefinitionWhenNotExistsDocs()
+    public function testGenerateEmptyDefinitionWhenNotExistsDocs()
     {
         $route = $this->newRouteByName('orders.store');
 
@@ -176,7 +189,7 @@ class DefinitionGeneratorTest extends TestCase
             ->assertEmptyDefinitions();
     }
 
-    public function testReturnDefinitionWithRelations()
+    public function testGenerateDefinitionWithRelations()
     {
         $route = $this->newRouteByName('orders.show');
 

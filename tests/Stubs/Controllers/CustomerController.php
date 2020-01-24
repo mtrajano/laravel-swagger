@@ -2,6 +2,7 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\Stubs\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Controller;
 use Mtrajano\LaravelSwagger\Tests\Stubs\Requests\StoreCustomerRequest;
 use Mtrajano\LaravelSwagger\Tests\Stubs\Requests\UpdateCustomerRequest;
@@ -57,5 +58,21 @@ class CustomerController extends Controller
     public function show(int $id)
     {
 
+    }
+
+    /**
+     * @model InvalidAppends
+     */
+    public function invalidAppends()
+    {
+
+    }
+}
+
+class InvalidAppends extends Model
+{
+    public function getAppends()
+    {
+        return 'test';
     }
 }
