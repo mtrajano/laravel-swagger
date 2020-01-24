@@ -13,6 +13,7 @@ use Mtrajano\LaravelSwagger\Definitions\Handlers\ValidationErrorDefinitionHandle
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
+use RuntimeException;
 
 class ResponseGeneratorTest extends TestCase
 {
@@ -252,6 +253,32 @@ class ResponseGeneratorTest extends TestCase
         $this->generateResponsesFromRoute($route);
 
         $this->assertEquals($response, $this->responses);
+    }
+
+    public function testGeneratedResponsesWhenHttpCodeHasNotHandler()
+    {
+        $this->expectException(RuntimeException::class);
+
+        $newErrorDefinitions = [
+            '404' => [
+                'http_code' => 404,
+                'exception' => ModelNotFoundException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+            '401' => [
+                'http_code' => 401,
+                'exception' => AuthenticationException::class,
+                'handler' => DefaultErrorDefinitionHandler::class
+            ],
+        ];
+
+        config(['laravel-swagger.versions.0.errors_definitions' => $newErrorDefinitions]);
+
+        $routeName = 'customers.update';
+
+        $route = new Route($this->getLaravelRouter()->getRoutes()->getByName($routeName));
+
+        $this->generateResponsesFromRoute($route);
     }
 
     private function getLaravelRouter(): Router

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use ReflectionException;
+use RuntimeException;
 
 class ErrorResponseGenerator
 {
@@ -93,7 +94,6 @@ class ErrorResponseGenerator
             }
         }
 
-        // TODO: Throw exception ???
-        return null;
+        throw new RuntimeException("There is no definition configured for the http code '{$httpCode}'");
     }
 }
