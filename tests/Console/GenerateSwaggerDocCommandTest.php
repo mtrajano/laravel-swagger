@@ -15,6 +15,11 @@ class GenerateSwaggerDocCommandTest extends TestCase
 {
     private $defaultVersionConfig;
 
+    /**
+     * @var SwaggerDocsManager
+     */
+    private $swaggerDocsManager;
+
     protected function getEnvironmentSetUp($app)
     {
         parent::getEnvironmentSetUp($app);
@@ -43,23 +48,20 @@ class GenerateSwaggerDocCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->defaultVersionConfig = (
-            new SwaggerDocsManager(config('laravel-swagger'))
-        )->getDefaultVersionConfig();
+        $this->swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
+        $this->defaultVersionConfig = $this->swaggerDocsManager->getDefaultVersionConfig();
     }
 
     public function testGenerateSwaggerDocToAllVersion()
     {
-        $version1FilePath = 'swagger-1-0-0.json';
-        $version2FilePath = 'swagger-2-0-0.json';
+        $version1FilePath = 'swagger-1.0.0.json';
+        $version2FilePath = 'swagger-2.0.0.json';
         $versions = [
             $this->defaultConfig([
                 'appVersion' => '1.0.0',
-                'file_path' => $version1FilePath,
             ]),
             $this->defaultConfig([
                 'appVersion' => '2.0.0',
-                'file_path' => $version2FilePath,
             ]),
         ];
 
@@ -78,23 +80,24 @@ class GenerateSwaggerDocCommandTest extends TestCase
     {
         $this->artisan('laravel-swagger:generate')->assertExitCode(0);
 
+        $defaultFileName = 'swagger-1.0.0.json';
+
         $this->assertTrue(
-            file_exists(public_path($this->defaultVersionConfig['file_path']))
+            file_exists(public_path($defaultFileName))
         );
 
-        unlink(public_path($this->defaultVersionConfig['file_path']));
+        unlink(public_path($defaultFileName));
     }
 
     public function testGenerateSwaggerDocPassingVersion()
     {
-        $version2FilePath = 'swagger-2-0-0.json';
+        $version2FilePath = 'swagger-2.0.0.json';
         $versions = [
             $this->defaultConfig([
                 'appVersion' => '1.0.0',
             ]),
             $this->defaultConfig([
                 'appVersion' => '2.0.0',
-                'file_path' => $version2FilePath,
             ]),
         ];
 
@@ -111,8 +114,8 @@ class GenerateSwaggerDocCommandTest extends TestCase
 
     public function testGenerateSwaggerDocsFilteringByBasePath()
     {
-        $version1FilePath = 'swagger-1-0-0.json';
-        $version2FilePath = 'swagger-2-0-0.json';
+        $version1FilePath = 'swagger-1.0.0.json';
+        $version2FilePath = 'swagger-2.0.0.json';
         $version1BasePath = '/v1';
         $version2BasePath = '/v2';
         $versions = [
@@ -166,7 +169,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
             'parseDocBlock' => true,
             'parseSecurity' => true,
             'authFlow' => 'accessCode',
-            'file_path' => 'swagger-1-0-0.json',
+            'file_path' => 'swagger-1.0.0.json',
             'errors_definitions' => [
                 'UnprocessableEntity' => [
                     'http_code' => 422,

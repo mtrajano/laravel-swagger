@@ -29,9 +29,7 @@ class SwaggerDocsController extends Controller
 
         $apiVersions = $this->swaggerDocsManager->getRoutesWithVersions();
 
-        $versionConfig = $this->swaggerDocsManager->findVersionConfig($version);
-
-        $filePath = config('app.url').'/'.$versionConfig['file_path'];
+        $filePath = $this->swaggerDocsManager->getFilePathByVersion($version);
 
         return view('laravel-swagger::index')
             ->with([

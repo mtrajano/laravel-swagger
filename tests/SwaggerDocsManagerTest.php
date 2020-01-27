@@ -3,9 +3,10 @@
 namespace Mtrajano\LaravelSwagger\Tests;
 
 use Mtrajano\LaravelSwagger\SwaggerDocsManager;
-use PHPUnit\Framework\TestCase as BaseTestCase;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
-class SwaggerDocsManagerTest extends BaseTestCase
+class SwaggerDocsManagerTest extends TestCase
 {
     protected $config = [];
 
@@ -40,7 +41,7 @@ class SwaggerDocsManagerTest extends BaseTestCase
             'parseDocBlock' => true,
             'parseSecurity' => true,
             'authFlow' => 'accessCode',
-            'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1-0-0.json'),
+            'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
             'title' => '',
             'description' => '',
         ];
@@ -62,7 +63,7 @@ class SwaggerDocsManagerTest extends BaseTestCase
             'parseDocBlock' => true,
             'parseSecurity' => true,
             'authFlow' => 'accessCode',
-            'file_path' => 'swagger-2-0-0.json',
+            'file_path' => 'swagger-2.0.0.json',
             'title' => '',
             'description' => '',
         ];
@@ -109,4 +110,58 @@ class SwaggerDocsManagerTest extends BaseTestCase
 
         $this->assertEmpty($swaggerDocs->findVersionConfig('3.0.0'));
     }
+
+    public function testGenerateSwaggerFileNameWithDefaultGenerator()
+    {
+        $swaggerDocs = new SwaggerDocsManager($this->config);
+
+        $fileName = $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
+
+        $this->assertEquals('swagger-1.0.0.json', $fileName);
+    }
+
+    public function testChangeFileNameGenerator()
+    {
+        SwaggerDocsManager::setFileNameGenerator(function (string $version, string $format) {
+            $version = str_replace('.', '_', $version);
+
+            return "my-swagger-file-{$version}.{$format}";
+        });
+
+        $swaggerDocs = new SwaggerDocsManager($this->config);
+
+        $fileName = $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
+
+        $this->assertEquals('my-swagger-file-1_0_0.json', $fileName);
+    }
+
+    public function provideInvalidFileNames()
+    {
+        return [
+            [''],
+            [[]],
+            [0],
+            ['swagger file name'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideInvalidFileNames
+     * @param $invalidFileName
+     */
+    public function testChangeFileNameGeneratorReturningInvalidFileName(
+        $invalidFileName
+    ) {
+        $this->expectException(RuntimeException::class);
+
+        SwaggerDocsManager::setFileNameGenerator(
+            function (string $version, string $format) use ($invalidFileName) {
+                return $invalidFileName;
+            }
+        );
+
+        $swaggerDocs = new SwaggerDocsManager($this->config);
+        $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
+    }
+
 }

@@ -189,3 +189,16 @@ if (! function_exists('laravel_swagger_asset')) {
         return route('laravel-swagger.asset', $asset).'?v='.md5_file($file);
     }
 }
+
+if (! function_exists('is_valid_file_name')) {
+    /**
+     * Determine if a value is a valid file name.
+     *
+     * @param string $file
+     * @return bool
+     */
+    function is_valid_file_name(string $file)
+    {
+        return preg_match('/^([-.\w]+)$/', $file) > 0;
+    }
+}

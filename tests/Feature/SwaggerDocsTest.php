@@ -40,7 +40,7 @@ class SwaggerDocsTest extends TestCase
                     'parseDocBlock' => true,
                     'parseSecurity' => true,
                     'authFlow' => 'accessCode',
-                    'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1-0-0.json'),
+                    'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
                 ],
                 [
                     'appVersion' => '2.0.0',
@@ -59,7 +59,7 @@ class SwaggerDocsTest extends TestCase
                     'parseDocBlock' => true,
                     'parseSecurity' => true,
                     'authFlow' => 'accessCode',
-                    'file_path' => env('SWAGGER_FILE_PATH', 'swagger-2-0-0.json'),
+                    'file_path' => env('SWAGGER_FILE_PATH', 'swagger-2.0.0.json'),
                 ],
             ],
         ];
@@ -74,7 +74,7 @@ class SwaggerDocsTest extends TestCase
             false
         );
 
-        $filePath = 'swagger-'.str_replace('.', '-', $defaultVersion).'.json';
+        $filePath = "swagger-$defaultVersion.json";
 
         $apiVersions = [
             '/docs/1.0.0' => "1.0.0",
@@ -97,12 +97,13 @@ class SwaggerDocsTest extends TestCase
                 $version['appVersion'],
                 false
             );
+
             $this->get($route)
                 ->assertSuccessful()
                 ->assertViewIs('laravel-swagger::index')
                 ->assertViewHas(
                     'filePath',
-                    config('app.url').'/'.$version['file_path']
+                    config('app.url')."/swagger-{$version['appVersion']}.json"
                 )
                 ->assertViewHas('currentVersion', $version['appVersion']);
         }

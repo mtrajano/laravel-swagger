@@ -141,13 +141,9 @@ return [
 
             /*
             |------------------------------------------------------------------
-            | File path
+            | File format
             |------------------------------------------------------------------
             |
-            | The config file path should be accessible from public URL. The
-            | default value expects the "swagger-1-0-0.json" file exists on
-            | "public" folder from Laravel project. The "file_path" config must
-            | be on format "swagger-{replacing dots (.) to hyphens (-)}.(json|yaml)".
             | The "format" must be exactly the same from docs generation. E.g.:
             |
             | If you used the following command to generate:
@@ -155,7 +151,7 @@ return [
             | the format must be "yaml".
             |
             */
-            'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1-0-0.json'),
+            'file_format' => 'json',
 
             /*
             |------------------------------------------------------------------

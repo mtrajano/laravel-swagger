@@ -43,6 +43,7 @@ class GenerateSwaggerDocCommand extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws \Mtrajano\LaravelSwagger\LaravelSwaggerException
      */
     public function handle()
     {
@@ -67,11 +68,15 @@ class GenerateSwaggerDocCommand extends Command
 
             if ($file) {
                 file_put_contents($file, $formattedDocs);
-            } else {
-                $version = str_replace('.', '-', $versionConfig['appVersion']);
-
-                file_put_contents(public_path("swagger-{$version}.{$format}"), $formattedDocs);
+                continue;
             }
+
+            $fileName = $this->swaggerDocsManager->generateSwaggerFileName(
+                $versionConfig['appVersion'],
+                $format
+            );
+
+            file_put_contents(public_path($fileName), $formattedDocs);
         }
     }
 
