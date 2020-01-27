@@ -45,7 +45,7 @@ class SuccessResponseGenerator
         $description = $this->getDescriptionByHttpCode($httpCode);
 
         $this->setModelFromRouteAction();
-        if ($this->model === false) {
+        if (!$this->model) {
             return [];
         }
 
