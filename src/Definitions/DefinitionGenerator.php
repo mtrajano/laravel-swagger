@@ -21,7 +21,7 @@ class DefinitionGenerator
     private $route;
 
     /**
-     * @var Model
+     * @var Model|null
      */
     private $model;
 
@@ -49,13 +49,11 @@ class DefinitionGenerator
     {
         if ($this->canGenerateModelsDefinition()) {
             $this->setModelFromRouteAction();
-            if ($this->model === false) {
-                return [];
+            if ($this->model) {
+                $this->generateFromCurrentModel();
+
+                $this->generateFromRelations();
             }
-
-            $this->generateFromCurrentModel();
-
-            $this->generateFromRelations();
         }
 
         $this->generateFromErrors();

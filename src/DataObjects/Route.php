@@ -127,7 +127,7 @@ class Route
             ?? $this->getModelNameFromControllerDocs();
 
         if (!$modelName) {
-            return false;
+            return null;
         }
 
         if (!is_subclass_of($modelName, Model::class)) {
