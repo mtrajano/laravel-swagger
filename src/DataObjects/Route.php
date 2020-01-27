@@ -119,9 +119,9 @@ class Route
      * Get model searching on route.
      *
      * @throws ReflectionException|RuntimeException
-     * @return Model|false
+     * @return Model|null
      */
-    public function getModel()
+    public function getModel(): ?Model
     {
         $modelName = $this->getModelNameFromMethodDocs()
             ?? $this->getModelNameFromControllerDocs();
