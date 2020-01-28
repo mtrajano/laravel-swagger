@@ -65,6 +65,7 @@ class SwaggerDocsManager
 
         $version['title'] = $this->config['title'];
         $version['description'] = $this->config['description'];
+        $version['host'] = $this->config['host'];
 
         return $version;
     }

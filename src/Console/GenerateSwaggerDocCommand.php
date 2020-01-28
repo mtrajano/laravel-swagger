@@ -57,6 +57,7 @@ class GenerateSwaggerDocCommand extends Command
         foreach ($versions as $versionConfig) {
             $versionConfig['title'] = config('laravel-swagger.title');
             $versionConfig['description'] = config('laravel-swagger.description');
+            $versionConfig['host'] = config('laravel-swagger.host');
 
             $docs = (new Generator($versionConfig, $versionConfig['basePath']))->generate();
 

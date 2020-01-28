@@ -5,9 +5,10 @@ namespace Mtrajano\LaravelSwagger;
 use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
+use Mtrajano\LaravelSwagger\Definitions\Security\SecurityDefinitionsFactory;
+use Mtrajano\LaravelSwagger\Definitions\Security\Contracts\SecurityDefinitionsGenerator;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionException;
@@ -15,10 +16,6 @@ use ReflectionMethod;
 
 class Generator
 {
-    const SECURITY_DEFINITION_NAME = 'OAuth2';
-    const OAUTH_TOKEN_PATH = '/oauth/token';
-    const OAUTH_AUTHORIZE_PATH = '/oauth/authorize';
-
     protected $config;
     protected $routeFilter;
     protected $docs;
@@ -31,25 +28,45 @@ class Generator
     protected $docParser;
     protected $hasSecurityDefinitions;
 
+    /**
+     * @var SecurityDefinitionsGenerator|null
+     */
+    private $securityDefinitionGenerator;
+
+    /**
+     * Generator constructor.
+     * @param $config
+     * @param null $routeFilter
+     * @throws LaravelSwaggerException
+     */
     public function __construct($config, $routeFilter = null)
     {
         $this->config = $config;
         $this->routeFilter = $routeFilter;
         $this->docParser = DocBlockFactory::createInstance();
         $this->hasSecurityDefinitions = false;
+
+        if ($this->config['parseSecurity']) {
+            $this->securityDefinitionGenerator = SecurityDefinitionsFactory::createGenerator(
+                $config['security_definition_type'],
+                $config['authFlow']
+            );
+        }
     }
 
     /**
      * @return array
      * @throws LaravelSwaggerException
+     * @throws ReflectionException
      */
     public function generate()
     {
         $this->docs = $this->getBaseInfo();
         $this->docs['definitions'] = [];
 
-        if ($this->config['parseSecurity'] && $this->hasOauthRoutes()) {
-            $this->docs['securityDefinitions'] = $this->generateSecurityDefinitions();
+        $securityDefinitions = $this->generateSecurityDefinitions();
+        if ($securityDefinitions) {
+            $this->docs['securityDefinitions'] = $securityDefinitions;
             $this->hasSecurityDefinitions = true;
         }
 
@@ -147,28 +164,11 @@ class Generator
      */
     protected function generateSecurityDefinitions()
     {
-        $authFlow = $this->config['authFlow'];
-
-        $this->validateAuthFlow($authFlow);
-
-        $securityDefinition = [
-            self::SECURITY_DEFINITION_NAME => [
-                'type' => 'oauth2',
-                'flow' => $authFlow,
-            ],
-        ];
-
-        if (in_array($authFlow, ['implicit', 'accessCode'])) {
-            $securityDefinition[self::SECURITY_DEFINITION_NAME]['authorizationUrl'] = $this->getEndpoint(self::OAUTH_AUTHORIZE_PATH);
+        if (!$this->securityDefinitionGenerator) {
+            return null;
         }
 
-        if (in_array($authFlow, ['password', 'application', 'accessCode'])) {
-            $securityDefinition[self::SECURITY_DEFINITION_NAME]['tokenUrl'] = $this->getEndpoint(self::OAUTH_TOKEN_PATH);
-        }
-
-        $securityDefinition[self::SECURITY_DEFINITION_NAME]['scopes'] = $this->generateOauthScopes();
-
-        return $securityDefinition;
+        return $this->securityDefinitionGenerator->generate();
     }
 
     /**
@@ -196,7 +196,7 @@ class Generator
         $this->addActionParameters();
 
         if ($this->hasSecurityDefinitions) {
-            $this->addActionScopes();
+            $this->addRouteSecurityDefinitions();
         }
     }
 
@@ -220,14 +220,11 @@ class Generator
         }
     }
 
-    protected function addActionScopes()
+    protected function addRouteSecurityDefinitions()
     {
-        foreach ($this->route->middleware() as $middleware) {
-            if ($this->isPassportScopeMiddleware($middleware)) {
-                $this->docs['paths'][$this->getRouteUri()][$this->method]['security'] = [
-                    self::SECURITY_DEFINITION_NAME => $middleware->parameters(),
-                ];
-            }
+        $routeDefinitions = $this->securityDefinitionGenerator->generateForRoute($this->route);
+        if ($routeDefinitions) {
+            $this->docs['paths'][$this->getRouteUri()][$this->method]['security'] = $routeDefinitions;
         }
     }
 
@@ -301,64 +298,6 @@ class Generator
         } catch (Exception $e) {
             return [false, '', ''];
         }
-    }
-
-    /**
-     * Assumes routes have been created using Passport::routes().
-     */
-    private function hasOauthRoutes()
-    {
-        foreach ($this->getAllAppRoutes() as $route) {
-            $uri = $route->uri();
-
-            if ($uri === self::OAUTH_TOKEN_PATH || $uri === self::OAUTH_AUTHORIZE_PATH) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function getEndpoint(string $path)
-    {
-        return rtrim($this->config['host'], '/') . $path;
-    }
-
-    private function generateOauthScopes()
-    {
-        if (!class_exists('\Laravel\Passport\Passport')) {
-            return [];
-        }
-
-        $scopes = Passport::scopes()->toArray();
-
-        return array_combine(array_column($scopes, 'id'), array_column($scopes, 'description'));
-    }
-
-    /**
-     * @param string $flow
-     * @throws LaravelSwaggerException
-     */
-    private function validateAuthFlow(string $flow)
-    {
-        if (!in_array($flow, ['password', 'application', 'implicit', 'accessCode'])) {
-            throw new LaravelSwaggerException('Invalid OAuth flow passed');
-        }
-    }
-
-    private function isPassportScopeMiddleware(DataObjects\Middleware $middleware)
-    {
-        $resolver = $this->getMiddlewareResolver($middleware->name());
-
-        return $resolver === 'Laravel\Passport\Http\Middleware\CheckScopes' ||
-               $resolver === 'Laravel\Passport\Http\Middleware\CheckForAnyScope';
-    }
-
-    private function getMiddlewareResolver(string $middleware)
-    {
-        $middlewareMap = app('router')->getMiddleware();
-
-        return $middlewareMap[$middleware] ?? null;
     }
 
     private function addActionResponses()

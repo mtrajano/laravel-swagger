@@ -6,8 +6,8 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
-use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultErrorDefinitionHandler;
-use Mtrajano\LaravelSwagger\Definitions\Handlers\ValidationErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\ValidationErrorDefinitionHandler;
 use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 
@@ -153,6 +153,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
     private function defaultConfig(array $config = [])
     {
         return array_merge([
+            'security_definition_type' => 'oauth2',
             'appVersion' => '1.0.0',
             'host' => env('APP_URL'),
             'basePath' => '/',

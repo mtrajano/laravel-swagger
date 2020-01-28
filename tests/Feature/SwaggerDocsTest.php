@@ -17,6 +17,7 @@ class SwaggerDocsTest extends TestCase
             'defaultVersion' => '1.0.0',
             'title' => env('APP_NAME'),
             'description' => '',
+            'host' => env('APP_URL'),
             'route' => [
                 'path' => '/docs/{version?}',
                 'name' => 'laravel-swagger.docs',
@@ -25,7 +26,6 @@ class SwaggerDocsTest extends TestCase
             'versions' => [
                 [
                     'appVersion' => '1.0.0',
-                    'host' => env('APP_URL'),
                     'basePath' => '/v1',
                     'schemes' => [],
                     'consumes' => [],
@@ -44,7 +44,6 @@ class SwaggerDocsTest extends TestCase
                 ],
                 [
                     'appVersion' => '2.0.0',
-                    'host' => env('APP_URL'),
                     'basePath' => '/v2',
                     'schemes' => [],
                     'consumes' => [],

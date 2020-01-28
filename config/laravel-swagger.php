@@ -4,10 +4,12 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
-use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultErrorDefinitionHandler;
-use Mtrajano\LaravelSwagger\Definitions\Handlers\ValidationErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\ValidationErrorDefinitionHandler;
 
 return [
+
+    'host' => env('APP_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -60,8 +62,6 @@ return [
     'versions' => [
         [
             'appVersion' => '1.0.0',
-
-            'host' => env('APP_URL'),
 
             'basePath' => '/v1',
 
@@ -138,6 +138,18 @@ return [
             'parseSecurity' => true,
 
             'authFlow' => 'accessCode',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Security Definitions Type
+            |--------------------------------------------------------------------------
+            |
+            | You must define the security definition type. You can choose
+            | between "jwt" and "oauth2".
+            |
+            */
+
+            'security_definition_type' => 'oauth2',
 
             /*
             |------------------------------------------------------------------

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
-use Mtrajano\LaravelSwagger\Definitions\Handlers\DefaultDefinitionHandler;
+use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\DefaultDefinitionHandler;
 use ReflectionException;
 use RuntimeException;
 

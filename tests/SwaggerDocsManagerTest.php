@@ -26,7 +26,6 @@ class SwaggerDocsManagerTest extends TestCase
 
         $this->defaultVersion = [
             'appVersion' => '1.0.0',
-            'host' => env('APP_URL'),
             'basePath' => '/',
             'schemes' => [],
             'consumes' => [],
@@ -44,11 +43,11 @@ class SwaggerDocsManagerTest extends TestCase
             'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
             'title' => '',
             'description' => '',
+            'host' => env('APP_URL'),
         ];
 
         $this->versionTwo = [
             'appVersion' => '2.0.0',
-            'host' => env('APP_URL'),
             'basePath' => '/',
             'schemes' => [],
             'consumes' => [],
@@ -66,9 +65,11 @@ class SwaggerDocsManagerTest extends TestCase
             'file_path' => 'swagger-2.0.0.json',
             'title' => '',
             'description' => '',
+            'host' => env('APP_URL'),
         ];
 
         $this->config = [
+            'host' => env('APP_URL'),
             'defaultVersion' => '1.0.0',
             'title' => '',
             'description' => '',
@@ -163,5 +164,4 @@ class SwaggerDocsManagerTest extends TestCase
         $swaggerDocs = new SwaggerDocsManager($this->config);
         $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
     }
-
 }
