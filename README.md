@@ -25,8 +25,7 @@ For example it chooses to say a route has a deprecated value of false rather tha
 I believe this makes reading the documentation easier by not leaving important information out. 
 The file can be easily cleaned up afterwards if the user chooses to leave out the defaults.
 
-Will be available automatically a route to check your docs. 
-Just access the route `/docs` after generate the docs to show Swagger UI view. 
+A route with the generated docs will be available in `/docs` with Swagger UI view. 
 
 ## Installation
 
@@ -38,9 +37,118 @@ This will register the artisan command that will be available to you.
 
 You can also override the default config provided by the application by running `php artisan vendor:publish --provider "Mtrajano\LaravelSwagger\SwaggerServiceProvider"` in your projects root and change the configuration in the new `config/laravel-swagger.php` file created.
 
+## Configuration
+
+In the file `config/laravel-swagger.php`, you can define your api versions, just copy the default and update 
+according to your need. E.g.
+```php
+[
+    // ...
+
+    'versions' => [
+        [
+            'appVersion' => '1.0.0',
+            'basePath' => '/v1',
+            'schemes' => [
+                // 'http',
+                // 'https',
+            ],
+            'consumes' => [
+                // 'application/json',
+            ],
+            'produces' => [
+                // 'application/json',
+            ],
+            'ignoredMethods' => [
+                'head',
+            ],
+            'ignoredRoutes' => [
+                'laravel-swagger.docs',
+                'laravel-swagger.asset'
+            ],
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
+            'authFlow' => 'accessCode',
+            'security_definition_type' => 'oauth2',
+            'file_format' => 'json',
+            'errors_definitions' => [
+                'UnprocessableEntity' => [
+                    'http_code' => 422,
+                    'exception' => ValidationException::class,
+                    'handler' => ValidationErrorDefinitionHandler::class
+                ],
+                'Forbidden' => [
+                    'http_code' => 403,
+                    'exception' => AuthorizationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'NotFound' => [
+                    'http_code' => 404,
+                    'exception' => ModelNotFoundException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'Unauthenticated' => [
+                    'http_code' => 401,
+                    'exception' => AuthenticationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+            ],
+        ],
+        [
+            'appVersion' => '2.0.0',
+            'basePath' => '/v2',
+            'schemes' => [
+                // 'http',
+                // 'https',
+            ],
+            'consumes' => [
+                // 'application/json',
+            ],
+            'produces' => [
+                // 'application/json',
+            ],
+            'ignoredMethods' => [
+                'head',
+            ],
+            'ignoredRoutes' => [
+                'laravel-swagger.docs',
+                'laravel-swagger.asset'
+            ],
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
+            'authFlow' => 'accessCode',
+            'security_definition_type' => 'jwt',
+            'file_format' => 'json',
+            'errors_definitions' => [
+                'UnprocessableEntity' => [
+                    'http_code' => 422,
+                    'exception' => ValidationException::class,
+                    'handler' => ValidationErrorDefinitionHandler::class
+                ],
+                'Forbidden' => [
+                    'http_code' => 403,
+                    'exception' => AuthorizationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'NotFound' => [
+                    'http_code' => 404,
+                    'exception' => ModelNotFoundException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+                'Unauthenticated' => [
+                    'http_code' => 401,
+                    'exception' => AuthenticationException::class,
+                    'handler' => DefaultErrorDefinitionHandler::class
+                ],
+            ],
+        ],
+    ],
+];
+```
+
 ## Usage
 
-To definitions generations works you will need migrate your database tables. So make sure execute migration before generate docs:
+To definitions generation works you will need migrate your database tables. Make sure execute `migrate` command before generate docs:
 
 ```shell script
 php artisan migrate
@@ -52,23 +160,22 @@ The command will generate the swagger docs to API default version defined on `co
 
 To generate the docs for all versions you can run `php artisan laravel-swagger:generate --all-versions`.
 
-You can still generate the docs to specific version passing the parameter `--version=`. E.g.:
+You can still generate the docs to specific version passing the parameter `--api-version=`. E.g.:
 
 ```shell script
-php artisan laravel-swagger:generate --version=2.0.0
+php artisan laravel-swagger:generate --api-version=2.0.0
 ``` 
 
-By default, laravel-swagger prints out the documentation in json format, if you want it in YAML format you can override the format using the `--format` flag. Make sure to have the yaml extension installed if you choose to do so.
+By default, laravel-swagger generates the documentation in json format, if you want it in YAML format you can override the format using the `--format` flag. Make sure to have the yaml extension installed if you choose to do so.
 
 Format options are:
 - `json`
 - `yaml`
 
-If you changes the default format on docs generation, you must change the format in `file_path` in `config/laravel-swagger.php`.
 
 After generate the docs access the route `/docs` to see the API docs. 
 The default version of the API will be shown, but you can choose the version on screen
-or passing the version on route path. E.g.: `/docs/2.0.0`. 
+or passing the version on path param. E.g.: `/docs/2.0.0`.
 
 ## Example
 
@@ -108,7 +215,7 @@ class UserShowRequest extends FormRequest
 
 ```
 
-Running `php artisan laravel-swagger:generate > swagger.json` will generate the following file:
+Running `php artisan laravel-swagger:generate` will generate a file on public path with the following definitions:
 ```json
 {
     "swagger": "2.0",
@@ -162,8 +269,8 @@ Running `php artisan laravel-swagger:generate > swagger.json` will generate the 
 
 ## Definitions
 
-You can define the annotation `@model` in your method, or a global on controller. 
-It says that the action refs the model in your response. E.g.:
+You can define the annotation `@model` with the Model full path in the method or controller (For all methods) doc block comment. 
+It says that the action refs the model in the response. E.g.:
 
 ```php
 // Model definition on method:
@@ -171,7 +278,7 @@ class OrderController
 {
     /**
      * @param int $id
-     * @model App\Order
+     * @model App\Models\Order
      */
     public function show(int $id)
     {
@@ -182,7 +289,7 @@ class OrderController
 // Model definition on Controller:
 /**
  * Class ProductController
- * @model App\Product
+ * @model App\Models\Product
  */
 class ProductController
 {
@@ -198,21 +305,27 @@ class ProductController
 
 ### Model
 
-The model definition fields will be obtained from `table columns` returned by 
+The model definition fields will be obtained from table `columns` returned by 
 `Schema::getColumnListing($model->getTable())` function. 
 
-If you want use the fields from `$appends` attribute, create a method `getAppends()` in your 
-model class returning the `$appends` attribute content. E.g.:
+If you want use the fields from `$appends` attribute, use the trait 'Mtrajano\LaravelSwagger\Traits\HasAppends' in your 
+model class. E.g.:
 
 ```php
-public function getAppends(): array
+use Mtrajano\LaravelSwagger\Traits\HasAppends;
+
+class MyModel extends Model
 {
-    return $this->appends;
+    use HasAppends;
+    
+    // ...
 }
 ```
 
 If exists a [factory](https://laravel.com/docs/master/database-testing#writing-factories) defined to Models, will be
 generated fake data and added to `example` field on properties.
+
+WARNING: The fake data will not saved on the database. We used database transaction and not commit the data.
 
 The columns will be filtered to remove fields on `$hidden` attribute. 
 The model relationships will be added to definitions too.
@@ -239,8 +352,12 @@ Schema::create('orders', function (Blueprint $table) {
 });
 
 // Models
+use Mtrajano\LaravelSwagger\Traits\HasAppends;
+
 class Order extends Model
 {
+    use HasAppends;
+
     protected $fillable = [
         'value',
     ];
@@ -265,12 +382,6 @@ class Order extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    // ** Implements this method to use fields from $appends on model definition. ** 
-    public function getAppends(): array
-    {
-        return $this->appends;
     }
 }
 
@@ -388,7 +499,7 @@ The responses will be defined based on routes http methods, `@throws` annotation
 // Routes
 Route::get('/customers', 'CustomerController@index')
     ->name('customers.index')
-    ->middleware('auth:jwt');
+    ->middleware('auth:api');
 
 Route::get('/customers', 'CustomerController@store')
     ->name('customers.store');
@@ -397,18 +508,26 @@ Route::put('/customers/{id}', 'CustomerController@update')
     ->name('customers.update');
 
 // Controller
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
+
 /**
  * Class CustomerController
  * @model App\Customer
  */
 class CustomerController extends Controller
 {
+    public function __construct() 
+    {
+        $this->middleware('auth:api');
+    }
+
     public function index()
     {
 
     }
 
-    public function store(UpdateCustomerRequest $request)
+    public function store(StoreCustomerRequest $request)
     {
 
     }
