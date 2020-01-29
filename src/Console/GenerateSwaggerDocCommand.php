@@ -28,7 +28,6 @@ class GenerateSwaggerDocCommand extends Command
      */
     protected $signature = 'laravel-swagger:generate
                             {--format=json : The format of the output, current options are json and yaml}
-                            {--o|output= : Output file to write the contents to, defaults to stdout}
                             {--all-versions : Generate swagger docs for all versions}
                             {--api-version= : The version of the swagger docs. Uses defaultVersion by default}';
 
@@ -42,16 +41,12 @@ class GenerateSwaggerDocCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
      * @throws \Mtrajano\LaravelSwagger\LaravelSwaggerException
+     * @throws \ReflectionException
      */
     public function handle()
     {
-        // TODO: Only accept file parameter when will generate just one version docs.
-        //       If will generate more than one version don't make sense generate by name;
-        //       The first versions will be overwrote by last version.
-        $file = $this->option('output') ?: null;
-
         $versions = $this->getVersionsConfigToGenerate();
 
         foreach ($versions as $versionConfig) {
@@ -66,11 +61,6 @@ class GenerateSwaggerDocCommand extends Command
             $formattedDocs = (new FormatterManager($docs))
                 ->setFormat($format)
                 ->format();
-
-            if ($file) {
-                file_put_contents($file, $formattedDocs);
-                continue;
-            }
 
             $fileName = $this->swaggerDocsManager->generateSwaggerFileName(
                 $versionConfig['appVersion'],
