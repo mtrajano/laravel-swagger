@@ -70,11 +70,9 @@ class Route
 
     protected function formatMiddleware()
     {
-        $middleware = $this->route->getAction()['middleware'] ?? [];
-
         return array_map(function ($middleware) {
             return new Middleware($middleware);
-        }, Arr::wrap($middleware));
+        }, $this->route->gatherMiddleware());
     }
 
     /**
