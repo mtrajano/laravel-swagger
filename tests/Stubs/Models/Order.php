@@ -3,9 +3,12 @@
 namespace Mtrajano\LaravelSwagger\Tests\Stubs\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Mtrajano\LaravelSwagger\Traits\HasAppends;
 
 class Order extends Model
 {
+    use HasAppends;
+
     protected $fillable = [
         'value',
     ];
@@ -35,10 +38,5 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function getAppends(): array
-    {
-        return $this->appends;
     }
 }
