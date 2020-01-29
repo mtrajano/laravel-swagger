@@ -17,6 +17,9 @@ use RuntimeException;
 class Route
 {
     private $route;
+    /**
+     * @var Middleware[]
+     */
     private $middleware;
 
     public function __construct(LaravelRoute $route)
@@ -41,6 +44,9 @@ class Route
         return strip_optional_char($this->originalUri());
     }
 
+    /**
+     * @return array|Middleware[]
+     */
     public function middleware()
     {
         return $this->middleware;

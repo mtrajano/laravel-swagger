@@ -10,11 +10,16 @@ class TestCase extends OrchestraTestCase
 {
     protected function getPackageProviders($app)
     {
-        return ['Mtrajano\LaravelSwagger\SwaggerServiceProvider'];
+        return [
+            'Laravel\Passport\PassportServiceProvider',
+            'Mtrajano\LaravelSwagger\SwaggerServiceProvider'
+        ];
     }
 
     protected function getEnvironmentSetUp($app)
     {
+        $app['config']->set('app.key', 'base64:r+nhiNB44vkb+4+Yd3NiU1E+W/xbMQMTy6se5k3m5oE=');
+
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'laravel-swagger');
         $app['config']->set('database.connections.laravel-swagger', [
