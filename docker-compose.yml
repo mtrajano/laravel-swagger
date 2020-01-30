@@ -1,0 +1,12 @@
+version: '3'
+services:
+  laravel-swagger:
+    build: .
+    volumes:
+      - laravel-swagger-sync:/var/www:nocopy
+    ports:
+      - 9000:9000
+
+volumes:
+  laravel-swagger-sync:
+    external: true

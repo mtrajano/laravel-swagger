@@ -1,8 +1,0 @@
-version: '3'
-services:
-  laravel-swagger:
-    build: .
-    volumes:
-      - ./:/var/www
-    ports:
-      - 9000:9000
