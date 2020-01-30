@@ -2,6 +2,7 @@
 
 namespace Mtrajano\LaravelSwagger\Tests;
 
+use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 use Mtrajano\LaravelSwagger\Tests\Stubs\Middleware\RandomMiddleware;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
@@ -12,7 +13,8 @@ class TestCase extends OrchestraTestCase
     {
         return [
             'Laravel\Passport\PassportServiceProvider',
-            'Mtrajano\LaravelSwagger\SwaggerServiceProvider'
+            'Mtrajano\LaravelSwagger\SwaggerServiceProvider',
+            TestProvider::class,
         ];
     }
 
@@ -41,11 +43,19 @@ class TestCase extends OrchestraTestCase
         $app['router']->get('/api', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\ApiController@index')
             ->middleware(RandomMiddleware::class);
         $app['router']->put('/api/store', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\ApiController@store');
+    }
+}
+
+class TestProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        Passport::loadKeysFrom(__DIR__.'/Stubs/secret-keys');
 
         Passport::routes();
 
-        $app['router']->aliasMiddleware('scopes', \Laravel\Passport\Http\Middleware\CheckScopes::class);
-        $app['router']->aliasMiddleware('scope', \Laravel\Passport\Http\Middleware\CheckForAnyScope::class);
+        app('router')->aliasMiddleware('scopes', \Laravel\Passport\Http\Middleware\CheckScopes::class);
+        app('router')->aliasMiddleware('scope', \Laravel\Passport\Http\Middleware\CheckForAnyScope::class);
 
         Passport::tokensCan([
             'user-read' => 'Read user information such as email, name and phone number',
