@@ -67,9 +67,9 @@ class Route
      *
      * @return array
      */
-    public function validMethods()
+    public function validMethods(): array
     {
-        return array_filter($this->methods(), function ($route) {
+        return (array) array_filter($this->methods(), function ($route) {
             return $route !== 'head';
         });
     }

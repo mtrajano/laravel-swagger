@@ -85,15 +85,16 @@ class DefinitionGenerator
         $this->model = $this->route->getModel();
     }
 
+    /**
+     * Check if all http methods from route allows generate definitions.
+     *
+     * @return bool
+     */
     private function allowsHttpMethodGenerate(): bool
     {
         $allowGenerateDefinitionMethods = ['get', 'post'];
 
-        $methods = array_filter($this->route->methods(), function ($route) {
-            return $route !== 'head';
-        });
-
-        foreach ($methods as $method) {
+        foreach ($this->route->validMethods() as $method) {
             if (!in_array($method, $allowGenerateDefinitionMethods)) {
                 return false;
             }
