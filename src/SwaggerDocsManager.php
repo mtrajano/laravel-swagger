@@ -61,13 +61,7 @@ class SwaggerDocsManager
             return [];
         }
 
-        $version = $filteredVersions[0];
-
-        $version['title'] = $this->config['title'];
-        $version['description'] = $this->config['description'];
-        $version['host'] = $this->config['host'];
-
-        return $version;
+        return $filteredVersions[0];
     }
 
     /**
@@ -79,7 +73,7 @@ class SwaggerDocsManager
     public function filterVersionsConfigs(string $version): array
     {
         return array_values(array_filter(
-            $this->config['versions'],
+            $this->getAllVersionsConfigs(),
             function ($config) use ($version) {
                 return $config['appVersion'] == $version;
             }
@@ -93,7 +87,9 @@ class SwaggerDocsManager
      */
     public function getAllVersionsConfigs(): array
     {
-        return $this->config['versions'];
+        return array_map(function (array $version) {
+            return $this->getFilledWithGlobalConfigs($version);
+        }, $this->config['versions']);
     }
 
     /**
@@ -180,5 +176,22 @@ class SwaggerDocsManager
         return function (string $version, string $format = 'json') {
             return "swagger-{$version}.{$format}";
         };
+    }
+
+    /**
+     * Fill an array version with global configs.
+     *
+     * @param $version
+     * @return array
+     */
+    private function getFilledWithGlobalConfigs(array $version): array
+    {
+        $version['title'] = $this->config['title'];
+        $version['description'] = $this->config['description'];
+        $version['host'] = $this->config['host'];
+        $version['parseDocBlock'] = $this->config['parseDocBlock'];
+        $version['parseSecurity'] = $this->config['parseSecurity'];
+
+        return $version;
     }
 }

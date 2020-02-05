@@ -18,6 +18,8 @@ class SwaggerDocsTest extends TestCase
             'title' => env('APP_NAME'),
             'description' => '',
             'host' => env('APP_URL'),
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
             'route' => [
                 'path' => '/docs/{version?}',
                 'name' => 'laravel-swagger.docs',
@@ -37,8 +39,6 @@ class SwaggerDocsTest extends TestCase
                         'laravel-swagger.docs',
                         'laravel-swagger.asset'
                     ],
-                    'parseDocBlock' => true,
-                    'parseSecurity' => true,
                     'authFlow' => 'accessCode',
                     'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
                 ],
@@ -55,8 +55,6 @@ class SwaggerDocsTest extends TestCase
                         'laravel-swagger.docs',
                         'laravel-swagger.asset'
                     ],
-                    'parseDocBlock' => true,
-                    'parseSecurity' => true,
                     'authFlow' => 'accessCode',
                     'file_path' => env('SWAGGER_FILE_PATH', 'swagger-2.0.0.json'),
                 ],

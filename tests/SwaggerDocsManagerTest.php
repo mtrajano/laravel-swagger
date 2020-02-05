@@ -37,13 +37,13 @@ class SwaggerDocsManagerTest extends TestCase
                 'laravel-swagger.docs',
                 'laravel-swagger.asset'
             ],
-            'parseDocBlock' => true,
-            'parseSecurity' => true,
             'authFlow' => 'accessCode',
             'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
             'title' => '',
             'description' => '',
             'host' => env('APP_URL'),
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
         ];
 
         $this->versionTwo = [
@@ -73,6 +73,8 @@ class SwaggerDocsManagerTest extends TestCase
             'defaultVersion' => '1.0.0',
             'title' => '',
             'description' => '',
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
             'route' => [
                 'path' => '/docs/{version?}',
                 'name' => 'laravel-swagger.docs',
