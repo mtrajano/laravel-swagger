@@ -47,7 +47,7 @@ class DefinitionGenerator
      */
     public function generate()
     {
-        if ($this->canGenerateModelsDefinition()) {
+        if ($this->allowsHttpMethodGenerate()) {
             $this->setModelFromRouteAction();
             if ($this->model) {
                 $this->generateFromCurrentModel();
@@ -83,11 +83,6 @@ class DefinitionGenerator
     private function setModelFromRouteAction()
     {
         $this->model = $this->route->getModel();
-    }
-
-    private function canGenerateModelsDefinition()
-    {
-        return $this->allowsHttpMethodGenerate();
     }
 
     private function allowsHttpMethodGenerate(): bool
