@@ -95,6 +95,7 @@ class Route
      * Get model name from Controller DocBlock.
      *
      * @return string|null
+     *
      * @throws ReflectionException
      */
     private function getModelNameFromControllerDocs(): ?string
@@ -111,19 +112,15 @@ class Route
 
         $docBlock = $reflection->getDocComment();
 
-        $annotations = $this->getModelAnnotations($docBlock);
-        if (empty($annotations)) {
-            return null;
-        }
-
-        return $annotations[0];
+        return $this->getModelAnnotation($docBlock);
     }
 
     /**
      * Get model searching on route.
      *
-     * @throws ReflectionException|RuntimeException
      * @return Model|null
+     *
+     * @throws ReflectionException|RuntimeException
      */
     public function getModel(): ?Model
     {
@@ -147,6 +144,7 @@ class Route
      * Get action DockBlock.
      *
      * @return string
+     *
      * @throws ReflectionException
      */
     private function getActionDocBlock()
@@ -162,19 +160,12 @@ class Route
      * Get Model name from method DocBlock.
      *
      * @return string|null
+     *
      * @throws ReflectionException
      */
     private function getModelNameFromMethodDocs(): ?string
     {
-        $docBlock = $this->getActionDocBlock();
-
-        $annotations = $this->getModelAnnotations($docBlock);
-
-        if (!$annotations) {
-            return null;
-        }
-
-        return reset($annotations);
+        return $this->getModelAnnotation();
     }
 
     /**
@@ -182,6 +173,7 @@ class Route
      *
      * @param string $action
      * @return ReflectionMethod
+     *
      * @throws ReflectionException
      */
     private function getActionClassInstance(string $action)
@@ -195,6 +187,7 @@ class Route
      * Check the action has a FormRequest on params.
      *
      * @return bool
+     *
      * @throws ReflectionException
      */
     public function hasFormRequestOnParams()
@@ -204,6 +197,7 @@ class Route
 
     /**
      * @return FormRequest|null
+     *
      * @throws ReflectionException
      */
     public function getFormRequestFromParams(): ?FormRequest
@@ -218,6 +212,7 @@ class Route
 
     /**
      * @return string|null
+     *
      * @throws ReflectionException
      */
     public function getFormRequestClassFromParams()
@@ -248,6 +243,7 @@ class Route
      * Get exceptions thrown in action.
      *
      * @return array
+     *
      * @throws ReflectionException
      */
     public function getThrows(): array
@@ -266,14 +262,20 @@ class Route
     }
 
     /**
-     * Get annotations from specific model.
+     * Get annotation from specific model. You can pass the docBlock
+     * content on param $docBlock. By default will be used the docBlock
+     * from action.
      *
-     * @param string $docBlock
-     * @return array
+     * @param  string|null  $docBlock
+     * @return string|null
+     *
+     * @throws \ReflectionException
      */
-    private function getModelAnnotations(string $docBlock): array
+    private function getModelAnnotation(?string $docBlock = null): ?string
     {
-        return get_annotations($docBlock, '@model');
+        $docBlock = $docBlock ?? $this->getActionDocBlock();
+
+        return get_annotations($docBlock, '@model')[0] ?? null;
     }
 
     /**
@@ -297,6 +299,7 @@ class Route
      * block, form request if exists and auth middleware if defined.
      *
      * @return array
+     *
      * @throws ReflectionException
      */
     public function getExceptions(): array
