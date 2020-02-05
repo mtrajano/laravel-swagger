@@ -149,11 +149,9 @@ class Route
      */
     private function getActionDocBlock()
     {
-        $action = $this->action();
+        $actionInstance = $this->getActionClassInstance();
 
-        $actionInstance = is_string($action) ? $this->getActionClassInstance($action) : null;
-
-        return $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
+        return $actionInstance ? $actionInstance->getDocComment() ?: '' : '';
     }
 
     /**
@@ -171,14 +169,18 @@ class Route
     /**
      * Return a ReflectionMethod instance from current action.
      *
-     * @param string $action
-     * @return ReflectionMethod
+     * @return ReflectionMethod|null
      *
      * @throws ReflectionException
      */
-    private function getActionClassInstance(string $action)
+    private function getActionClassInstance(): ?ReflectionMethod
     {
-        list($class, $method) = Str::parseCallback($action);
+        $action = $this->action();
+        if (!is_string($action)) {
+            return null;
+        }
+
+        list($class, $method) = Str::parseCallback($this->action());
 
         return new ReflectionMethod($class, $method);
     }
@@ -217,11 +219,12 @@ class Route
      */
     public function getFormRequestClassFromParams()
     {
-        if (!is_string($this->action())) {
+        $actionInstance = $this->getActionClassInstance();
+        if (!$actionInstance) {
             return null;
         }
 
-        $parameters = $this->getActionClassInstance($this->action())->getParameters();
+        $parameters = $actionInstance->getParameters();
 
         foreach ($parameters as $parameter) {
             $reflectionClass = $parameter->getClass();
