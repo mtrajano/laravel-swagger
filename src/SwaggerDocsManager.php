@@ -43,9 +43,9 @@ class SwaggerDocsManager
      *
      * @return array
      */
-    public function getDefaultVersionConfig(): array
+    public function getLastVersionConfig(): array
     {
-        return $this->findVersionConfig($this->getDefaultVersionKey());
+        return $this->findVersionConfig($this->getLastVersionKey());
     }
 
     /**
@@ -93,13 +93,16 @@ class SwaggerDocsManager
     }
 
     /**
-     * Get the default version key.
+     * Get the last version key.
      *
      * @return mixed
      */
-    public function getDefaultVersionKey()
+    public function getLastVersionKey()
     {
-        return $this->config['defaultVersion'];
+        return collect($this->config['versions'])
+            ->pluck('appVersion')
+            ->sort()
+            ->last();
     }
 
     /**

@@ -156,9 +156,7 @@ php artisan migrate
 
 Generating the swagger documentation is easy, simply run `php artisan laravel-swagger:generate` in your project root.
 
-The command will generate the swagger docs to API default version defined on `config/laravel-swagger.php` file.
-
-To generate the docs for all versions you can run `php artisan laravel-swagger:generate --all-versions`.
+By default, the command will generate the docs for all versions defined on `config/laravel-swagger.php`.
 
 You can still generate the docs to specific version passing the parameter `--api-version=`. E.g.:
 
@@ -171,7 +169,6 @@ By default, laravel-swagger generates the documentation in json format, if you w
 Format options are:
 - `json`
 - `yaml`
-
 
 After generate the docs access the route `/docs` to see the API docs. 
 The default version of the API will be shown, but you can choose the version on screen

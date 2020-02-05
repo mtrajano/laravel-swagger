@@ -25,11 +25,13 @@ class GenerateSwaggerDocCommand extends Command
      * The name and signature of the console command.
      *
      * @var string
+     * @todo When define the default value from "api-version" param as "*" the
+     *       value returned by the method $this->option('api-version') returns
+     *       an empty array.
      */
     protected $signature = 'laravel-swagger:generate
                             {--format=json : The format of the output, current options are json and yaml}
-                            {--all-versions : Generate swagger docs for all versions}
-                            {--api-version= : The version of the swagger docs. Uses defaultVersion by default}';
+                            {--api-version= : The version of the swagger docs. Generate for all version by default}';
 
     /**
      * The console command description.
@@ -50,10 +52,6 @@ class GenerateSwaggerDocCommand extends Command
         $versions = $this->getVersionsConfigToGenerate();
 
         foreach ($versions as $versionConfig) {
-            $versionConfig['title'] = config('laravel-swagger.title');
-            $versionConfig['description'] = config('laravel-swagger.description');
-            $versionConfig['host'] = config('laravel-swagger.host');
-
             $docs = (new Generator($versionConfig, $versionConfig['basePath']))->generate();
 
             $format = $this->option('format');
@@ -78,10 +76,9 @@ class GenerateSwaggerDocCommand extends Command
      */
     private function getVersionsConfigToGenerate(): array
     {
-        $apiVersion = $this->option('api-version')
-            ?? $this->swaggerDocsManager->getDefaultVersionKey();
+        $apiVersion = $this->option('api-version') ?? '*';
 
-        return $this->option('all-versions')
+        return $apiVersion === '*'
             ? $this->swaggerDocsManager->getAllVersionsConfigs()
             : $this->swaggerDocsManager->filterVersionsConfigs($apiVersion);
     }

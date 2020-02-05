@@ -18,13 +18,13 @@ class SwaggerDocsManagerTest extends TestCase
     /**
      * @var array
      */
-    private $versionTwo;
+    private $versionOne;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->defaultVersion = [
+        $this->versionOne = [
             'appVersion' => '1.0.0',
             'basePath' => '/',
             'schemes' => [],
@@ -46,7 +46,7 @@ class SwaggerDocsManagerTest extends TestCase
             'parseSecurity' => true,
         ];
 
-        $this->versionTwo = [
+        $this->defaultVersion = [
             'appVersion' => '2.0.0',
             'basePath' => '/',
             'schemes' => [],
@@ -82,7 +82,7 @@ class SwaggerDocsManagerTest extends TestCase
             ],
             'versions' => [
                 $this->defaultVersion,
-                $this->versionTwo
+                $this->versionOne
             ],
         ];
     }
@@ -93,7 +93,7 @@ class SwaggerDocsManagerTest extends TestCase
 
         $this->assertEquals(
             $this->defaultVersion,
-            $swaggerDocs->getDefaultVersionConfig()
+            $swaggerDocs->getLastVersionConfig()
         );
     }
 
@@ -102,8 +102,8 @@ class SwaggerDocsManagerTest extends TestCase
         $swaggerDocs = new SwaggerDocsManager($this->config);
 
         $this->assertEquals(
-            $this->versionTwo,
-            $swaggerDocs->findVersionConfig('2.0.0')
+            $this->versionOne,
+            $swaggerDocs->findVersionConfig('1.0.0')
         );
     }
 

@@ -39,7 +39,7 @@ class GeneratorTest extends TestCase
         parent::setUp();
 
         $swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
-        $this->config = $swaggerDocsManager->getDefaultVersionConfig();
+        $this->config = $swaggerDocsManager->getLastVersionConfig();
 
         $this->generator = new Generator($this->config);
 

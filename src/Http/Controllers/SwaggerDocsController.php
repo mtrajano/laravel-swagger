@@ -25,7 +25,7 @@ class SwaggerDocsController extends Controller
      */
     public function __invoke(string $version = null)
     {
-        $version = $version ?? $this->swaggerDocsManager->getDefaultVersionKey();
+        $version = $version ?? $this->swaggerDocsManager->getLastVersionKey();
 
         $apiVersions = $this->swaggerDocsManager->getRoutesWithVersions();
 

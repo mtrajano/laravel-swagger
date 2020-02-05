@@ -506,12 +506,12 @@ class DefinitionGeneratorTest extends TestCase
 
     private function generateDefinitionsForRoute(Route $route)
     {
-        $defaultConfig = (new SwaggerDocsManager(config('laravel-swagger')))
-            ->getDefaultVersionConfig();
+        $lastVersionConfig = (new SwaggerDocsManager(config('laravel-swagger')))
+            ->getLastVersionConfig();
 
         $this->definitions = (new DefinitionGenerator(
             $route,
-            $defaultConfig['errors_definitions'])
+            $lastVersionConfig['errors_definitions'])
         )->generate();
         return $this;
     }
@@ -520,10 +520,10 @@ class DefinitionGeneratorTest extends TestCase
     {
         $this->generateDefinitionsForRoute($route);
 
-        $defaultConfig = (new SwaggerDocsManager(config('laravel-swagger')))
-            ->getDefaultVersionConfig();
+        $lastVersionConfig = (new SwaggerDocsManager(config('laravel-swagger')))
+            ->getLastVersionConfig();
 
-        $errorDefinitionsNames = array_keys($defaultConfig['errors_definitions']);
+        $errorDefinitionsNames = array_keys($lastVersionConfig['errors_definitions']);
 
         $definitions = [];
         foreach ($this->definitions as $definition => $value) {

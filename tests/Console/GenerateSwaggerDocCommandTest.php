@@ -13,7 +13,7 @@ use Mtrajano\LaravelSwagger\Tests\TestCase;
 
 class GenerateSwaggerDocCommandTest extends TestCase
 {
-    private $defaultVersionConfig;
+    private $lastVersionConfig;
 
     /**
      * @var SwaggerDocsManager
@@ -49,7 +49,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
         parent::setUp();
 
         $this->swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
-        $this->defaultVersionConfig = $this->swaggerDocsManager->getDefaultVersionConfig();
+        $this->lastVersionConfig = $this->swaggerDocsManager->getLastVersionConfig();
     }
 
     public function testGenerateSwaggerDocToAllVersion()
@@ -67,7 +67,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
 
         config(['laravel-swagger.versions' => $versions]);
 
-        $this->artisan('laravel-swagger:generate', ['--all-versions' => true]);
+        $this->artisan('laravel-swagger:generate', ['--api-version' => '*']);
 
         foreach ([$version1FilePath, $version2FilePath] as $versionFilePath) {
             $this->assertTrue(file_exists(public_path($versionFilePath)));
@@ -76,17 +76,28 @@ class GenerateSwaggerDocCommandTest extends TestCase
         }
     }
 
-    public function testGenerateSwaggerDocToDefaultVersion()
+    public function testGenerateSwaggerDocsToAllVersionsByDefault()
     {
-        $this->artisan('laravel-swagger:generate')->assertExitCode(0);
+        $version1FilePath = 'swagger-1.0.0.json';
+        $version2FilePath = 'swagger-2.0.0.json';
+        $versions = [
+            $this->defaultConfig([
+                'appVersion' => '1.0.0',
+            ]),
+            $this->defaultConfig([
+                'appVersion' => '2.0.0',
+            ]),
+        ];
 
-        $defaultFileName = 'swagger-1.0.0.json';
+        config(['laravel-swagger.versions' => $versions]);
 
-        $this->assertTrue(
-            file_exists(public_path($defaultFileName))
-        );
+        $this->artisan('laravel-swagger:generate');
 
-        unlink(public_path($defaultFileName));
+        foreach ([$version1FilePath, $version2FilePath] as $versionFilePath) {
+            $this->assertTrue(file_exists(public_path($versionFilePath)));
+
+            unlink(public_path($versionFilePath));
+        }
     }
 
     public function testGenerateSwaggerDocPassingVersion()
@@ -133,7 +144,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
 
         config(['laravel-swagger.versions' => $versions]);
 
-        $this->artisan('laravel-swagger:generate', ['--all-versions' => true]);
+        $this->artisan('laravel-swagger:generate');
 
         $swaggerDocsVersion1 = json_decode(
             file_get_contents(public_path($version1FilePath)),
