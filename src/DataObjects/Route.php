@@ -38,9 +38,9 @@ class Route
         return $this->middleware;
     }
 
-    public function action()
+    public function action() : string
     {
-        return $this->route->getAction()['uses'];
+        return $this->route->getActionName();
     }
 
     public function methods()
