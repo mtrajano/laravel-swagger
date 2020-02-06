@@ -38,7 +38,7 @@ class Route
         return $this->middleware;
     }
 
-    public function action() : string
+    public function action(): string
     {
         return $this->route->getActionName();
     }
