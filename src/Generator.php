@@ -179,7 +179,7 @@ class Generator
         }
     }
 
-    protected function getFormRules() : array
+    protected function getFormRules(): array
     {
         $action_instance = $this->getActionClassInstance();
 
@@ -218,7 +218,7 @@ class Generator
         }
     }
 
-    private function getActionClassInstance() : ?ReflectionMethod
+    private function getActionClassInstance(): ?ReflectionMethod
     {
         [$class, $method] = Str::parseCallback($this->route->action());
 
