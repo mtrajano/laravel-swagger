@@ -176,7 +176,7 @@ class Generator
      */
     protected function generatePath()
     {
-        $actionInstance = is_string($this->route->action()) ? $this->getActionClassInstance($this->route->action()) : null;
+        $actionInstance = $this->getActionClassInstance();
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
 
         [$isDeprecated, $summary, $description] = $this->parseActionDocBlock($docBlock);
@@ -229,31 +229,33 @@ class Generator
     }
 
     /**
-     * @return bool
      * @throws ReflectionException
      */
-    protected function getFormRules()
+    protected function getFormRules(): array
     {
-        if (!is_string($this->route->action())) {
-            return false;
+        $action_instance = $this->getActionClassInstance();
+
+        if (!$action_instance) {
+            return [];
         }
 
-        $parameters = $this->getActionClassInstance($this->route->action())->getParameters();
+        $parameters = $action_instance->getParameters();
 
         foreach ($parameters as $parameter) {
-            $reflectionClass = $parameter->getClass();
-            if (!$reflectionClass) {
+            $class = $parameter->getClass();
+
+            if (!$class) {
                 continue;
             }
 
-            $class = $reflectionClass->getName();
+            $class_name = $class->getName();
 
-            if (is_subclass_of($class, FormRequest::class)) {
-                return (new $class)->rules();
+            if (is_subclass_of($class_name, FormRequest::class)) {
+                return (new $class_name)->rules();
             }
         }
 
-        return false;
+        return [];
     }
 
     protected function getParameterGenerator($rules)
@@ -269,13 +271,15 @@ class Generator
     }
 
     /**
-     * @param string $action
-     * @return ReflectionMethod
      * @throws ReflectionException
      */
-    private function getActionClassInstance(string $action)
+    private function getActionClassInstance(): ?ReflectionMethod
     {
-        [$class, $method] = Str::parseCallback($action);
+        [$class, $method] = Str::parseCallback($this->route->action());
+
+        if (!$class || !$method) {
+            return null;
+        }
 
         return new ReflectionMethod($class, $method);
     }

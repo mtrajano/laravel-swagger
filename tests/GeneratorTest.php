@@ -34,7 +34,7 @@ class GeneratorTest extends TestCase
         '/oauth/personal-access-tokens/{token_id}',
     ];
 
-    public function setUp() : void
+    public function setUp(): void
     {
         parent::setUp();
 

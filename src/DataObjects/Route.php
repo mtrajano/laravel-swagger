@@ -52,9 +52,9 @@ class Route
         return $this->middleware;
     }
 
-    public function action()
+    public function action(): string
     {
-        return $this->route->getAction()['uses'];
+        return $this->route->getActionName();
     }
 
     public function methods()
@@ -169,18 +169,15 @@ class Route
     /**
      * Return a ReflectionMethod instance from current action.
      *
-     * @return ReflectionMethod|null
-     *
      * @throws ReflectionException
      */
     private function getActionClassInstance(): ?ReflectionMethod
     {
-        $action = $this->action();
-        if (!is_string($action)) {
+        list($class, $method) = Str::parseCallback($this->action());
+
+        if (!$class || !$method) {
             return null;
         }
-
-        list($class, $method) = Str::parseCallback($this->action());
 
         return new ReflectionMethod($class, $method);
     }
