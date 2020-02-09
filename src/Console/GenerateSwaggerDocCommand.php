@@ -9,6 +9,8 @@ use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 
 class GenerateSwaggerDocCommand extends Command
 {
+    const DEFAULT_API_VERSION = '*';
+
     /**
      * @var SwaggerDocsManager
      */
@@ -76,9 +78,9 @@ class GenerateSwaggerDocCommand extends Command
      */
     private function getVersionsConfigToGenerate(): array
     {
-        $apiVersion = $this->option('api-version') ?? '*';
+        $apiVersion = $this->option('api-version') ?? self::DEFAULT_API_VERSION;
 
-        return $apiVersion === '*'
+        return $apiVersion === self::DEFAULT_API_VERSION
             ? $this->swaggerDocsManager->getAllVersionsConfigs()
             : $this->swaggerDocsManager->filterVersionsConfigs($apiVersion);
     }

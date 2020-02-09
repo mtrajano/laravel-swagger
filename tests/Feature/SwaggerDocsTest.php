@@ -18,6 +18,7 @@ class SwaggerDocsTest extends TestCase
             'title' => env('APP_NAME'),
             'description' => '',
             'host' => env('APP_URL'),
+            'schemes' => [],
             'parseDocBlock' => true,
             'parseSecurity' => true,
             'route' => [
@@ -29,7 +30,6 @@ class SwaggerDocsTest extends TestCase
                 [
                     'appVersion' => '1.0.0',
                     'basePath' => '/v1',
-                    'schemes' => [],
                     'consumes' => [],
                     'produces' => [],
                     'ignoredMethods' => [
@@ -45,7 +45,6 @@ class SwaggerDocsTest extends TestCase
                 [
                     'appVersion' => '2.0.0',
                     'basePath' => '/v2',
-                    'schemes' => [],
                     'consumes' => [],
                     'produces' => [],
                     'ignoredMethods' => [

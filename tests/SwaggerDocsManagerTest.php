@@ -26,8 +26,8 @@ class SwaggerDocsManagerTest extends TestCase
 
         $this->versionOne = [
             'appVersion' => '1.0.0',
+            'host' => env('APP_URL'),
             'basePath' => '/',
-            'schemes' => [],
             'consumes' => [],
             'produces' => [],
             'ignoredMethods' => [
@@ -39,17 +39,19 @@ class SwaggerDocsManagerTest extends TestCase
             ],
             'authFlow' => 'accessCode',
             'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
+
+            // merged globals
             'title' => '',
             'description' => '',
-            'host' => env('APP_URL'),
+            'schemes' => [],
             'parseDocBlock' => true,
             'parseSecurity' => true,
         ];
 
         $this->defaultVersion = [
             'appVersion' => '2.0.0',
-            'basePath' => '/',
-            'schemes' => [],
+            'host' => env('APP_URL'),
+            'basePath' => '/v2',
             'consumes' => [],
             'produces' => [],
             'ignoredMethods' => [
@@ -59,17 +61,19 @@ class SwaggerDocsManagerTest extends TestCase
                 'laravel-swagger.docs',
                 'laravel-swagger.asset'
             ],
-            'parseDocBlock' => true,
-            'parseSecurity' => true,
             'authFlow' => 'accessCode',
             'file_path' => 'swagger-2.0.0.json',
+
+            // merged globals
             'title' => '',
             'description' => '',
-            'host' => env('APP_URL'),
+            'schemes' => [],
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
         ];
 
         $this->config = [
-            'host' => env('APP_URL'),
+            'schemes' => [],
             'defaultVersion' => '1.0.0',
             'title' => '',
             'description' => '',

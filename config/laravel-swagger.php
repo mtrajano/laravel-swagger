@@ -9,8 +9,6 @@ use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\ValidationErrorDefinitionH
 
 return [
 
-    'host' => env('APP_URL'),
-
     /*
     |--------------------------------------------------------------------------
     | Basic Info
@@ -20,9 +18,15 @@ return [
     | description.
     |
     */
+
     'title' => env('APP_NAME'),
 
     'description' => '',
+
+    'schemes' => [
+        // 'http',
+        // 'https',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -41,17 +45,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Security
+    | Parse summary and descriptions
     |--------------------------------------------------------------------------
     |
-    | If your application uses Laravel's Passport package with the recommended
-    | settings, Laravel Swagger will attempt to parse your settings and
-    | automatically generate the securityDefinitions along with the operation
-    | object's security parameter, you may turn off this behavior with parseSecurity.
-    |
-    | Possible values for flow: ["implicit", "password", "application", "accessCode"]
-    | See https://medium.com/@darutk/diagrams-and-movies-of-all-the-oauth-2-0-flows-194f3c3ade85
-    | for more information.
+    | Tries to parse your middleware and defines the security definitions of
+    | the application
     |
     */
 
@@ -65,6 +63,7 @@ return [
     | The route definitions that will be used to show the docs.
     |
     */
+
     'route' => [
         'path' => '/docs/{version?}',
         'name' => 'laravel-swagger.docs',
@@ -85,12 +84,9 @@ return [
         [
             'appVersion' => '1.0.0',
 
-            'basePath' => '/v1',
+            'host' => env('APP_URL'),
 
-            'schemes' => [
-                // 'http',
-                // 'https',
-            ],
+            'basePath' => '/',
 
             'consumes' => [
                 // 'application/json',
@@ -102,10 +98,10 @@ return [
 
             /*
             |--------------------------------------------------------------------------
-            | Ignore methods
+            | Ignores
             |--------------------------------------------------------------------------
             |
-            | Methods in the following array will be ignored in the paths array
+            | Methods and routes in the following array will be ignored in the paths array
             |
             */
 
@@ -113,18 +109,26 @@ return [
                 'head',
             ],
 
-            /*
-            |--------------------------------------------------------------------------
-            | Parse summary and descriptions
-            |--------------------------------------------------------------------------
-            |
-            | Define the routes that should be ignored on docs.
-            */
-
             'ignoredRoutes' => [
                 'laravel-swagger.docs',
                 'laravel-swagger.asset'
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Security
+            |--------------------------------------------------------------------------
+            |
+            | If your application uses Laravel's Passport package with the recommended
+            | settings, Laravel Swagger will attempt to parse your settings and
+            | automatically generate the securityDefinitions along with the operation
+            | object's security parameter, you may turn off this behavior with parseSecurity.
+            |
+            | Possible values for flow: ["implicit", "password", "application", "accessCode"]
+            | See https://medium.com/@darutk/diagrams-and-movies-of-all-the-oauth-2-0-flows-194f3c3ade85
+            | for more information.
+            |
+            */
 
             'authFlow' => 'accessCode',
 
@@ -152,6 +156,7 @@ return [
             | the format must be "yaml".
             |
             */
+
             'file_format' => 'json',
 
             /*
@@ -169,6 +174,7 @@ return [
             | handler and define here.
             |
             */
+
             'errors_definitions' => [
                 'UnprocessableEntity' => [
                     'http_code' => 422,

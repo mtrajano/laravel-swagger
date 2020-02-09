@@ -9,11 +9,10 @@
         }
     ],
     "require-dev": {
-        "php": ">=7.2",
+        "ext-json": "*",
         "orchestra/testbench": "~4.0",
         "phpunit/phpunit": "8.3.*",
-        "laravel/passport": "^8.0",
-        "ext-json": "*"
+        "laravel/passport": "^8.0"
     },
     "autoload": {
         "files": [
@@ -29,7 +28,8 @@
         }
     },
     "suggest": {
-        "ext-yaml": "Required to use the YAML output option"
+        "ext-yaml": "Required to use the YAML output option",
+        "ext-json": "Required to use the JSON output option"
     },
     "extra": {
         "laravel": {
@@ -39,6 +39,7 @@
         }
     },
     "require": {
+        "php": ">=7.1",
         "phpdocumentor/reflection-docblock": "^4.3",
         "swagger-api/swagger-ui": "^3.25"
     }

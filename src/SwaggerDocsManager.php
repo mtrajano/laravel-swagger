@@ -191,7 +191,7 @@ class SwaggerDocsManager
     {
         $version['title'] = $this->config['title'];
         $version['description'] = $this->config['description'];
-        $version['host'] = $this->config['host'];
+        $version['schemes'] = $this->config['schemes'];
         $version['parseDocBlock'] = $this->config['parseDocBlock'];
         $version['parseSecurity'] = $this->config['parseSecurity'];
 

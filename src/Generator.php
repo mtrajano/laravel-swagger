@@ -325,6 +325,8 @@ class Generator
 
     private function getRouteUri()
     {
-        return Str::replaceFirst($this->config['basePath'], '', $this->route->uri());
+        $uri = Str::replaceFirst($this->config['basePath'], '', $this->route->uri());
+
+        return Str::start($uri, '/');
     }
 }
