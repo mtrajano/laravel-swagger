@@ -13,9 +13,9 @@ use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
 use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\DefaultDefinitionHandler;
 use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\DefaultErrorDefinitionHandler;
+use Mtrajano\LaravelSwagger\LaravelSwaggerException;
 use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
-use RuntimeException;
 
 class DefinitionGeneratorTest extends TestCase
 {
@@ -90,7 +90,7 @@ class DefinitionGeneratorTest extends TestCase
 
     public function testGenerateDefinitionToModelWithInvalidGetAppendsMethod()
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(LaravelSwaggerException::class);
 
         $route = $this->newRouteByName('customers.invalid_appends');
 
@@ -124,7 +124,7 @@ class DefinitionGeneratorTest extends TestCase
 
     public function testGenerateDefinitionWhenClassOnMethodDocsIsNotModel()
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(LaravelSwaggerException::class);
 
         $route = $this->newRouteByName('products.index');
 

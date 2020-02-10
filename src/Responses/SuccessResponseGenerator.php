@@ -63,7 +63,7 @@ class SuccessResponseGenerator
         return $response;
     }
 
-    private function getDescriptionByHttpCode(string $httpCode)
+    private function getDescriptionByHttpCode(string $httpCode): string
     {
         $httpCodeDescription = [
             '200' => 'OK',
@@ -71,7 +71,7 @@ class SuccessResponseGenerator
             '204' => 'No Content',
         ];
 
-        return $httpCodeDescription[$httpCode] ?? null;
+        return $httpCodeDescription[$httpCode] ?? '';
     }
 
     private function getDefinitionName(): string

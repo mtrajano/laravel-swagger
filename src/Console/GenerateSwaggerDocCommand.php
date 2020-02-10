@@ -45,11 +45,10 @@ class GenerateSwaggerDocCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return void
      * @throws \Mtrajano\LaravelSwagger\LaravelSwaggerException
      * @throws \ReflectionException
      */
-    public function handle()
+    public function handle() : void
     {
         $versions = $this->getVersionsConfigToGenerate();
 
@@ -73,8 +72,6 @@ class GenerateSwaggerDocCommand extends Command
 
     /**
      * Get versions config to generate swagger docs.
-     *
-     * @return array
      */
     private function getVersionsConfigToGenerate(): array
     {

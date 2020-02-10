@@ -41,10 +41,9 @@ class DefinitionGenerator
     }
 
     /**
-     * @return array
      * @throws ReflectionException
      */
-    public function generate()
+    public function generate(): array
     {
         if ($this->allowsHttpMethodGenerate()) {
             $this->setModelFromRouteAction();
@@ -79,15 +78,13 @@ class DefinitionGenerator
      *
      * @throws ReflectionException
      */
-    private function setModelFromRouteAction()
+    private function setModelFromRouteAction(): void
     {
         $this->model = $this->route->getModel();
     }
 
     /**
      * Check if all http methods from route allows generate definitions.
-     *
-     * @return bool
      */
     private function allowsHttpMethodGenerate(): bool
     {
