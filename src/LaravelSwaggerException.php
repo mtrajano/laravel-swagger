@@ -2,6 +2,4 @@
 
 namespace Mtrajano\LaravelSwagger;
 
-class LaravelSwaggerException extends \Exception
-{
-}
+class LaravelSwaggerException extends \Exception {}

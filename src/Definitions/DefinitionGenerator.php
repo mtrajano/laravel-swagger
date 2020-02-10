@@ -3,7 +3,6 @@
 namespace Mtrajano\LaravelSwagger\Definitions;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -102,17 +101,9 @@ class DefinitionGenerator
         return true;
     }
 
-    /**
-     * Get the model's columns from table.
-     *
-     * @return array
-     */
     private function getModelColumns(): array
     {
-        /** @var Builder $schema */
-        $schema = Schema::getFacadeRoot();
-
-        return $schema->getColumnListing($this->model->getTable());
+        return Schema::getColumnListing($this->model->getTable());
     }
 
     private function getDefinitionProperties()
@@ -122,14 +113,6 @@ class DefinitionGenerator
         $hiddenColumns = $this->model->getHidden();
 
         if (method_exists($this->model, 'getAppends')) {
-            $appends = $this->model->getAppends();
-            // TODO: Test condition
-            if (!is_array($appends)) {
-                throw new RuntimeException(
-                    'The return type of the "getAppends" method must be an array.'
-                );
-            }
-
             $columns = array_merge($columns, $this->model->getAppends());
         }
 
@@ -152,8 +135,6 @@ class DefinitionGenerator
 
     /**
      * Create an instance of the model with fake data or return null.
-     *
-     * @return Model|null
      */
     private function getModelFake(): ?Model
     {

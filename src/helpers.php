@@ -199,6 +199,6 @@ if (! function_exists('is_valid_file_name')) {
      */
     function is_valid_file_name(string $file)
     {
-        return preg_match('/^([-.\w]+)$/', $file) > 0;
+        return preg_match('/^([-_.\w]+)$/', $file) > 0;
     }
 }

@@ -24,9 +24,12 @@ class RouteTest extends TestCase
             ->get('/middleware-controller-route', 'Mtrajano\LaravelSwagger\Tests\DataObjects\MiddlewareControllerRoute@index')
             ->name('middleware-controller-route')
             ->middleware('test');
+        $app['router']
+            ->get('/exception-route', 'Mtrajano\LaravelSwagger\Tests\DataObjects\ExceptionRoute@index')
+            ->name('exception-route');
     }
 
-    public function provideRoutesWithMiddleware()
+    public function provideRoutesWithMiddleware() : array
     {
         return [
             [
@@ -68,15 +71,20 @@ class RouteTest extends TestCase
         ];
     }
 
+    public function testGetThrows()
+    {
+        $laravelRoute = app('router')->getRoutes()->getByName('exception-route');
+
+        $route = new Route($laravelRoute);
+
+        $this->assertEquals(['Exception', 'SpaceExcetion', 'TabException'], $route->getThrows());
+    }
+
     /**
      * @dataProvider provideRoutesWithMiddleware
-     * @param string $routeName
-     * @param array $expectedMiddleware
      */
-    public function testCreateFromOnlyControllerWithMiddleware(
-        string $routeName,
-        array $expectedMiddleware
-    ) {
+    public function testCreateFromOnlyControllerWithMiddleware(string $routeName, array $expectedMiddleware)
+    {
         $laravelRoute = app('router')->getRoutes()->getByName($routeName);
 
         $route = new Route($laravelRoute);
@@ -99,9 +107,7 @@ class ControllerMiddleware extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
-    {
-    }
+    public function index() {}
 }
 
 class MiddlewareControllerRoute extends Controller
@@ -111,14 +117,22 @@ class MiddlewareControllerRoute extends Controller
         $this->middleware('auth:api');
     }
 
-    public function index()
-    {
-    }
+    public function index() {}
 }
 
 class OnlyRouteMiddleware extends Controller
 {
-    public function index()
-    {
-    }
+    public function index() {}
+}
+
+class ExceptionRoute extends Controller
+{
+    /**
+     * some description
+     *
+     * @throws \Exception
+     * @throws    \SpaceExcetion
+     * @throws  \TabException
+     */
+    public function index() {}
 }

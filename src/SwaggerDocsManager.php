@@ -105,15 +105,12 @@ class SwaggerDocsManager
             ->last();
     }
 
-    /**
-     * @return array
-     */
     public function getRoutesWithVersions(): array
     {
         $versions = array_column($this->getAllVersionsConfigs(), 'appVersion');
 
         $routesWithVersions = [];
-        foreach ($versions as $key => $version) {
+        foreach ($versions as $version) {
             $route = route(
                 config('laravel-swagger.route.name'),
                 $version,

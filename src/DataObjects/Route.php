@@ -112,7 +112,7 @@ class Route
 
         $docBlock = $reflection->getDocComment();
 
-        return $this->getModelAnnotation($docBlock);
+        return $this->getModelNameFromMethodDocs($docBlock);
     }
 
     /**
@@ -152,18 +152,6 @@ class Route
         $actionInstance = $this->getActionClassInstance();
 
         return $actionInstance ? $actionInstance->getDocComment() ?: '' : '';
-    }
-
-    /**
-     * Get Model name from method DocBlock.
-     *
-     * @return string|null
-     *
-     * @throws ReflectionException
-     */
-    private function getModelNameFromMethodDocs(): ?string
-    {
-        return $this->getModelAnnotation();
     }
 
     /**
@@ -254,7 +242,9 @@ class Route
 
         if (!empty($exceptions)) {
             $exceptions = array_unique(array_map(function ($e) {
-                return trim($e, "\ \t\n\r\0\x0B");
+                $trimmed_exception = preg_replace('/^\s+|\s+$/', '', $e);
+
+                return trim($trimmed_exception, '\\');
             }, $exceptions));
         }
 
@@ -271,7 +261,7 @@ class Route
      *
      * @throws \ReflectionException
      */
-    private function getModelAnnotation(?string $docBlock = null): ?string
+    private function getModelNameFromMethodDocs(?string $docBlock = null): ?string
     {
         $docBlock = $docBlock ?? $this->getActionDocBlock();
 

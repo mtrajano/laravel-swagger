@@ -61,8 +61,7 @@ class Generator
      */
     public function generate()
     {
-        $this->docs = $this->getBaseInfo();
-        $this->docs['definitions'] = [];
+        $this->docs = $this->getBaseStructure();
 
         $securityDefinitions = $this->generateSecurityDefinitions();
         if ($securityDefinitions) {
@@ -91,7 +90,7 @@ class Generator
         return $this->docs;
     }
 
-    protected function getBaseInfo()
+    protected function getBaseStructure()
     {
         $baseInfo = [
             'swagger' => '2.0',
@@ -117,6 +116,7 @@ class Generator
         }
 
         $baseInfo['paths'] = [];
+        $baseInfo['definitions'] = [];
 
         return $baseInfo;
     }
