@@ -3,14 +3,11 @@
 namespace Mtrajano\LaravelSwagger\Definitions;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\ErrorHandlers\DefaultDefinitionHandler;
-use ReflectionException;
-use RuntimeException;
 
 class DefinitionGenerator
 {
@@ -41,7 +38,7 @@ class DefinitionGenerator
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     public function generate(): array
     {
@@ -76,7 +73,7 @@ class DefinitionGenerator
      * Get model searching on route and define the found model on $this->model
      * property.
      *
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function setModelFromRouteAction(): void
     {
@@ -136,25 +133,18 @@ class DefinitionGenerator
     private function getModelFake(): ?Model
     {
         try {
-            DB::beginTransaction();
-
-            return factory(get_class($this->model))->create();
+            return factory(get_class($this->model))->make();
         } catch (InvalidArgumentException $e) {
             return null;
-        } finally {
-            DB::rollBack();
         }
     }
 
     /**
      * Identify all relationships for a given model
      *
-     * @param Model $model Model
-     * @return  array
-     *
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
-    public function getAllRelations(Model $model)
+    public function getAllRelations(Model $model): array
     {
         return get_all_model_relations($model);
     }
@@ -175,12 +165,12 @@ class DefinitionGenerator
     }
 
     /**
-     * @param Model $model
      * @return $this
      */
     private function setModel(Model $model)
     {
         $this->model = $model;
+
         return $this;
     }
 
@@ -219,29 +209,22 @@ class DefinitionGenerator
 
     /**
      * Set property data on specific definition.
-     *
-     * @param string $definition
-     * @param string $property
-     * @param $data
      */
-    private function setPropertyOnDefinition(
-        string $definition,
-        string $property,
-        $data
-    ) {
+    private function setPropertyOnDefinition(string $definition, string $property, $data)
+    {
         $this->definitions[$definition]['properties'][$property] = $data;
     }
 
     /**
      * Generate the definition from model Relations.
      *
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function generateFromRelations()
     {
+        $baseModel = $this->model;
         $relations = $this->getAllRelations($this->model);
 
-        $baseModel = $this->model;
         foreach ($relations as $relation) {
             $this->setModel($baseModel);
 
@@ -288,7 +271,7 @@ class DefinitionGenerator
     /**
      * Generate definition from errors.
      *
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function generateFromErrors()
     {
@@ -307,7 +290,7 @@ class DefinitionGenerator
     /**
      * @param $exception
      * @return DefaultDefinitionHandler|null
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function findExceptionDefinitionHandler($exception): ?DefaultDefinitionHandler
     {

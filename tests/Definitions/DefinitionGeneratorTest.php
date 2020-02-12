@@ -5,7 +5,11 @@ namespace Mtrajano\LaravelSwagger\Tests\Definitions;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -29,11 +33,6 @@ class DefinitionGeneratorTest extends TestCase
      */
     private $definition;
 
-    /**
-     * @var SwaggerDocsManager
-     */
-    private $swaggerDocsManager;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -45,8 +44,6 @@ class DefinitionGeneratorTest extends TestCase
         $this->artisan('migrate');
 
         $this->withFactories(__DIR__.'/../Stubs/database/factories');
-
-        $this->swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
     }
 
     protected function getEnvironmentSetUp($app)
@@ -370,9 +367,6 @@ class DefinitionGeneratorTest extends TestCase
 
     /**
      * @dataProvider provideRouteToReturnErrorDefinition
-     *
-     * @param string $routeName
-     * @param array $definitions
      */
     public function testReturnErrorDefinition(string $routeName, array $definitions)
     {
@@ -513,6 +507,7 @@ class DefinitionGeneratorTest extends TestCase
             $route,
             $lastVersionConfig['errors_definitions'])
         )->generate();
+
         return $this;
     }
 
@@ -555,7 +550,7 @@ class DefinitionGeneratorTest extends TestCase
         return $this;
     }
 
-    public function assertPropertyTimestampsDefinitions(
+    private function assertPropertyTimestampsDefinitions(
         array $timestamps = [],
         string $definition = null
     ) {
@@ -569,7 +564,7 @@ class DefinitionGeneratorTest extends TestCase
         ]);
     }
 
-    public function assertPropertyDefinitions(array $data)
+    private function assertPropertyDefinitions(array $data)
     {
         $definition = $data['definition'] ?? $this->definition;
         $properties = (array) $data['property'];
@@ -626,6 +621,7 @@ class DefinitionGeneratorTest extends TestCase
     private function assertEmptyDefinitions()
     {
         $this->assertEmpty($this->definitions);
+
         return $this;
     }
 
@@ -645,5 +641,94 @@ class DefinitionGeneratorTest extends TestCase
                 }
             });
         }
+    }
+
+    public function testGetAllRelations(): void
+    {
+        $route = $this->newRouteByName('customers.store');
+
+        $generator = new DefinitionGenerator($route, []);
+
+        $relations = $generator->getAllRelations(new Customer());
+        $relations = array_column($relations, 'related_model');
+
+        $relation_names = array_map('class_basename', $relations);
+
+        $this->assertEquals([
+            'Order',
+            'Company',
+            'Address'
+        ], $relation_names);
+    }
+
+    public function testOnlyRelationMethodsInvoked(): void
+    {
+        $mockCustomer = $this->createMock(Customer::class);
+        $route = $this->newRouteByName('customers.store');
+
+        $generator = new DefinitionGenerator($route, []);
+
+        $mockCustomer->expects($this->never())
+            ->method('someOtherMethod');
+        $mockCustomer->expects($this->once())
+            ->method('orders');
+        $mockCustomer->expects($this->once())
+            ->method('company');
+        $mockCustomer->expects($this->once())
+            ->method('address');
+
+        $generator->getAllRelations($mockCustomer);
+    }
+}
+
+class Customer extends Model
+{
+    protected function someProtectedMethod()
+    {
+        return [];
+    }
+
+    public function someOtherMethod()
+    {
+        return 'blah';
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany('Mtrajano\LaravelSwagger\Tests\Definitions\Order');
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo('Mtrajano\LaravelSwagger\Tests\Definitions\Company');
+    }
+
+    public function address(): HasOne
+    {
+        return $this->hasOne('Mtrajano\LaravelSwagger\Tests\Definitions\Address');
+    }
+}
+
+class Order extends Model
+{
+    public function customer()
+    {
+        return $this->belongsTo('Mtrajano\LaravelSwagger\Tests\Definitions\Customer');
+    }
+}
+
+class Company extends Model
+{
+    public function customers()
+    {
+        return $this->hasMany('Mtrajano\LaravelSwagger\Tests\Definitions\Customer');
+    }
+}
+
+class Address extends Model
+{
+    public function customer()
+    {
+        return $this->belongsTo('Mtrajano\LaravelSwagger\Tests\Definitions\Customer');
     }
 }

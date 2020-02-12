@@ -3,6 +3,7 @@
 namespace Mtrajano\LaravelSwagger\Tests\Stubs\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Mtrajano\LaravelSwagger\Traits\HasAppends;
 
 class Order extends Model
@@ -27,15 +28,12 @@ class Order extends Model
         return '$ '.$this->value;
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
