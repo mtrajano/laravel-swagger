@@ -672,7 +672,7 @@ class DefinitionGeneratorTest extends TestCase
                     'example',
                     $this->definitions[$definition]['properties'][$property]
                 );
-                $this->assertNotNull(
+                $this->assertNotEmpty(
                     $this->definitions[$definition]['properties'][$property]['example']
                 );
             }
