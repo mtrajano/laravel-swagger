@@ -191,6 +191,8 @@ class SwaggerDocsManager
         $version['schemes'] = $this->config['schemes'];
         $version['parseDocBlock'] = $this->config['parseDocBlock'];
         $version['parseSecurity'] = $this->config['parseSecurity'];
+        $version['generateExampleData'] = $this->config['generateExampleData'];
+        $version['parseModelRelationships'] = $this->config['parseModelRelationships'];
 
         return $version;
     }

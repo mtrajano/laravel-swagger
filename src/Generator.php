@@ -2,7 +2,6 @@
 
 namespace Mtrajano\LaravelSwagger;
 
-use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
@@ -11,7 +10,6 @@ use Mtrajano\LaravelSwagger\Definitions\Security\SecurityDefinitionsFactory;
 use Mtrajano\LaravelSwagger\Definitions\Security\Contracts\SecurityDefinitionsGenerator;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use phpDocumentor\Reflection\DocBlockFactory;
-use ReflectionException;
 use ReflectionMethod;
 
 class Generator
@@ -57,7 +55,7 @@ class Generator
     /**
      * @return array
      * @throws LaravelSwaggerException
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     public function generate()
     {
@@ -172,7 +170,7 @@ class Generator
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     protected function generatePath()
     {
@@ -201,7 +199,7 @@ class Generator
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     protected function addActionParameters()
     {
@@ -229,7 +227,7 @@ class Generator
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     protected function getFormRules(): array
     {
@@ -271,7 +269,7 @@ class Generator
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function getActionClassInstance(): ?ReflectionMethod
     {
@@ -299,7 +297,7 @@ class Generator
             $description = (string) $parsedComment->getDescription();
 
             return [$isDeprecated, $summary, $description];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return [false, '', ''];
         }
     }
@@ -314,13 +312,24 @@ class Generator
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function addActionDefinitions()
     {
-        $this->docs['definitions'] += (
-            new DefinitionGenerator($this->route, $this->config['errors_definitions'])
-        )->generate();
+        $this->docs['definitions'] += $this->getDefinitionGenerator()->generate();
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function getDefinitionGenerator(): DefinitionGenerator
+    {
+        return new DefinitionGenerator(
+            $this->route,
+            $this->config['errors_definitions'],
+            $this->config['generateExampleData'],
+            $this->config['parseModelRelationships']
+        );
     }
 
     private function getRouteUri()

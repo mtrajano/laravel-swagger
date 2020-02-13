@@ -477,6 +477,67 @@ class DefinitionGeneratorTest extends TestCase
         ]);
     }
 
+    public function testGetAllRelations(): void
+    {
+        $route = $this->createMock(Route::class);
+
+        $generator = new DefinitionGenerator($route);
+
+        $relations = $generator->getAllRelations(new Customer());
+        $relations = array_column($relations, 'related_model');
+
+        $relation_names = array_map('class_basename', $relations);
+
+        $this->assertEquals([
+            'Order',
+            'Company',
+            'Address'
+        ], $relation_names);
+    }
+
+    public function testOnlyRelationMethodsInvoked(): void
+    {
+        $mockCustomer = $this->createMock(Customer::class);
+        $route = $this->createMock(Route::class);
+
+        $generator = new DefinitionGenerator($route);
+
+        $mockCustomer->expects($this->never())
+            ->method('someOtherMethod');
+        $mockCustomer->expects($this->once())
+            ->method('orders');
+        $mockCustomer->expects($this->once())
+            ->method('company');
+        $mockCustomer->expects($this->once())
+            ->method('address');
+
+        $generator->getAllRelations($mockCustomer);
+    }
+
+    public function testRelationshipsNotParsedOnFalse(): void
+    {
+        $route = $this->createMock(Route::class);
+        $mockCustomer = $this->createMock(Customer::class);
+
+        $route->method('getModel')
+            ->willReturn($mockCustomer);
+
+        $route->method('validMethods')
+            ->willReturn(['get']);
+
+        $generator = $this->getMockBuilder(DefinitionGenerator::class)
+            ->setConstructorArgs([$route, [], false, false])
+            ->setMethods(['getAllRelations'])
+            ->getMock();
+
+        $generator->expects($this->never())
+            ->method('getAllRelations');
+
+        $generator->generate();
+
+
+    }
+
     private function getLaravelRouter(): Router
     {
         return app('router');
@@ -505,8 +566,10 @@ class DefinitionGeneratorTest extends TestCase
 
         $this->definitions = (new DefinitionGenerator(
             $route,
-            $lastVersionConfig['errors_definitions'])
-        )->generate();
+            $lastVersionConfig['errors_definitions'],
+            true,
+            true
+        ))->generate();
 
         return $this;
     }
@@ -641,43 +704,6 @@ class DefinitionGeneratorTest extends TestCase
                 }
             });
         }
-    }
-
-    public function testGetAllRelations(): void
-    {
-        $route = $this->newRouteByName('customers.store');
-
-        $generator = new DefinitionGenerator($route, []);
-
-        $relations = $generator->getAllRelations(new Customer());
-        $relations = array_column($relations, 'related_model');
-
-        $relation_names = array_map('class_basename', $relations);
-
-        $this->assertEquals([
-            'Order',
-            'Company',
-            'Address'
-        ], $relation_names);
-    }
-
-    public function testOnlyRelationMethodsInvoked(): void
-    {
-        $mockCustomer = $this->createMock(Customer::class);
-        $route = $this->newRouteByName('customers.store');
-
-        $generator = new DefinitionGenerator($route, []);
-
-        $mockCustomer->expects($this->never())
-            ->method('someOtherMethod');
-        $mockCustomer->expects($this->once())
-            ->method('orders');
-        $mockCustomer->expects($this->once())
-            ->method('company');
-        $mockCustomer->expects($this->once())
-            ->method('address');
-
-        $generator->getAllRelations($mockCustomer);
     }
 }
 

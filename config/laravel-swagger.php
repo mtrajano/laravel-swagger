@@ -33,8 +33,8 @@ return [
     | Parse summary and descriptions
     |--------------------------------------------------------------------------
     |
-    | If true will parse the action method docBlock and make it's best guess
-    | for what is the summary and description. Usually the first line will be
+    | If true will parse the action method docBlock and make its best guess
+    | as to what is the summary and description. Usually the first line will be
     | used as the route's summary and any paragraphs below (other than
     | annotations) will be used as the description. It will also parse any
     | appropriate annotations, such as @deprecated.
@@ -69,6 +69,30 @@ return [
         'name' => 'laravel-swagger.docs',
         'middleware' => [],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Danger zone
+    |--------------------------------------------------------------------------
+    |
+    | It is highly recommended that if you turn these configurations on, that you
+    | do not run this on a production environment.
+    |
+    | The `generateExampleData` flag is used to generate the example data for your
+    | parameters, if the parameter is part of a model that has a Factory associated
+    | with it. This will create an instance of the model between a transaction and
+    | then roll it back.
+    |
+    | The `parseModelRelationships` flag is used to generate the model definitions along with
+    | their relationships. In order to generate the relationships we need to call
+    | the relationship methods to get the associated model. Only turn this
+    | configuration on if there is no side effect in calling these methods.
+    |
+    */
+
+    'generateExampleData' => false,
+
+    'parseModelRelationships' => false,
 
     /*
     |--------------------------------------------------------------------------

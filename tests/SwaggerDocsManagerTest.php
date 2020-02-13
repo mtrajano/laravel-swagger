@@ -46,6 +46,8 @@ class SwaggerDocsManagerTest extends TestCase
             'schemes' => [],
             'parseDocBlock' => true,
             'parseSecurity' => true,
+            'generateExampleData' => true,
+            'parseModelRelationships' => true,
         ];
 
         $this->defaultVersion = [
@@ -70,6 +72,8 @@ class SwaggerDocsManagerTest extends TestCase
             'schemes' => [],
             'parseDocBlock' => true,
             'parseSecurity' => true,
+            'generateExampleData' => true,
+            'parseModelRelationships' => true,
         ];
 
         $this->config = [
@@ -79,6 +83,8 @@ class SwaggerDocsManagerTest extends TestCase
             'description' => '',
             'parseDocBlock' => true,
             'parseSecurity' => true,
+            'generateExampleData' => true,
+            'parseModelRelationships' => true,
             'route' => [
                 'path' => '/docs/{version?}',
                 'name' => 'laravel-swagger.docs',

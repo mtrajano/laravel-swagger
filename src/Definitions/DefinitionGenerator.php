@@ -31,10 +31,22 @@ class DefinitionGenerator
      */
     private $errorsDefinitions;
 
-    public function __construct(Route $route, array $errorsDefinitions)
+    /**
+     * @var bool
+     */
+    private $shouldGenerateExampleData;
+
+    /**
+     * @var bool
+     */
+    private $shouldParseRelationshipDefinitions;
+
+    public function __construct(Route $route, array $errorsDefinitions = [], $shouldGenerateExampleData = false, $shouldParseRelationshipDefinitions = false)
     {
         $this->route = $route;
         $this->errorsDefinitions = $errorsDefinitions;
+        $this->shouldGenerateExampleData = $shouldGenerateExampleData;
+        $this->shouldParseRelationshipDefinitions = $shouldParseRelationshipDefinitions;
     }
 
     /**
@@ -47,7 +59,9 @@ class DefinitionGenerator
             if ($this->model) {
                 $this->generateFromCurrentModel();
 
-                $this->generateFromRelations();
+                if ($this->shouldParseRelationshipDefinitions) {
+                    $this->generateFromRelations();
+                }
             }
         }
 
@@ -60,13 +74,18 @@ class DefinitionGenerator
     {
         $definition = $this->mountColumnDefinition($column);
 
-        $modelFake = $this->getModelFake();
-        // TODO: Create tests to case when has no factory defined to model.
-        if ($modelFake) {
-            $definition['example'] = (string) $modelFake->{$column};
+        if ($this->shouldGenerateExampleData) {
+            $definition['example'] = $this->generateExampleData($column);
         }
 
         return $definition;
+    }
+
+    private function generateExampleData(string $column): ?string
+    {
+        $modelFake = $this->getModelFake();
+
+        return $modelFake ? (string) $modelFake->{$column} : null;
     }
 
     /**

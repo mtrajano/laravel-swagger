@@ -21,6 +21,8 @@ class SwaggerDocsTest extends TestCase
             'schemes' => [],
             'parseDocBlock' => true,
             'parseSecurity' => true,
+            'generateExampleData' => true,
+            'parseModelRelationships' => true,
             'route' => [
                 'path' => '/docs/{version?}',
                 'name' => 'laravel-swagger.docs',
