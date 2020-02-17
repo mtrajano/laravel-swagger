@@ -2,8 +2,11 @@
 
 namespace Mtrajano\LaravelSwagger\Tests;
 
+use Illuminate\Routing\Route;
+use Mtrajano\LaravelSwagger\Definitions\Security\OAuthSecurityDefinitionsGenerator;
 use Mtrajano\LaravelSwagger\Generator;
 use Mtrajano\LaravelSwagger\LaravelSwaggerException;
+use Mtrajano\LaravelSwagger\SwaggerDocsManager;
 
 class GeneratorTest extends TestCase
 {
@@ -18,6 +21,7 @@ class GeneratorTest extends TestCase
         '/users/ping',
         '/api',
         '/api/store',
+        '/customers',
         '/oauth/authorize',
         '/oauth/token',
         '/oauth/tokens',
@@ -34,9 +38,31 @@ class GeneratorTest extends TestCase
     {
         parent::setUp();
 
-        $this->generator = new Generator(
-            $this->config = config('laravel-swagger')
-        );
+        $swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
+        $this->config = $swaggerDocsManager->getLastVersionConfig();
+
+        $this->generator = new Generator($this->config);
+
+        $this->loadMigrationsFrom(__DIR__.'/Stubs/database/migrations');
+
+        $this->loadLaravelMigrations(['--database' => 'laravel-swagger']);
+
+        $this->artisan('migrate');
+
+        $this->withFactories(__DIR__.'/Stubs/database/factories');
+    }
+
+    protected function getEnvironmentSetUp($app)
+    {
+        parent::getEnvironmentSetUp($app);
+
+        $app['router']
+            ->get('customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@index')
+            ->name('customers.index');
+        $app['router']
+            ->post('customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@store')
+            ->name('customers.store')
+            ->middleware('auth:api');
     }
 
     public function testRequiredBaseInfo()
@@ -78,11 +104,60 @@ class GeneratorTest extends TestCase
         $this->assertEquals('My awesome site!', $docs['info']['title']);
         $this->assertEquals('This is my awesome site, please enjoy it', $docs['info']['description']);
         $this->assertEquals('1.0.0', $docs['info']['version']);
-        $this->assertEquals('https://example.com', $docs['host']);
+        $this->assertEquals('example.com', $docs['host']);
         $this->assertEquals('/api', $docs['basePath']);
         $this->assertEquals(['https'], $docs['schemes']);
         $this->assertEquals(['application/json'], $docs['consumes']);
         $this->assertEquals(['application/json'], $docs['produces']);
+    }
+
+    public function testJwtSecurityDefinitions()
+    {
+        $docs = $this->getDocsWithNewConfig([
+            'security_definition_type' => 'jwt',
+        ]);
+
+        $this->assertArrayHasKey('securityDefinitions', $docs);
+
+        $this->assertArrayHasKey('Bearer', $docs['securityDefinitions']);
+
+        $securityDefinition = $docs['securityDefinitions']['Bearer'];
+
+        $this->assertEquals('apiKey', $securityDefinition['type']);
+        $this->assertEquals('Authorization', $securityDefinition['name']);
+        $this->assertEquals('header', $securityDefinition['in']);
+    }
+
+    public function testJwtSecurityDefinitionsForNotAuthenticatedRoute()
+    {
+        $docs = $this->getDocsWithNewConfig([
+            'security_definition_type' => 'jwt',
+        ]);
+
+        /** @var Route $route */
+        $route = app('router')->getRoutes()->getByName('customers.index');
+
+        $routeDefinitions = $docs['paths']['/'.$route->uri()]['get'];
+
+        $this->assertArrayNotHasKey('security', $routeDefinitions);
+    }
+
+    public function testJwtSecurityDefinitionsForAuthenticatedRoute()
+    {
+        $docs = $this->getDocsWithNewConfig([
+            'security_definition_type' => 'jwt',
+        ]);
+
+        /** @var Route $route */
+        $route = app('router')->getRoutes()->getByName('customers.store');
+
+        $routeDefinitions = $docs['paths']['/'.$route->uri()]['post'];
+
+        $this->assertArrayHasKey('security', $routeDefinitions);
+        $this->assertCount(1, $routeDefinitions['security']);
+        $this->assertIsArray($routeDefinitions['security'][0]);
+        $this->assertArrayHasKey('Bearer', $routeDefinitions['security'][0]);
+        $this->assertEquals([], $routeDefinitions['security'][0]['Bearer']);
     }
 
     public function testSecurityDefinitionsAccessCodeFlow()
@@ -168,7 +243,9 @@ class GeneratorTest extends TestCase
      */
     public function testHasPaths($docs)
     {
-        $this->assertEquals($this->endpoints, array_keys($docs['paths']));
+        foreach ($this->endpoints as $endpoint) {
+            $this->assertContains($endpoint, array_keys($docs['paths']));
+        }
 
         return $docs['paths'];
     }
@@ -225,8 +302,8 @@ EOD;
      */
     public function testRouteScopes($paths)
     {
-        $this->assertEquals(['user-read'], $paths['/users']['get']['security'][Generator::SECURITY_DEFINITION_NAME]);
-        $this->assertEquals(['user-write', 'user-read'], $paths['/users']['post']['security'][Generator::SECURITY_DEFINITION_NAME]);
+        $this->assertEquals(['user-read'], $paths['/users']['get']['security'][OAuthSecurityDefinitionsGenerator::SECURITY_DEFINITION_NAME]);
+        $this->assertEquals(['user-write', 'user-read'], $paths['/users']['post']['security'][OAuthSecurityDefinitionsGenerator::SECURITY_DEFINITION_NAME]);
     }
 
     public function testOverwriteIgnoreMethods()

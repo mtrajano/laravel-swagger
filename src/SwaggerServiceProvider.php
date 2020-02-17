@@ -3,6 +3,7 @@
 namespace Mtrajano\LaravelSwagger;
 
 use Illuminate\Support\ServiceProvider;
+use Mtrajano\LaravelSwagger\Console\GenerateSwaggerDocCommand;
 
 class SwaggerServiceProvider extends ServiceProvider
 {
@@ -13,9 +14,13 @@ class SwaggerServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->app->bind(SwaggerDocsManager::class, function ($app) {
+            return new SwaggerDocsManager($app['config']['laravel-swagger']);
+        });
+
         if ($this->app->runningInConsole()) {
             $this->commands([
-                GenerateSwaggerDoc::class,
+                GenerateSwaggerDocCommand::class,
             ]);
         }
 
@@ -28,5 +33,9 @@ class SwaggerServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             $source, 'laravel-swagger'
         );
+
+        $this->loadRoutesFrom(__DIR__.'/routes.php');
+
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-swagger');
     }
 }
