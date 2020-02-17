@@ -8,7 +8,7 @@ use Mtrajano\LaravelSwagger\Definitions\Security\Contracts\SecurityDefinitionsGe
 class JWTSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
 {
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function generate(): array
     {
@@ -22,7 +22,7 @@ class JWTSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function generateForRoute(Route $route): array
     {
@@ -33,7 +33,7 @@ class JWTSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
         return [
             [
                 'Bearer' => [],
-            ]
+            ],
         ];
     }
 }

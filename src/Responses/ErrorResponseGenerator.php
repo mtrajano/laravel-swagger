@@ -42,7 +42,7 @@ class ErrorResponseGenerator
             (string) $httpCode => [
                 'description' => $description,
                 'schema' => [
-                    '$ref' => '#/definitions/'.$this->getDefinitionName($httpCode),
+                    '$ref' => '#/definitions/' . $this->getDefinitionName($httpCode),
                 ],
             ],
         ];

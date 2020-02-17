@@ -100,7 +100,7 @@ class Route
     {
         $action = $this->action();
 
-        list($class) = is_string($action) ? Str::parseCallback($action) : [null];
+        [$class] = is_string($action) ? Str::parseCallback($action) : [null];
 
         if (!$class) {
             return null;
@@ -129,7 +129,7 @@ class Route
 
         if (!is_subclass_of($modelName, Model::class)) {
             throw new LaravelSwaggerException(
-                "{$modelName} @model must be an instance of [".Model::class."]"
+                "{$modelName} @model must be an instance of [" . Model::class . ']'
             );
         }
 
@@ -157,7 +157,7 @@ class Route
      */
     private function getActionClassInstance(): ?ReflectionMethod
     {
-        list($class, $method) = Str::parseCallback($this->action());
+        [$class, $method] = Str::parseCallback($this->action());
 
         if (!$class || !$method) {
             return null;

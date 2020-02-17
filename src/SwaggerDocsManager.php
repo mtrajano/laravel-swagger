@@ -140,7 +140,7 @@ class SwaggerDocsManager
 
         $url = "/{$fileName}";
         if ($absolute) {
-            $url = config('app.url').$url;
+            $url = config('app.url') . $url;
         }
 
         return $url;
@@ -160,7 +160,7 @@ class SwaggerDocsManager
         $fileName = $generator($version, $format);
 
         if (!is_string($fileName) || !is_valid_file_name($fileName)) {
-            throw new RuntimeException("The filename is invalid.");
+            throw new RuntimeException('The filename is invalid.');
         }
 
         return $fileName;

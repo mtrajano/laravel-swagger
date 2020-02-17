@@ -26,13 +26,13 @@ class ResponseGeneratorTest extends TestCase
     {
         parent::setUp();
 
-        $this->loadMigrationsFrom(__DIR__.'/../Stubs/database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../Stubs/database/migrations');
 
         $this->loadLaravelMigrations(['--database' => 'laravel-swagger']);
 
         $this->artisan('migrate');
 
-        $this->withFactories(__DIR__.'/../Stubs/database/factories');
+        $this->withFactories(__DIR__ . '/../Stubs/database/factories');
     }
 
     protected function getEnvironmentSetUp($app)
@@ -89,7 +89,7 @@ class ResponseGeneratorTest extends TestCase
                     '201' => [
                         'description' => 'Created',
                         'schema' => [
-                            '$ref' => '#/definitions/Customer'
+                            '$ref' => '#/definitions/Customer',
                         ],
                     ],
                     '422' => [
@@ -152,7 +152,7 @@ class ResponseGeneratorTest extends TestCase
                     '200' => [
                         'description' => 'OK',
                         'schema' => [
-                            '$ref' => '#/definitions/Customer'
+                            '$ref' => '#/definitions/Customer',
                         ],
                     ],
                 ],
@@ -196,22 +196,22 @@ class ResponseGeneratorTest extends TestCase
             '422' => [
                 'http_code' => 422,
                 'exception' => ValidationException::class,
-                'handler' => ValidationErrorDefinitionHandler::class
+                'handler' => ValidationErrorDefinitionHandler::class,
             ],
             '403' => [
                 'http_code' => 403,
                 'exception' => AuthorizationException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
             '404' => [
                 'http_code' => 404,
                 'exception' => ModelNotFoundException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
             '401' => [
                 'http_code' => 401,
                 'exception' => AuthenticationException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
         ];
 
@@ -263,12 +263,12 @@ class ResponseGeneratorTest extends TestCase
             '404' => [
                 'http_code' => 404,
                 'exception' => ModelNotFoundException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
             '401' => [
                 'http_code' => 401,
                 'exception' => AuthenticationException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
         ];
 

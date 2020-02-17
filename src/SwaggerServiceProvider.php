@@ -34,8 +34,8 @@ class SwaggerServiceProvider extends ServiceProvider
             $source, 'laravel-swagger'
         );
 
-        $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadRoutesFrom(__DIR__ . '/routes.php');
 
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-swagger');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'laravel-swagger');
     }
 }

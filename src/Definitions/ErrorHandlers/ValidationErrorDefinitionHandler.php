@@ -41,7 +41,7 @@ class ValidationErrorDefinitionHandler extends DefaultDefinitionHandler
                 ],
                 'errors' => [
                     'type' => 'object',
-                    'properties' => $errorsProperties
+                    'properties' => $errorsProperties,
                 ],
             ],
         ];

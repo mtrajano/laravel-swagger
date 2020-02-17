@@ -48,7 +48,7 @@ class GenerateSwaggerDocCommand extends Command
      * @throws \Mtrajano\LaravelSwagger\LaravelSwaggerException
      * @throws \ReflectionException
      */
-    public function handle() : void
+    public function handle(): void
     {
         $versions = $this->getVersionsConfigToGenerate();
 

@@ -37,13 +37,13 @@ class DefinitionGeneratorTest extends TestCase
     {
         parent::setUp();
 
-        $this->loadMigrationsFrom(__DIR__.'/../Stubs/database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../Stubs/database/migrations');
 
         $this->loadLaravelMigrations(['--database' => 'laravel-swagger']);
 
         $this->artisan('migrate');
 
-        $this->withFactories(__DIR__.'/../Stubs/database/factories');
+        $this->withFactories(__DIR__ . '/../Stubs/database/factories');
     }
 
     protected function getEnvironmentSetUp($app)
@@ -140,11 +140,11 @@ class DefinitionGeneratorTest extends TestCase
             $test
                 ->assertPropertyDefinitions([
                     'property' => 'id',
-                    'type' => 'integer'
+                    'type' => 'integer',
                 ])
                 ->assertPropertyDefinitions([
                     'property' => 'name',
-                    'type' => 'string'
+                    'type' => 'string',
                 ])
                 ->assertPropertyDefinitions([
                     'property' => 'price',
@@ -167,11 +167,11 @@ class DefinitionGeneratorTest extends TestCase
             $test
                 ->assertPropertyDefinitions([
                     'property' => 'id',
-                    'type' => 'integer'
+                    'type' => 'integer',
                 ])
                 ->assertPropertyDefinitions([
                     'property' => 'name',
-                    'type' => 'string'
+                    'type' => 'string',
                 ])
                 ->assertPropertyDefinitions([
                     'property' => 'price',
@@ -202,11 +202,11 @@ class DefinitionGeneratorTest extends TestCase
                 $test
                     ->assertPropertyDefinitions([
                         'property' => 'id',
-                        'type' => 'integer'
+                        'type' => 'integer',
                     ])
                     ->assertPropertyDefinitions([
                         'property' => 'name',
-                        'type' => 'string'
+                        'type' => 'string',
                     ])
                     ->assertPropertyDefinitions([
                         'property' => 'price',
@@ -219,8 +219,8 @@ class DefinitionGeneratorTest extends TestCase
                         'value' => [
                             'type' => 'array',
                             'items' => [
-                                '$ref' => '#/definitions/ProductItem'
-                            ]
+                                '$ref' => '#/definitions/ProductItem',
+                            ],
                         ],
                     ]);
             })
@@ -228,7 +228,7 @@ class DefinitionGeneratorTest extends TestCase
                 $test
                     ->assertPropertyDefinitions([
                         'property' => 'id',
-                        'type' => 'integer'
+                        'type' => 'integer',
                     ])
                     ->assertPropertyDefinitions([
                         'property' => 'value',
@@ -302,7 +302,7 @@ class DefinitionGeneratorTest extends TestCase
                                     ],
                                 ],
                             ],
-                        ]
+                        ],
                     ],
                 ],
             ],
@@ -335,7 +335,7 @@ class DefinitionGeneratorTest extends TestCase
                                     ],
                                 ],
                             ],
-                        ]
+                        ],
                     ],
                     'NotFound' => [
                         [
@@ -389,10 +389,7 @@ class DefinitionGeneratorTest extends TestCase
     {
         $route = $this->newRouteByName('customers.update');
 
-        $validationDefinitionHandler = new class(
-            $route,
-            '422'
-        ) extends DefaultDefinitionHandler {
+        $validationDefinitionHandler = new class($route, '422') extends DefaultDefinitionHandler {
             protected function getDefinitionContent(): array
             {
                 return [
@@ -413,7 +410,7 @@ class DefinitionGeneratorTest extends TestCase
                         ],
                         'message' => [
                             'type' => 'string',
-                            'example' => 'Invalid email'
+                            'example' => 'Invalid email',
                         ],
                     ],
                 ];
@@ -424,22 +421,22 @@ class DefinitionGeneratorTest extends TestCase
             '422' => [
                 'http_code' => 422,
                 'exception' => ValidationException::class,
-                'handler' => get_class($validationDefinitionHandler)
+                'handler' => get_class($validationDefinitionHandler),
             ],
             '403' => [
                 'http_code' => 403,
                 'exception' => AuthorizationException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
             '404' => [
                 'http_code' => 404,
                 'exception' => ModelNotFoundException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
             '401' => [
                 'http_code' => 401,
                 'exception' => AuthenticationException::class,
-                'handler' => DefaultErrorDefinitionHandler::class
+                'handler' => DefaultErrorDefinitionHandler::class,
             ],
         ];
 
@@ -455,7 +452,7 @@ class DefinitionGeneratorTest extends TestCase
                 ],
                 [
                     'property' => 'field',
-                    'type' => 'string'
+                    'type' => 'string',
                 ],
                 [
                     'property' => 'message',
@@ -497,7 +494,7 @@ class DefinitionGeneratorTest extends TestCase
         $this->assertEquals([
             'Order',
             'Company',
-            'Address'
+            'Address',
         ], $relation_names);
     }
 
@@ -540,8 +537,6 @@ class DefinitionGeneratorTest extends TestCase
             ->method('getAllRelations');
 
         $generator->generate();
-
-
     }
 
     private function getLaravelRouter(): Router

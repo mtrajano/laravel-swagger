@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Mtrajano\LaravelSwagger\Definitions\ErrorHandlers;
 
 use Mtrajano\LaravelSwagger\DataObjects\Route;
@@ -26,7 +25,7 @@ abstract class DefaultDefinitionHandler
     /**
      * @return array
      */
-    public final function handle()
+    final public function handle()
     {
         return [
             $this->ref => $this->getDefinitionContent(),

@@ -81,7 +81,8 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
             '',
             rtrim(config('laravel-swagger.host'), '/')
         );
-        return $baseUrl.$path;
+
+        return $baseUrl . $path;
     }
 
     private function generateOauthScopes()

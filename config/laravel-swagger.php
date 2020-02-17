@@ -135,7 +135,7 @@ return [
 
             'ignoredRoutes' => [
                 'laravel-swagger.docs',
-                'laravel-swagger.asset'
+                'laravel-swagger.asset',
             ],
 
             /*
@@ -203,22 +203,22 @@ return [
                 'UnprocessableEntity' => [
                     'http_code' => 422,
                     'exception' => ValidationException::class,
-                    'handler' => ValidationErrorDefinitionHandler::class
+                    'handler' => ValidationErrorDefinitionHandler::class,
                 ],
                 'Forbidden' => [
                     'http_code' => 403,
                     'exception' => AuthorizationException::class,
-                    'handler' => DefaultErrorDefinitionHandler::class
+                    'handler' => DefaultErrorDefinitionHandler::class,
                 ],
                 'NotFound' => [
                     'http_code' => 404,
                     'exception' => ModelNotFoundException::class,
-                    'handler' => DefaultErrorDefinitionHandler::class
+                    'handler' => DefaultErrorDefinitionHandler::class,
                 ],
                 'Unauthenticated' => [
                     'http_code' => 401,
                     'exception' => AuthenticationException::class,
-                    'handler' => DefaultErrorDefinitionHandler::class
+                    'handler' => DefaultErrorDefinitionHandler::class,
                 ],
             ],
         ],

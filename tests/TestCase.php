@@ -50,7 +50,7 @@ class TestProvider extends ServiceProvider
 {
     public function boot()
     {
-        Passport::loadKeysFrom(__DIR__.'/Stubs/secret-keys');
+        Passport::loadKeysFrom(__DIR__ . '/Stubs/secret-keys');
 
         Passport::routes();
 
