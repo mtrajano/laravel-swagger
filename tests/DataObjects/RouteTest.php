@@ -29,7 +29,7 @@ class RouteTest extends TestCase
             ->name('exception-route');
     }
 
-    public function provideRoutesWithMiddleware() : array
+    public function provideRoutesWithMiddleware(): array
     {
         return [
             [
@@ -37,7 +37,7 @@ class RouteTest extends TestCase
                 [
                     [
                         'name' => 'auth',
-                        'params' => []
+                        'params' => [],
                     ],
                 ],
             ],
@@ -51,7 +51,7 @@ class RouteTest extends TestCase
                     [
                         'name' => 'auth',
                         'params' => [
-                            'api'
+                            'api',
                         ],
                     ],
                 ],
@@ -107,7 +107,9 @@ class ControllerMiddleware extends Controller
         $this->middleware('auth');
     }
 
-    public function index() {}
+    public function index()
+    {
+    }
 }
 
 class MiddlewareControllerRoute extends Controller
@@ -117,22 +119,28 @@ class MiddlewareControllerRoute extends Controller
         $this->middleware('auth:api');
     }
 
-    public function index() {}
+    public function index()
+    {
+    }
 }
 
 class OnlyRouteMiddleware extends Controller
 {
-    public function index() {}
+    public function index()
+    {
+    }
 }
 
 class ExceptionRoute extends Controller
 {
     /**
-     * some description
+     * some description.
      *
      * @throws \Exception
      * @throws    \SpaceExcetion
      * @throws  \TabException
      */
-    public function index() {}
+    public function index()
+    {
+    }
 }

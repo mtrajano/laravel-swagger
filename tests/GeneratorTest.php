@@ -43,13 +43,13 @@ class GeneratorTest extends TestCase
 
         $this->generator = new Generator($this->config);
 
-        $this->loadMigrationsFrom(__DIR__.'/Stubs/database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/Stubs/database/migrations');
 
         $this->loadLaravelMigrations(['--database' => 'laravel-swagger']);
 
         $this->artisan('migrate');
 
-        $this->withFactories(__DIR__.'/Stubs/database/factories');
+        $this->withFactories(__DIR__ . '/Stubs/database/factories');
     }
 
     protected function getEnvironmentSetUp($app)
@@ -137,7 +137,7 @@ class GeneratorTest extends TestCase
         /** @var Route $route */
         $route = app('router')->getRoutes()->getByName('customers.index');
 
-        $routeDefinitions = $docs['paths']['/'.$route->uri()]['get'];
+        $routeDefinitions = $docs['paths']['/' . $route->uri()]['get'];
 
         $this->assertArrayNotHasKey('security', $routeDefinitions);
     }
@@ -151,7 +151,7 @@ class GeneratorTest extends TestCase
         /** @var Route $route */
         $route = app('router')->getRoutes()->getByName('customers.store');
 
-        $routeDefinitions = $docs['paths']['/'.$route->uri()]['post'];
+        $routeDefinitions = $docs['paths']['/' . $route->uri()]['post'];
 
         $this->assertArrayHasKey('security', $routeDefinitions);
         $this->assertCount(1, $routeDefinitions['security']);

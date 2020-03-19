@@ -6,8 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Mtrajano\LaravelSwagger\DataObjects\Route;
 use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
-use Mtrajano\LaravelSwagger\Definitions\Security\SecurityDefinitionsFactory;
 use Mtrajano\LaravelSwagger\Definitions\Security\Contracts\SecurityDefinitionsGenerator;
+use Mtrajano\LaravelSwagger\Definitions\Security\SecurityDefinitionsFactory;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
@@ -163,7 +163,7 @@ class Generator
     protected function generateSecurityDefinitions()
     {
         if (!$this->securityDefinitionGenerator) {
-            return null;
+            return;
         }
 
         return $this->securityDefinitionGenerator->generate();

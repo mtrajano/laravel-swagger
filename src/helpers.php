@@ -36,13 +36,14 @@ if (!function_exists('get_annotations')) {
 
 if (!function_exists('get_all_model_relations')) {
     /**
-     * Identify all relationships for a given model
+     * Identify all relationships for a given model.
      *
      * @param string $heritage A flag that indicates whether parent and/or child
      *                         relationships should be included
      * @throws ReflectionException
      */
-    function get_all_model_relations(Model $model, $heritage = 'all'): array {
+    function get_all_model_relations(Model $model, $heritage = 'all'): array
+    {
         $types = ['children' => 'Has', 'parents' => 'Belongs', 'all' => ''];
         $filter = $types[$heritage] ?? $types['all'];
         $reflectionClass = new ReflectionClass($model);
@@ -52,9 +53,8 @@ if (!function_exists('get_all_model_relations')) {
 
         $methods = collect($methods)
             ->map(function (ReflectionMethod $method) use ($filter, $model) {
-
                 if (!$method->getReturnType() || !$method->getReturnType()->getName()) {
-                    return null;
+                    return;
                 }
 
                 $methodName = $method->getName();
@@ -74,8 +74,6 @@ if (!function_exists('get_all_model_relations')) {
                         ];
                     }
                 }
-
-                return null;
             })
             // Remove elements reflecting methods that do not have the desired
             // return type
@@ -86,7 +84,7 @@ if (!function_exists('get_all_model_relations')) {
     }
 }
 
-if (! function_exists('laravel_swagger_ui_dist_path')) {
+if (!function_exists('laravel_swagger_ui_dist_path')) {
     /**
      * Returns swagger-ui composer dist path.
      *
@@ -112,19 +110,19 @@ if (! function_exists('laravel_swagger_ui_dist_path')) {
 
         $path = base_path('vendor/swagger-api/swagger-ui/dist/');
 
-        if (! $asset) {
+        if (!$asset) {
             return realpath($path);
         }
 
-        if (! in_array($asset, $allowedFiles)) {
+        if (!in_array($asset, $allowedFiles)) {
             throw new RuntimeException(sprintf('(%s) - this asset is not allowed', $asset));
         }
 
-        return realpath($path.$asset);
+        return realpath($path . $asset);
     }
 }
 
-if (! function_exists('laravel_swagger_asset')) {
+if (!function_exists('laravel_swagger_asset')) {
     /**
      * Returns asset from swagger-ui composer package.
      *
@@ -137,15 +135,15 @@ if (! function_exists('laravel_swagger_asset')) {
     {
         $file = laravel_swagger_ui_dist_path($asset);
 
-        if (! file_exists($file)) {
+        if (!file_exists($file)) {
             throw new RuntimeException(sprintf('Requested asset file (%s) does not exists', $asset));
         }
 
-        return route('laravel-swagger.asset', $asset).'?v='.md5_file($file);
+        return route('laravel-swagger.asset', $asset) . '?v=' . md5_file($file);
     }
 }
 
-if (! function_exists('is_valid_file_name')) {
+if (!function_exists('is_valid_file_name')) {
     /**
      * Determine if a value is a valid file name.
      *

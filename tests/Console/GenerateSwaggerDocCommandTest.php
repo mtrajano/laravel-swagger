@@ -115,7 +115,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
         config(['laravel-swagger.versions' => $versions]);
 
         $this->artisan('laravel-swagger:generate', [
-            '--api-version' => '2.0.0'
+            '--api-version' => '2.0.0',
         ]);
 
         $this->assertTrue(file_exists(public_path($version2FilePath)));
@@ -176,7 +176,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
             ],
             'ignoredRoutes' => [
                 'laravel-swagger.docs',
-                'laravel-swagger.asset'
+                'laravel-swagger.asset',
             ],
             'parseDocBlock' => true,
             'parseSecurity' => true,
@@ -186,22 +186,22 @@ class GenerateSwaggerDocCommandTest extends TestCase
                 'UnprocessableEntity' => [
                     'http_code' => 422,
                     'exception' => ValidationException::class,
-                    'handler' => ValidationErrorDefinitionHandler::class
+                    'handler' => ValidationErrorDefinitionHandler::class,
                 ],
                 'Forbidden' => [
                     'http_code' => 403,
                     'exception' => AuthorizationException::class,
-                    'handler' => DefaultErrorDefinitionHandler::class
+                    'handler' => DefaultErrorDefinitionHandler::class,
                 ],
                 'NotFound' => [
                     'http_code' => 404,
                     'exception' => ModelNotFoundException::class,
-                    'handler' => DefaultErrorDefinitionHandler::class
+                    'handler' => DefaultErrorDefinitionHandler::class,
                 ],
                 'Unauthenticated' => [
                     'http_code' => 401,
                     'exception' => AuthenticationException::class,
-                    'handler' => DefaultErrorDefinitionHandler::class
+                    'handler' => DefaultErrorDefinitionHandler::class,
                 ],
             ],
         ], $config);

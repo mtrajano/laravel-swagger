@@ -2,13 +2,13 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\Parameters;
 
+use Illuminate\Database\Eloquent\Model;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 use Mtrajano\LaravelSwagger\Traits\HasAppends;
-use Illuminate\Database\Eloquent\Model;
 
 class HasAppendsTest extends TestCase
 {
-    public function testModelReturnsAppends() : void
+    public function testModelReturnsAppends(): void
     {
         $this->assertEquals([
             'property-1',
@@ -16,7 +16,7 @@ class HasAppendsTest extends TestCase
         ], (new ModelWithAppends())->getAppends());
     }
 
-    public function testModelWithoutAppendsReturnsEmpty() : void
+    public function testModelWithoutAppendsReturnsEmpty(): void
     {
         $this->assertEquals([], (new ModelWithoutAppends())->getAppends());
     }

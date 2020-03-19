@@ -39,7 +39,7 @@ class SwaggerDocsTest extends TestCase
                     ],
                     'ignoredRoutes' => [
                         'laravel-swagger.docs',
-                        'laravel-swagger.asset'
+                        'laravel-swagger.asset',
                     ],
                     'authFlow' => 'accessCode',
                     'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
@@ -54,7 +54,7 @@ class SwaggerDocsTest extends TestCase
                     ],
                     'ignoredRoutes' => [
                         'laravel-swagger.docs',
-                        'laravel-swagger.asset'
+                        'laravel-swagger.asset',
                     ],
                     'authFlow' => 'accessCode',
                     'file_path' => env('SWAGGER_FILE_PATH', 'swagger-2.0.0.json'),
@@ -75,21 +75,21 @@ class SwaggerDocsTest extends TestCase
         $filePath = "swagger-$defaultVersion.json";
 
         $apiVersions = [
-            '/docs/1.0.0' => "1.0.0",
-            '/docs/2.0.0' => "2.0.0",
+            '/docs/1.0.0' => '1.0.0',
+            '/docs/2.0.0' => '2.0.0',
         ];
 
         $this->get($route)
             ->assertSuccessful()
             ->assertViewIs('laravel-swagger::index')
-            ->assertViewHas('filePath', config('app.url').'/'.$filePath)
+            ->assertViewHas('filePath', config('app.url') . '/' . $filePath)
             ->assertViewHas('apiVersions', $apiVersions)
             ->assertViewHas('currentVersion', $defaultVersion);
     }
 
     public function testGetSwaggerUi()
     {
-        foreach(config('laravel-swagger.versions') as $version) {
+        foreach (config('laravel-swagger.versions') as $version) {
             $route = route(
                 config('laravel-swagger.route.name'),
                 $version['appVersion'],
@@ -101,7 +101,7 @@ class SwaggerDocsTest extends TestCase
                 ->assertViewIs('laravel-swagger::index')
                 ->assertViewHas(
                     'filePath',
-                    config('app.url')."/swagger-{$version['appVersion']}.json"
+                    config('app.url') . "/swagger-{$version['appVersion']}.json"
                 )
                 ->assertViewHas('currentVersion', $version['appVersion']);
         }

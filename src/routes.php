@@ -10,7 +10,7 @@ Route::get(config('laravel-swagger.route.path'), [
     'uses' => SwaggerDocsController::class,
 ]);
 
-Route::get(config('laravel-swagger.routes.docs.path').'/asset/{asset}', [
+Route::get(config('laravel-swagger.routes.docs.path') . '/asset/{asset}', [
     'as' => 'laravel-swagger.asset',
     'middleware' => config('laravel-swagger.routes.docs.middleware', []),
     'uses' => SwaggerAssetController::class,

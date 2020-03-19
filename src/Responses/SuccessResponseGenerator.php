@@ -52,7 +52,7 @@ class SuccessResponseGenerator
         $response = [
             $httpCode => [
                 'description' => $description,
-            ]
+            ],
         ];
 
         $schema = $this->mountSchema($httpCode);
@@ -85,7 +85,7 @@ class SuccessResponseGenerator
             return [];
         }
 
-        $schema = ['$ref' => '#/definitions/'.$this->getDefinitionName()];
+        $schema = ['$ref' => '#/definitions/' . $this->getDefinitionName()];
 
         if ($this->isTypeArrayRoute()) {
             $schema = [

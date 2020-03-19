@@ -112,6 +112,7 @@ class DefinitionGenerator
                 return false;
             }
         }
+
         return true;
     }
 
@@ -156,7 +157,6 @@ class DefinitionGenerator
             DB::beginTransaction();
 
             return factory(get_class($this->model))->create();
-
         } catch (InvalidArgumentException $e) {
             return null;
         } finally {
@@ -165,7 +165,7 @@ class DefinitionGenerator
     }
 
     /**
-     * Identify all relationships for a given model
+     * Identify all relationships for a given model.
      *
      * @throws \ReflectionException
      */
@@ -186,6 +186,7 @@ class DefinitionGenerator
                 'properties' => $this->getDefinitionProperties(),
             ],
         ];
+
         return true;
     }
 
@@ -256,7 +257,7 @@ class DefinitionGenerator
             $relatedModel = $relation['related_model'];
 
             $relationPropertyData = [
-                '$ref' => '#/definitions/'.class_basename($relatedModel)
+                '$ref' => '#/definitions/' . class_basename($relatedModel),
             ];
             if (Str::contains($relation['relation'], 'Many')) {
                 $relationPropertyData = [

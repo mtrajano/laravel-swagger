@@ -35,7 +35,7 @@ class SwaggerDocsManagerTest extends TestCase
             ],
             'ignoredRoutes' => [
                 'laravel-swagger.docs',
-                'laravel-swagger.asset'
+                'laravel-swagger.asset',
             ],
             'authFlow' => 'accessCode',
             'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
@@ -61,7 +61,7 @@ class SwaggerDocsManagerTest extends TestCase
             ],
             'ignoredRoutes' => [
                 'laravel-swagger.docs',
-                'laravel-swagger.asset'
+                'laravel-swagger.asset',
             ],
             'authFlow' => 'accessCode',
             'file_path' => 'swagger-2.0.0.json',
@@ -92,7 +92,7 @@ class SwaggerDocsManagerTest extends TestCase
             ],
             'versions' => [
                 $this->defaultVersion,
-                $this->versionOne
+                $this->versionOne,
             ],
         ];
     }
