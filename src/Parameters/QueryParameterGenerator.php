@@ -13,7 +13,7 @@ class QueryParameterGenerator implements ParameterGenerator
         $this->rules = $rules;
     }
 
-    public function getParameters()
+    public function getParameters(): array
     {
         $params = [];
         $arrayTypes = [];
@@ -53,7 +53,7 @@ class QueryParameterGenerator implements ParameterGenerator
         return array_values($params);
     }
 
-    protected function addArrayTypes($params, $arrayTypes)
+    protected function addArrayTypes(array $params, array $arrayTypes): array
     {
         foreach ($arrayTypes as $arrayKey => $type) {
             if (!isset($params[$arrayKey])) {
@@ -76,7 +76,7 @@ class QueryParameterGenerator implements ParameterGenerator
         return $params;
     }
 
-    public function getParamLocation()
+    public function getParamLocation(): string
     {
         return 'query';
     }

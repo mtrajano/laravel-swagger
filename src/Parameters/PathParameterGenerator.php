@@ -13,7 +13,7 @@ class PathParameterGenerator implements ParameterGenerator
         $this->uri = $uri;
     }
 
-    public function getParameters()
+    public function getParameters(): array
     {
         $params = [];
         $pathVariables = $this->getAllVariablesFromUri();
@@ -38,12 +38,12 @@ class PathParameterGenerator implements ParameterGenerator
         return $pathVariables[1];
     }
 
-    public function getParamLocation()
+    public function getParamLocation(): string
     {
         return 'path';
     }
 
-    private function isPathVariableRequired($pathVariable)
+    private function isPathVariableRequired($pathVariable): bool
     {
         return !Str::contains($pathVariable, '?');
     }
