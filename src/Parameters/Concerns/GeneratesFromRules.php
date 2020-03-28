@@ -15,7 +15,7 @@ trait GeneratesFromRules
         }
     }
 
-    protected function getParamType(array $paramRules)
+    protected function getParamType(array $paramRules): string
     {
         if (in_array('integer', $paramRules)) {
             return 'integer';
@@ -31,12 +31,12 @@ trait GeneratesFromRules
         }
     }
 
-    protected function isParamRequired(array $paramRules)
+    protected function isParamRequired(array $paramRules): bool
     {
         return in_array('required', $paramRules);
     }
 
-    protected function isArrayParameter($param)
+    protected function isArrayParameter($param): bool
     {
         return Str::contains($param, '*');
     }
@@ -46,7 +46,7 @@ trait GeneratesFromRules
         return current(explode('.', $param));
     }
 
-    protected function getEnumValues(array $paramRules)
+    protected function getEnumValues(array $paramRules): array
     {
         $in = $this->getInParameter($paramRules);
 
@@ -62,7 +62,7 @@ trait GeneratesFromRules
     private function getInParameter(array $paramRules)
     {
         foreach ($paramRules as $rule) {
-            if ((is_string($rule) || method_exists($rule, '__toString')) && Str::startsWith($rule, 'in:')) {
+            if ((is_string($rule) || method_exists($rule, '__toString')) && Str::startsWith((string) $rule, 'in:')) {
                 return $rule;
             }
         }

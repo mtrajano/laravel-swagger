@@ -24,16 +24,15 @@ class SuccessResponseGenerator
     }
 
     /**
-     * @return array
      * @throws ReflectionException
      */
-    public function generate()
+    public function generate(): array
     {
         $methodMappingHttpCode = [
-            'get' => '200',
-            'post' => '201',
-            'put' => '204',
-            'delete' => '204',
+            'get' => 200,
+            'post' => 201,
+            'put' => 204,
+            'delete' => 204,
         ];
 
         // Get the status code from route method
@@ -63,12 +62,12 @@ class SuccessResponseGenerator
         return $response;
     }
 
-    private function getDescriptionByHttpCode(string $httpCode): string
+    private function getDescriptionByHttpCode(int $httpCode): string
     {
         $httpCodeDescription = [
-            '200' => 'OK',
-            '201' => 'Created',
-            '204' => 'No Content',
+            200 => 'OK',
+            201 => 'Created',
+            204 => 'No Content',
         ];
 
         return $httpCodeDescription[$httpCode] ?? '';
@@ -79,9 +78,9 @@ class SuccessResponseGenerator
         return class_basename($this->model);
     }
 
-    private function mountSchema(string $httpCode)
+    private function mountSchema(int $httpCode): array
     {
-        if ($httpCode == 204) {
+        if ($httpCode === 204) {
             return [];
         }
 
@@ -97,7 +96,7 @@ class SuccessResponseGenerator
         return $schema;
     }
 
-    private function isTypeArrayRoute()
+    private function isTypeArrayRoute(): bool
     {
         // Only check it. To check if the route parameters is empty can be wrong
         // for routes like "/orders/{id}/products".
@@ -107,7 +106,7 @@ class SuccessResponseGenerator
     /**
      * @throws ReflectionException
      */
-    private function setModelFromRouteAction()
+    private function setModelFromRouteAction(): void
     {
         $this->model = $this->route->getModel();
     }

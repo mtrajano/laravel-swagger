@@ -21,7 +21,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
 
     /**
      * OAuthSecurityDefinitionsGenerator constructor.
-     * @param string $authFlow
+     *
      * @throws LaravelSwaggerException
      */
     public function __construct(string $authFlow)
@@ -30,10 +30,9 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     }
 
     /**
-     * @param string $authFlow
      * @throws LaravelSwaggerException
      */
-    private function setAuthFlow(string $authFlow)
+    private function setAuthFlow(string $authFlow): void
     {
         if (!in_array($authFlow, ['password', 'application', 'implicit', 'accessCode'])) {
             throw new LaravelSwaggerException('Invalid OAuth flow passed');
@@ -43,7 +42,6 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     }
 
     /**
-     * @return array
      * @throws LaravelSwaggerException
      */
     public function generate(): array
@@ -74,7 +72,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
         return $securityDefinition;
     }
 
-    private function getEndpoint(string $path)
+    private function getEndpoint(string $path): string
     {
         $baseUrl = preg_replace(
             '/^https?:\/\//',
@@ -85,7 +83,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
         return $baseUrl . $path;
     }
 
-    private function generateOauthScopes()
+    private function generateOauthScopes(): array
     {
         if (!class_exists('\Laravel\Passport\Passport')) {
             return [];
@@ -110,7 +108,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
         return $actionScopes;
     }
 
-    private function isPassportScopeMiddleware(Middleware $middleware)
+    private function isPassportScopeMiddleware(Middleware $middleware): bool
     {
         $resolver = $this->getMiddlewareResolver($middleware->name());
 
@@ -128,7 +126,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     /**
      * Assumes routes have been created using Passport::routes().
      */
-    private function hasOauthRoutes()
+    private function hasOauthRoutes(): bool
     {
         foreach ($this->getAllAppRoutes() as $route) {
             $uri = $route->uri();
@@ -144,7 +142,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     /**
      * @return Route[]
      */
-    protected function getAllAppRoutes()
+    protected function getAllAppRoutes(): array
     {
         $routes = app('router')->getRoutes()->getRoutes();
 

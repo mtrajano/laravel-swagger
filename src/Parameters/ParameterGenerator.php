@@ -4,7 +4,7 @@ namespace Mtrajano\LaravelSwagger\Parameters;
 
 interface ParameterGenerator
 {
-    public function getParameters();
+    public function getParameters(): array;
 
-    public function getParamLocation();
+    public function getParamLocation(): string;
 }

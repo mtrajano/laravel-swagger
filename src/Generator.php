@@ -53,11 +53,10 @@ class Generator
     }
 
     /**
-     * @return array
      * @throws LaravelSwaggerException
      * @throws \ReflectionException
      */
-    public function generate()
+    public function generate(): array
     {
         $this->docs = $this->getBaseStructure();
 
@@ -88,7 +87,7 @@ class Generator
         return $this->docs;
     }
 
-    protected function getBaseStructure()
+    protected function getBaseStructure(): array
     {
         $baseInfo = [
             'swagger' => '2.0',
@@ -147,7 +146,7 @@ class Generator
     /**
      * @return Route[]
      */
-    protected function getAllAppRoutes()
+    protected function getAllAppRoutes(): array
     {
         $routes = app('router')->getRoutes()->getRoutes();
 
@@ -157,13 +156,12 @@ class Generator
     }
 
     /**
-     * @return array
      * @throws LaravelSwaggerException
      */
-    protected function generateSecurityDefinitions()
+    protected function generateSecurityDefinitions(): array
     {
         if (!$this->securityDefinitionGenerator) {
-            return;
+            return [];
         }
 
         return $this->securityDefinitionGenerator->generate();
@@ -172,7 +170,7 @@ class Generator
     /**
      * @throws \ReflectionException
      */
-    protected function generatePath()
+    protected function generatePath(): void
     {
         $actionInstance = $this->getActionClassInstance();
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
@@ -201,7 +199,7 @@ class Generator
     /**
      * @throws \ReflectionException
      */
-    protected function addActionParameters()
+    protected function addActionParameters(): void
     {
         $rules = $this->getFormRules() ?: [];
 
@@ -218,7 +216,7 @@ class Generator
         }
     }
 
-    protected function addRouteSecurityDefinitions()
+    protected function addRouteSecurityDefinitions(): void
     {
         $routeDefinitions = $this->securityDefinitionGenerator->generateForRoute($this->route);
         if ($routeDefinitions) {
@@ -256,7 +254,7 @@ class Generator
         return [];
     }
 
-    protected function getParameterGenerator($rules)
+    protected function getParameterGenerator($rules): Parameters\ParameterGenerator
     {
         switch ($this->method) {
             case 'post':
@@ -282,7 +280,7 @@ class Generator
         return new ReflectionMethod($class, $method);
     }
 
-    private function parseActionDocBlock(string $docBlock)
+    private function parseActionDocBlock(string $docBlock): array
     {
         if (empty($docBlock) || !$this->config['parseDocBlock']) {
             return [false, '', ''];
@@ -302,7 +300,7 @@ class Generator
         }
     }
 
-    private function addActionResponses()
+    private function addActionResponses(): void
     {
         $responses = (
             new ResponseGenerator($this->route, $this->config['errors_definitions'])
@@ -314,7 +312,7 @@ class Generator
     /**
      * @throws \ReflectionException
      */
-    private function addActionDefinitions()
+    private function addActionDefinitions(): void
     {
         $this->docs['definitions'] += $this->getDefinitionGenerator()->generate();
     }
@@ -332,7 +330,7 @@ class Generator
         );
     }
 
-    private function getRouteUri()
+    private function getRouteUri(): string
     {
         $uri = Str::replaceFirst($this->config['basePath'], '', $this->route->uri());
 
