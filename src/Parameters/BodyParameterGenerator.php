@@ -80,14 +80,12 @@ class BodyParameterGenerator implements ParameterGenerator
         }
 
         if ($type === 'array') {
-
             if (!isset($properties[$name]['items'])) {
                 $properties[$name]['items'] = [];
             }
 
             $this->addToProperties($properties[$name]['items'], $nameTokens, $rules);
         } elseif ($type === 'object') {
-
             if (!isset($properties[$name]['properties'])) {
                 $properties[$name]['properties'] = [];
             }
