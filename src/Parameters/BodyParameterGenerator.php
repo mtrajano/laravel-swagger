@@ -13,7 +13,7 @@ class BodyParameterGenerator implements ParameterGenerator
         $this->rules = $rules;
     }
 
-    public function getParameters()
+    public function getParameters(): array
     {
         $required = [];
         $properties = [];
@@ -47,12 +47,12 @@ class BodyParameterGenerator implements ParameterGenerator
         return [$params];
     }
 
-    public function getParamLocation()
+    public function getParamLocation(): string
     {
         return 'body';
     }
 
-    protected function addToProperties(&$properties, $nameTokens, $rules)
+    protected function addToProperties(array &$properties, array $nameTokens, array $rules): void
     {
         if (empty($nameTokens)) {
             return;
@@ -80,13 +80,21 @@ class BodyParameterGenerator implements ParameterGenerator
         }
 
         if ($type === 'array') {
+            if (!isset($properties[$name]['items'])) {
+                $properties[$name]['items'] = [];
+            }
+
             $this->addToProperties($properties[$name]['items'], $nameTokens, $rules);
         } elseif ($type === 'object') {
+            if (!isset($properties[$name]['properties'])) {
+                $properties[$name]['properties'] = [];
+            }
+
             $this->addToProperties($properties[$name]['properties'], $nameTokens, $rules);
         }
     }
 
-    protected function getNestedParamType($nameTokens)
+    protected function getNestedParamType($nameTokens): string
     {
         if (current($nameTokens) === '*') {
             return 'array';
@@ -95,7 +103,7 @@ class BodyParameterGenerator implements ParameterGenerator
         }
     }
 
-    protected function getNewPropObj($type, $rules)
+    protected function getNewPropObj($type, $rules): array
     {
         $propObj = [
             'type' => $type,

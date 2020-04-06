@@ -12,7 +12,8 @@
         "ext-json": "*",
         "orchestra/testbench": "^3.8 || ^4.0",
         "phpunit/phpunit": "7.5.* || 8.3.*",
-        "laravel/passport": "^7.5 || ^8.0"
+        "laravel/passport": "^7.5 || ^8.0",
+        "vimeo/psalm": "^3.9"
     },
     "autoload": {
         "files": [

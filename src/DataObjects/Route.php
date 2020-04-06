@@ -98,9 +98,7 @@ class Route
      */
     private function getModelNameFromControllerDocs(): ?string
     {
-        $action = $this->action();
-
-        [$class] = is_string($action) ? Str::parseCallback($action) : [null];
+        [$class] = Str::parseCallback($this->action());
 
         if (!$class) {
             return null;
