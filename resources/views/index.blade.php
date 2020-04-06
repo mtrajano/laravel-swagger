@@ -79,7 +79,7 @@
         id="api-versions"
         onchange="handleChangeApiVersion()"
     >
-        @foreach ($apiVersions as $route => $version)
+        @foreach ($apiVersions as $version => $route)
             <option
                 {{ $currentVersion === $version ? "selected" : ''}}
                 value="{{ $route }}"

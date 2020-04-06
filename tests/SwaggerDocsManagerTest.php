@@ -8,23 +8,27 @@ use RuntimeException;
 
 class SwaggerDocsManagerTest extends TestCase
 {
-    protected $config = [];
-
-    /**
-     * @var array
-     */
-    private $defaultVersion;
-
-    /**
-     * @var array
-     */
-    private $versionOne;
+    private $_config;
+    private $_globalConfig;
+    private $_defaultVersion;
+    private $_versionOne;
+    private $_docsManager;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->versionOne = [
+        $this->_globalConfig = [
+            'title' => '',
+            'description' => '',
+            'schemes' => [],
+            'parseDocBlock' => true,
+            'parseSecurity' => true,
+            'generateExampleData' => true,
+            'parseModelRelationships' => true,
+        ];
+
+        $this->_versionOne = [
             'appVersion' => '1.0.0',
             'host' => env('APP_URL'),
             'basePath' => '/',
@@ -38,19 +42,10 @@ class SwaggerDocsManagerTest extends TestCase
                 'laravel-swagger.asset',
             ],
             'authFlow' => 'accessCode',
-            'file_path' => env('SWAGGER_FILE_PATH', 'swagger-1.0.0.json'),
-
-            // merged globals
-            'title' => '',
-            'description' => '',
-            'schemes' => [],
-            'parseDocBlock' => true,
-            'parseSecurity' => true,
-            'generateExampleData' => true,
-            'parseModelRelationships' => true,
+            'file_format' => 'json',
         ];
 
-        $this->defaultVersion = [
+        $this->_defaultVersion = [
             'appVersion' => '2.0.0',
             'host' => env('APP_URL'),
             'basePath' => '/v2',
@@ -64,19 +59,10 @@ class SwaggerDocsManagerTest extends TestCase
                 'laravel-swagger.asset',
             ],
             'authFlow' => 'accessCode',
-            'file_path' => 'swagger-2.0.0.json',
-
-            // merged globals
-            'title' => '',
-            'description' => '',
-            'schemes' => [],
-            'parseDocBlock' => true,
-            'parseSecurity' => true,
-            'generateExampleData' => true,
-            'parseModelRelationships' => true,
+            'file_format' => 'json',
         ];
 
-        $this->config = [
+        $this->_config = [
             'schemes' => [],
             'defaultVersion' => '1.0.0',
             'title' => '',
@@ -91,49 +77,55 @@ class SwaggerDocsManagerTest extends TestCase
                 'middleware' => [],
             ],
             'versions' => [
-                $this->defaultVersion,
-                $this->versionOne,
+                $this->_versionOne,
+                $this->_defaultVersion,
             ],
         ];
+
+        $this->_docsManager = new SwaggerDocsManager($this->_config);
     }
 
-    public function testGetDefaultVersion()
+    public function testGetLastestVersionConfig(): void
     {
-        $swaggerDocs = new SwaggerDocsManager($this->config);
-
         $this->assertEquals(
-            $this->defaultVersion,
-            $swaggerDocs->getLastVersionConfig()
+            $this->_withGlobals($this->_defaultVersion),
+            $this->_docsManager->getLastestVersionConfig()
         );
     }
 
-    public function testFindVersion()
+    public function testFindVersionConfig(): void
     {
-        $swaggerDocs = new SwaggerDocsManager($this->config);
-
         $this->assertEquals(
-            $this->versionOne,
-            $swaggerDocs->findVersionConfig('1.0.0')
+            $this->_withGlobals($this->_versionOne),
+            $this->_docsManager->findVersionConfig('1.0.0')
         );
     }
 
-    public function testFindVersionConfigWithNotExistentConfig()
+    public function testGetLatestVersion(): void
     {
-        $swaggerDocs = new SwaggerDocsManager($this->config);
-
-        $this->assertEmpty($swaggerDocs->findVersionConfig('3.0.0'));
+        $this->assertEquals('2.0.0', $this->_docsManager->getLatestVersion());
     }
 
-    public function testGenerateSwaggerFileNameWithDefaultGenerator()
+    public function testFindVersionConfigWithNotExistentConfig(): void
     {
-        $swaggerDocs = new SwaggerDocsManager($this->config);
+        $this->assertEmpty($this->_docsManager->findVersionConfig('3.0.0'));
+    }
 
-        $fileName = $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
+    public function testGenerateSwaggerFileNameWithDefaultGenerator(): void
+    {
+        $fileName = $this->_docsManager->generateSwaggerFileName('1.0.0', 'json');
 
         $this->assertEquals('swagger-1.0.0.json', $fileName);
     }
 
-    public function testChangeFileNameGenerator()
+    public function testGetAllVersionConfigs(): void
+    {
+        $bothVersions = [$this->_withGlobals($this->_versionOne), $this->_withGlobals($this->_defaultVersion)];
+
+        $this->assertEquals($bothVersions, $this->_docsManager->getAllVersionConfigs());
+    }
+
+    public function testChangeFileNameGenerator(): void
     {
         SwaggerDocsManager::setFileNameGenerator(function (string $version, string $format) {
             $version = str_replace('.', '_', $version);
@@ -141,14 +133,12 @@ class SwaggerDocsManagerTest extends TestCase
             return "my-swagger-file-{$version}.{$format}";
         });
 
-        $swaggerDocs = new SwaggerDocsManager($this->config);
-
-        $fileName = $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
+        $fileName = $this->_docsManager->generateSwaggerFileName('1.0.0', 'json');
 
         $this->assertEquals('my-swagger-file-1_0_0.json', $fileName);
     }
 
-    public function provideInvalidFileNames()
+    public function provideInvalidFileNames(): array
     {
         return [
             [''],
@@ -160,11 +150,8 @@ class SwaggerDocsManagerTest extends TestCase
 
     /**
      * @dataProvider provideInvalidFileNames
-     * @param $invalidFileName
      */
-    public function testChangeFileNameGeneratorReturningInvalidFileName(
-        $invalidFileName
-    ) {
+    public function testChangeFileNameGeneratorReturningInvalidFileName($invalidFileName): void {
         $this->expectException(RuntimeException::class);
 
         SwaggerDocsManager::setFileNameGenerator(
@@ -173,7 +160,12 @@ class SwaggerDocsManagerTest extends TestCase
             }
         );
 
-        $swaggerDocs = new SwaggerDocsManager($this->config);
+        $swaggerDocs = new SwaggerDocsManager($this->_config);
         $swaggerDocs->generateSwaggerFileName('1.0.0', 'json');
+    }
+
+    private function _withGlobals(array $versionConfig): array
+    {
+        return array_merge($this->_globalConfig, $versionConfig);
     }
 }

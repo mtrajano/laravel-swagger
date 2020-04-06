@@ -25,11 +25,11 @@ class SwaggerDocsController extends Controller
      */
     public function __invoke(string $version = null)
     {
-        $version = $version ?? $this->swaggerDocsManager->getLastVersionKey();
+        $version = $version ?? $this->swaggerDocsManager->getLatestVersion();
 
-        $apiVersions = $this->swaggerDocsManager->getRoutesWithVersions();
+        $apiVersions = $this->swaggerDocsManager->getVersionRoutePaths();
 
-        $filePath = $this->swaggerDocsManager->getFilePathByVersion($version);
+        $filePath = $this->swaggerDocsManager->getSwaggerFileUrl($version);
 
         return view('laravel-swagger::index')
             ->with([

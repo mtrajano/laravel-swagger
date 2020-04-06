@@ -290,7 +290,7 @@ class ResponseGeneratorTest extends TestCase
     {
         $config = (
             new SwaggerDocsManager(config('laravel-swagger'))
-        )->getLastVersionConfig();
+        )->getLastestVersionConfig();
 
         $this->responses = (
             new ResponseGenerator($route, $config['errors_definitions'])

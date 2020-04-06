@@ -25,6 +25,6 @@ class SecurityDefinitionsFactory
             return new JWTSecurityDefinitionsGenerator();
         }
 
-        throw new InvalidArgumentException('Invalid security type');
+        throw new InvalidArgumentException('Unsupported security type');
     }
 }

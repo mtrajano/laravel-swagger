@@ -78,7 +78,7 @@ class GenerateSwaggerDocCommand extends Command
         $apiVersion = $this->option('api-version') ?? self::DEFAULT_API_VERSION;
 
         return $apiVersion === self::DEFAULT_API_VERSION
-            ? $this->swaggerDocsManager->getAllVersionsConfigs()
-            : $this->swaggerDocsManager->filterVersionsConfigs($apiVersion);
+            ? $this->swaggerDocsManager->getAllVersionConfigs()
+            : [$this->swaggerDocsManager->findVersionConfig($apiVersion)];
     }
 }

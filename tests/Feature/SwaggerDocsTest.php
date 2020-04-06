@@ -75,8 +75,8 @@ class SwaggerDocsTest extends TestCase
         $filePath = "swagger-$defaultVersion.json";
 
         $apiVersions = [
-            '/docs/1.0.0' => '1.0.0',
-            '/docs/2.0.0' => '2.0.0',
+            '1.0.0' => '/docs/1.0.0',
+            '2.0.0' => '/docs/2.0.0',
         ];
 
         $this->get($route)

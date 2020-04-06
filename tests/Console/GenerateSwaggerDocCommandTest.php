@@ -49,7 +49,7 @@ class GenerateSwaggerDocCommandTest extends TestCase
         parent::setUp();
 
         $this->swaggerDocsManager = new SwaggerDocsManager(config('laravel-swagger'));
-        $this->lastVersionConfig = $this->swaggerDocsManager->getLastVersionConfig();
+        $this->lastVersionConfig = $this->swaggerDocsManager->getLastestVersionConfig();
     }
 
     public function testGenerateSwaggerDocToAllVersion()
