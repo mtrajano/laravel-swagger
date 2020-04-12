@@ -113,7 +113,7 @@ class DefinitionGeneratorTest extends TestCase
         array $notAllowwedHttpMethods
     ) {
         $routeMock = $this->createMock(Route::class);
-        $routeMock->method('methods')->willReturn($notAllowwedHttpMethods);
+        $routeMock->method('getMethods')->willReturn($notAllowwedHttpMethods);
 
         $this->generateDefinitionsForRoute($routeMock)
             ->assertEmptyDefinitions();
@@ -525,7 +525,7 @@ class DefinitionGeneratorTest extends TestCase
         $route->method('getModel')
             ->willReturn($mockCustomer);
 
-        $route->method('validMethods')
+        $route->method('getActionMethods')
             ->willReturn(['get']);
 
         $generator = $this->getMockBuilder(DefinitionGenerator::class)

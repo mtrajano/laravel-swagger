@@ -97,7 +97,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     public function generateForRoute(Route $route): array
     {
         $actionScopes = [];
-        foreach ($route->middleware() as $middleware) {
+        foreach ($route->getMiddleware() as $middleware) {
             if ($this->isPassportScopeMiddleware($middleware)) {
                 $actionScopes = [
                     self::SECURITY_DEFINITION_NAME => $middleware->parameters(),
@@ -129,7 +129,7 @@ class OAuthSecurityDefinitionsGenerator implements SecurityDefinitionsGenerator
     private function hasOauthRoutes(): bool
     {
         foreach ($this->getAllAppRoutes() as $route) {
-            $uri = $route->uri();
+            $uri = $route->getUri();
 
             if ($uri === self::OAUTH_TOKEN_PATH || $uri === self::OAUTH_AUTHORIZE_PATH) {
                 return true;

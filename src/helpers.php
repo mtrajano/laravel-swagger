@@ -11,29 +11,6 @@ if (!function_exists('strip_optional_char')) {
     }
 }
 
-if (!function_exists('get_annotations')) {
-    /**
-     * Get annotations from text filtering by name.
-     *
-     * @param string $from  The annotation name with "@". E.g.: "@throws"
-     * @param string $annotationName
-     * @return array
-     */
-    function get_annotations(string $from, string $annotationName): array
-    {
-        preg_match_all('#@(.*?)\n#s', $from, $annotations);
-
-        $foundAnnotations = [];
-        foreach (reset($annotations) as $annotation) {
-            if (Str::startsWith($annotation, $annotationName)) {
-                $foundAnnotations[] = trim(Str::replaceFirst($annotationName, '', $annotation));
-            }
-        }
-
-        return $foundAnnotations;
-    }
-}
-
 if (!function_exists('get_all_model_relations')) {
     /**
      * Identify all relationships for a given model.

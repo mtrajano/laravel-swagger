@@ -36,7 +36,7 @@ class SuccessResponseGenerator
         ];
 
         // Get the status code from route method
-        $methods = $this->route->validMethods();
+        $methods = $this->route->getActionMethods();
 
         // TODO: Handle with many methods in same route. E.g.: Route::match(['GET', 'POST']);
         $httpCode = $methodMappingHttpCode[$methods[0]];

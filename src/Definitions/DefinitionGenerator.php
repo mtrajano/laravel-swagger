@@ -107,7 +107,7 @@ class DefinitionGenerator
     {
         $allowGenerateDefinitionMethods = ['get', 'post'];
 
-        foreach ($this->route->validMethods() as $method) {
+        foreach ($this->route->getActionMethods() as $method) {
             if (!in_array($method, $allowGenerateDefinitionMethods)) {
                 return false;
             }

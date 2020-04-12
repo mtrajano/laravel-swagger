@@ -3,32 +3,41 @@
 namespace Mtrajano\LaravelSwagger\DataObjects;
 
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as LaravelModel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Mtrajano\LaravelSwagger\LaravelSwaggerException;
-use ReflectionClass;
-use ReflectionMethod;
+use phpDocumentor\Reflection;
 
 class Route
 {
-    private $route;
     /**
-     * @var Middleware[]
+     * @var \Illuminate\Routing\Route
      */
-    private $middleware;
+    private $_route;
 
-    public function __construct(LaravelRoute $route)
+    /**
+     * @var \Mtrajano\LaravelSwagger\DataObjects\Middleware[]
+     */
+    private $_middleware;
+
+    /**
+     * @var \phpDocumentor\Reflection\DocBlockFactoryInterface
+     */
+    private $_docParserFactory;
+
+    public function __construct(LaravelRoute $route, Reflection\DocBlockFactory $docParserFactory = null)
     {
-        $this->route = $route;
-        $this->middleware = $this->formatMiddleware();
+        $this->_route = $route;
+        $this->_docParserFactory = $docParserFactory ?? Reflection\DocBlockFactory::createInstance();
+        $this->_middleware = $this->_formatMiddleware();
     }
 
-    public function originalUri()
+    public function getOriginalUri(): string
     {
-        $uri = $this->route->uri();
+        $uri = $this->_route->uri();
 
         if (!Str::startsWith($uri, '/')) {
             $uri = '/' . $uri;
@@ -37,56 +46,108 @@ class Route
         return $uri;
     }
 
-    public function uri()
+    public function getUri(): string
     {
-        return strip_optional_char($this->originalUri());
+        return strip_optional_char($this->getOriginalUri());
     }
 
     /**
-     * @return array|Middleware[]
+     * @return \Mtrajano\LaravelSwagger\DataObjects\Middleware[]
      */
-    public function middleware()
+    public function getMiddleware(): array
     {
-        return $this->middleware;
+        return $this->_middleware;
     }
 
-    public function action(): string
+    public function getAction(): string
     {
-        return $this->route->getActionName();
+        return $this->_route->getActionName();
     }
 
-    public function methods()
+    public function getMethods(): array
     {
-        return array_map('strtolower', $this->route->methods());
+        return array_map('strtolower', $this->_route->methods());
     }
 
     /**
      * Get valid http methods from action.
-     *
-     * @return array
      */
-    public function validMethods(): array
+    public function getActionMethods(): array
     {
-        return (array) array_filter($this->methods(), function ($route) {
+        return (array) array_filter($this->getMethods(), function ($route) {
             return $route !== 'head';
         });
     }
 
-    protected function formatMiddleware()
+    /**
+     * Get route name.
+     */
+    public function getName(): ?string
     {
-        return array_map(function ($middleware) {
-            return new Middleware($middleware);
-        }, $this->route->gatherMiddleware());
+        return $this->_route->getName();
     }
 
     /**
-     * Get route name.
+     * Get exceptions thrown in action.
      *
-     * @return string
+     * @throws \ReflectionException
      */
-    public function getName()
+    public function getThrows(): array
     {
-        return $this->route->getName();
+        $docBlock = $this->_getActionDocBlock();
+
+        $exceptions = $this->_getTagValuesForDocblock($docBlock, 'throws');
+
+        return array_unique(array_map(function ($e) {
+            return trim(trim($e), '\\');
+        }, $exceptions));
+    }
+
+    /**
+     * Get model searching on route.
+     *
+     * @throws \ReflectionException
+     */
+    public function getModel(): ?LaravelModel
+    {
+        $modelName = $this->_getModelNameFromMethodDocs()
+            ?? $this->_getModelNameFromControllerDocs();
+
+        if (!$modelName) {
+            return null;
+        }
+
+        if (!is_subclass_of($modelName, LaravelModel::class)) {
+            throw new LaravelSwaggerException(
+                "{$modelName} @model must be an instance of [" . LaravelModel::class . ']'
+            );
+        }
+
+        return new $modelName;
+    }
+
+    /**
+     * @return \Mtrajano\LaravelSwagger\DataObjects\Middleware[]
+     */
+    private function _formatMiddleware(): array
+    {
+        return array_map(function ($middleware) {
+            return new Middleware($middleware);
+        }, $this->_route->gatherMiddleware());
+    }
+
+    /**
+     * Get annotation from specific model. You can pass the docBlock
+     * content on param $docBlock. By default will be used the docBlock
+     * from action.
+     *
+     * @throws \ReflectionException
+     */
+    private function _getModelNameFromMethodDocs(?string $docBlock = null): ?string
+    {
+        $docBlock = $docBlock ?? $this->_getActionDocBlock();
+
+        return $this->_getTagValuesForDocblock($docBlock, 'model')[0] ?? null;
     }
 
     /**
@@ -96,54 +157,29 @@ class Route
      *
      * @throws \ReflectionException
      */
-    private function getModelNameFromControllerDocs(): ?string
+    private function _getModelNameFromControllerDocs(): ?string
     {
-        [$class] = Str::parseCallback($this->action());
+        [$class] = Str::parseCallback($this->getAction());
 
         if (!$class) {
             return null;
         }
 
-        $reflection = new ReflectionClass($class);
+        $reflection = new \ReflectionClass($class);
 
         $docBlock = $reflection->getDocComment();
 
-        return $this->getModelNameFromMethodDocs($docBlock);
-    }
-
-    /**
-     * Get model searching on route.
-     *
-     * @throws \ReflectionException
-     */
-    public function getModel(): ?Model
-    {
-        $modelName = $this->getModelNameFromMethodDocs()
-            ?? $this->getModelNameFromControllerDocs();
-
-        if (!$modelName) {
-            return null;
-        }
-
-        if (!is_subclass_of($modelName, Model::class)) {
-            throw new LaravelSwaggerException(
-                "{$modelName} @model must be an instance of [" . Model::class . ']'
-            );
-        }
-
-        return new $modelName;
+        return $this->_getModelNameFromMethodDocs($docBlock);
     }
 
     /**
      * Get action DockBlock.
      *
-     * @return string
-     *
      * @throws \ReflectionException
      */
-    private function getActionDocBlock()
+    private function _getActionDocBlock(): string
     {
-        $actionInstance = $this->getActionClassInstance();
+        $actionInstance = $this->_getActionClassInstance();
 
         return $actionInstance ? $actionInstance->getDocComment() ?: '' : '';
     }
@@ -153,15 +189,30 @@ class Route
      *
      * @throws \ReflectionException
      */
-    private function getActionClassInstance(): ?ReflectionMethod
+    private function _getActionClassInstance(): ?\ReflectionMethod
     {
-        [$class, $method] = Str::parseCallback($this->action());
+        [$class, $method] = Str::parseCallback($this->getAction());
 
         if (!$class || !$method) {
             return null;
         }
 
-        return new ReflectionMethod($class, $method);
+        return new \ReflectionMethod($class, $method);
+    }
+
+    private function _getTagValuesForDocblock(string $docBlock, string $tag): array
+    {
+        if (!$docBlock || !$tag) {
+            return [];
+        }
+
+        $docBlock = $this->_docParserFactory->create($docBlock);
+
+        $values = array_map(function($tag) {
+            return (string) $tag;
+        }, $docBlock->getTagsByName($tag));
+
+        return array_values(array_filter($values));
     }
 
     /**
@@ -192,7 +243,7 @@ class Route
      */
     public function getFormRequestClassFromParams(): ?string
     {
-        $actionInstance = $this->getActionClassInstance();
+        $actionInstance = $this->_getActionClassInstance();
         if (!$actionInstance) {
             return null;
         }
@@ -216,49 +267,11 @@ class Route
     }
 
     /**
-     * Get exceptions thrown in action.
-     *
-     * @throws \ReflectionException
-     */
-    public function getThrows(): array
-    {
-        $docBlock = $this->getActionDocBlock();
-
-        $exceptions = get_annotations($docBlock, '@throws');
-
-        if (!empty($exceptions)) {
-            $exceptions = array_unique(array_map(function ($e) {
-                $trimmed_exception = preg_replace('/^\s+|\s+$/', '', $e);
-
-                return trim($trimmed_exception, '\\');
-            }, $exceptions));
-        }
-
-        return $exceptions;
-    }
-
-    /**
-     * Get annotation from specific model. You can pass the docBlock
-     * content on param $docBlock. By default will be used the docBlock
-     * from action.
-     *
-     * @throws \ReflectionException
-     */
-    private function getModelNameFromMethodDocs(?string $docBlock = null): ?string
-    {
-        $docBlock = $docBlock ?? $this->getActionDocBlock();
-
-        return get_annotations($docBlock, '@model')[0] ?? null;
-    }
-
-    /**
      * Check if this route has auth middleware.
-     *
-     * @return bool
      */
     public function hasAuthMiddleware(): bool
     {
-        foreach ($this->middleware() as $middleware) {
+        foreach ($this->getMiddleware() as $middleware) {
             if (Str::contains($middleware->name(), 'auth')) {
                 return true;
             }

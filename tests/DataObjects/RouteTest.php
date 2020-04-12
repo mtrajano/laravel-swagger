@@ -2,13 +2,33 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\DataObjects;
 
-use Illuminate\Routing\Controller;
-use Mtrajano\LaravelSwagger\DataObjects\Middleware;
-use Mtrajano\LaravelSwagger\DataObjects\Route;
+use Illuminate\Routing\Controller as LaravelController;
+use Illuminate\Routing\Route as LaravelRoute;
+use Illuminate\Database\Eloquent\Model as LaravelModel;
+use Mtrajano\LaravelSwagger\DataObjects;
+use Mtrajano\LaravelSwagger\LaravelSwaggerException;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
 
 class RouteTest extends TestCase
 {
+    private $_route;
+    private $_laravel_route;
+    private $_laravel_middleware = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->_laravel_route = $this->createMock(LaravelRoute::class);
+        $this->_laravel_route
+            ->method('gatherMiddleware')
+            ->willReturnCallback(function() {
+                return $this->_laravel_middleware;
+            });
+
+        $this->_route = new DataObjects\Route($this->_laravel_route);
+    }
+
     protected function getEnvironmentSetUp($app)
     {
         parent::getEnvironmentSetUp($app);
@@ -27,6 +47,148 @@ class RouteTest extends TestCase
         $app['router']
             ->get('/exception-route', 'Mtrajano\LaravelSwagger\Tests\DataObjects\ExceptionRoute@index')
             ->name('exception-route');
+        $app['router']
+            ->get('/model-route-action', 'Mtrajano\LaravelSwagger\Tests\DataObjects\ModelRoute@index')
+            ->name('model-route-action');
+        $app['router']
+            ->get('/model-route-invalid', 'Mtrajano\LaravelSwagger\Tests\DataObjects\ModelRoute@show')
+            ->name('model-route-invalid');
+        $app['router']
+            ->get('/model-route-class', 'Mtrajano\LaravelSwagger\Tests\DataObjects\ModelRoute@delete')
+            ->name('model-route-class');
+
+    }
+
+    public function testGetOriginalUriDoesNotPrefixIfPrefixedAlready(): void
+    {
+        $this->_laravel_route
+            ->method('uri')
+            ->willReturn('/path/{user_id?}');
+
+        $this->assertEquals('/path/{user_id?}', $this->_route->getOriginalUri());
+    }
+
+    public function testGetOriginaluriPrefixesIfNotAlready(): void
+    {
+        $this->_laravel_route
+            ->method('uri')
+            ->willReturn('path/{user_id?}');
+
+        $this->assertEquals('/path/{user_id?}', $this->_route->getOriginalUri());
+    }
+
+    public function testGetUriStripsOptionalTag(): void
+    {
+        $this->_laravel_route
+            ->method('uri')
+            ->willReturn('/path/{user_id?}');
+
+        $this->assertEquals('/path/{user_id}', $this->_route->getUri());
+    }
+
+    public function testGetMiddleware(): void
+    {
+        $this->_laravel_middleware = [
+            'signed',
+            'auth:api',
+            'throttle:60,1'
+        ];
+
+        $this->_route = new DataObjects\Route($this->_laravel_route);
+        $middleware = $this->_route->getMiddleware();
+
+        $this->assertCount(3, $middleware);
+        $this->assertContainsOnlyInstancesOf(DataObjects\Middleware::class, $middleware);
+    }
+
+    /**
+     * @todo test with actual laravel route
+     */
+    public function testGetAction():  void
+    {
+        $this->_laravel_route
+            ->method('getActionName')
+            ->willReturn('SomeClass@action');
+
+        $this->assertEquals('SomeClass@action', $this->_route->getAction());
+    }
+
+    public function testGetMethods(): void
+    {
+        $this->_laravel_route
+            ->method('methods')
+            ->willReturn(['GET', 'POST']);
+
+        $this->assertEquals(['get', 'post'], $this->_route->getMethods());
+    }
+
+    public function testActionMethodsDoesNotReturnHead(): void
+    {
+        $this->_laravel_route
+            ->method('methods')
+            ->willReturn(['GET', 'POST', 'HEAD']);
+
+        $this->assertEquals(['get', 'post'], $this->_route->getActionMethods());
+    }
+
+    /**
+     * @todo test with actual laravel route (including route without an alias)
+     */
+    public function testGetName(): void
+    {
+        $this->_laravel_route
+            ->method('getName')
+            ->willReturn('photos.index');
+
+        $this->assertEquals('photos.index', $this->_route->getName());
+    }
+
+    // -------------------
+    // Using actual routes
+    // -------------------
+
+    public function testGetThrows(): void
+    {
+        $route = $this->_getRouteByName('exception-route');
+
+        $this->assertEquals(['Exception', 'SpaceExcetion', 'TabException'], $route->getThrows());
+    }
+
+    public function testGetThrowsWithoutThrowsTag(): void
+    {
+        $route = $this->_getRouteByName('only-route-middleware');
+
+        $this->assertEmpty($route->getThrows());
+    }
+
+    public function testGetModelFromActionDocs(): void
+    {
+        $route = $this->_getRouteByName('model-route-action');
+
+        $this->assertInstanceOf(ActionModel::class, $route->getModel());
+    }
+
+    public function testGetModelFromClassDocs(): void
+    {
+        $route = $this->_getRouteByName('model-route-class');
+
+        $this->assertInstanceOf(ClassModel::class, $route->getModel());
+    }
+
+    public function testGetModelThatIsInvalid(): void
+    {
+        $this->expectException(LaravelSwaggerException::class);
+
+        $route = $this->_getRouteByName('model-route-invalid');
+
+        $route->getModel();
+    }
+
+    public function testGetModelWithoutModelTag(): void
+    {
+        $route = $this->_getRouteByName('only-route-middleware');
+
+        $this->assertNull($route->getModel());
     }
 
     public function provideRoutesWithMiddleware(): array
@@ -71,36 +233,35 @@ class RouteTest extends TestCase
         ];
     }
 
-    public function testGetThrows()
-    {
-        $laravelRoute = app('router')->getRoutes()->getByName('exception-route');
-
-        $route = new Route($laravelRoute);
-
-        $this->assertEquals(['Exception', 'SpaceExcetion', 'TabException'], $route->getThrows());
-    }
-
     /**
      * @dataProvider provideRoutesWithMiddleware
      */
-    public function testCreateFromOnlyControllerWithMiddleware(string $routeName, array $expectedMiddleware)
+    public function testCreateFromOnlyControllerWithMiddleware(string $routeName, array $expectedMiddleware): void
     {
-        $laravelRoute = app('router')->getRoutes()->getByName($routeName);
+        $route = $this->_getRouteByName($routeName);
 
-        $route = new Route($laravelRoute);
+        $this->assertIsArray($route->getMiddleware());
+        $this->assertNotEmpty($route->getMiddleware());
+        $this->assertContainsOnlyInstancesOf(DataObjects\Middleware::class, $route->getMiddleware());
 
-        $this->assertIsArray($route->middleware());
-        $this->assertNotEmpty($route->middleware());
-        $this->assertContainsOnlyInstancesOf(Middleware::class, $route->middleware());
-
-        foreach ($route->middleware() as $key => $middleware) {
+        foreach ($route->getMiddleware() as $key => $middleware) {
             $this->assertEquals($expectedMiddleware[$key]['name'], $middleware->name());
             $this->assertEquals($expectedMiddleware[$key]['params'], $middleware->parameters());
         }
     }
+
+    private function _getRouteByName(string $routeName): DataObjects\Route
+    {
+        $laravelRoute = app('router')->getRoutes()->getByName($routeName);
+
+        return new DataObjects\Route($laravelRoute);
+    }
 }
 
-class ControllerMiddleware extends Controller
+/**
+ * @todo move these to the stubs namespace
+ */
+class ControllerMiddleware extends LaravelController
 {
     public function __construct()
     {
@@ -112,7 +273,7 @@ class ControllerMiddleware extends Controller
     }
 }
 
-class MiddlewareControllerRoute extends Controller
+class MiddlewareControllerRoute extends LaravelController
 {
     public function __construct()
     {
@@ -124,14 +285,14 @@ class MiddlewareControllerRoute extends Controller
     }
 }
 
-class OnlyRouteMiddleware extends Controller
+class OnlyRouteMiddleware extends LaravelController
 {
     public function index()
     {
     }
 }
 
-class ExceptionRoute extends Controller
+class ExceptionRoute extends LaravelController
 {
     /**
      * some description.
@@ -143,4 +304,40 @@ class ExceptionRoute extends Controller
     public function index()
     {
     }
+}
+
+/**
+ * @model \Mtrajano\LaravelSwagger\Tests\DataObjects\ClassModel
+ */
+class ModelRoute extends LaravelController
+{
+    /**
+     * @model \Mtrajano\LaravelSwagger\Tests\DataObjects\ActionModel
+     */
+    public function index()
+    {
+    }
+
+    /**
+     * @model \Mtrajano\LaravelSwagger\Tests\DataObjects\InvalidModel
+     */
+    public function show()
+    {
+    }
+
+    public function delete()
+    {
+    }
+}
+
+class ClassModel extends LaravelModel
+{
+}
+
+class ActionModel extends LaravelModel
+{
+}
+
+class InvalidModel
+{
 }

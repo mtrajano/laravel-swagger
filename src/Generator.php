@@ -73,7 +73,7 @@ class Generator
                 $this->docs['paths'][$this->getRouteUri()] = [];
             }
 
-            foreach ($route->methods() as $method) {
+            foreach ($route->getMethods() as $method) {
                 $this->method = $method;
 
                 if (in_array($this->method, $this->config['ignoredMethods'])) {
@@ -135,7 +135,7 @@ class Generator
                     '/^' . // Starts with prefix
                     preg_quote($this->routeFilter, '/') .
                     '/',
-                    $route->uri()
+                    $route->getUri()
                 );
             });
         }
@@ -203,7 +203,7 @@ class Generator
     {
         $rules = $this->getFormRules() ?: [];
 
-        $parameters = (new Parameters\PathParameterGenerator($this->route->originalUri()))->getParameters();
+        $parameters = (new Parameters\PathParameterGenerator($this->route->getOriginalUri()))->getParameters();
 
         if (!empty($rules)) {
             $parameterGenerator = $this->getParameterGenerator($rules);
@@ -271,7 +271,7 @@ class Generator
      */
     private function getActionClassInstance(): ?ReflectionMethod
     {
-        [$class, $method] = Str::parseCallback($this->route->action());
+        [$class, $method] = Str::parseCallback($this->route->getAction());
 
         if (!$class || !$method) {
             return null;
@@ -332,7 +332,7 @@ class Generator
 
     private function getRouteUri(): string
     {
-        $uri = Str::replaceFirst($this->config['basePath'], '', $this->route->uri());
+        $uri = Str::replaceFirst($this->config['basePath'], '', $this->route->getUri());
 
         return Str::start($uri, '/');
     }
