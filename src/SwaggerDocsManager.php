@@ -103,7 +103,7 @@ class SwaggerDocsManager
 
         $fileName = $this->generateSwaggerFileName($version, $format);
 
-        return sprintf("%s/%s", config('app.url'), $fileName);
+        return sprintf('%s/%s', config('app.url'), $fileName);
     }
 
     /**

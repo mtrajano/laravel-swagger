@@ -178,7 +178,7 @@ class Generator
 
         [$isDeprecated, $summary, $description, $tags] = $this->parseActionDocBlock($docBlock);
 
-        if($this->config['autoTags'] && empty($tags)) {
+        if ($this->config['autoTags'] && empty($tags)) {
             $className = $actionInstance->getDeclaringClass()->getShortName();
             $tags = [substr($className, 0, strpos($className, 'Controller'))];
         }
@@ -303,8 +303,8 @@ class Generator
 
             /** @var Generic $actionTag */
             $actionTag = collect($parsedComment->getTagsByName('tags'))->first();
-            if($actionTag !== null && $actionTag->getDescription() !== null) {
-                $tags = explode(' ',$actionTag->getDescription()->getBodyTemplate());
+            if ($actionTag !== null && $actionTag->getDescription() !== null) {
+                $tags = explode(' ', $actionTag->getDescription()->getBodyTemplate());
             } else {
                 $tags = [];
             }

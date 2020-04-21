@@ -153,7 +153,8 @@ class SwaggerDocsManagerTest extends TestCase
     /**
      * @dataProvider provideInvalidFileNames
      */
-    public function testChangeFileNameGeneratorReturningInvalidFileName($invalidFileName): void {
+    public function testChangeFileNameGeneratorReturningInvalidFileName($invalidFileName): void
+    {
         $this->expectException(RuntimeException::class);
 
         SwaggerDocsManager::setFileNameGenerator(
