@@ -9,6 +9,7 @@ use Mtrajano\LaravelSwagger\Definitions\DefinitionGenerator;
 use Mtrajano\LaravelSwagger\Definitions\Security\Contracts\SecurityDefinitionsGenerator;
 use Mtrajano\LaravelSwagger\Definitions\Security\SecurityDefinitionsFactory;
 use Mtrajano\LaravelSwagger\Responses\ResponseGenerator;
+use phpDocumentor\Reflection\DocBlock\Tags\Generic;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
 
@@ -175,7 +176,12 @@ class Generator
         $actionInstance = $this->getActionClassInstance();
         $docBlock = $actionInstance ? ($actionInstance->getDocComment() ?: '') : '';
 
-        [$isDeprecated, $summary, $description] = $this->parseActionDocBlock($docBlock);
+        [$isDeprecated, $summary, $description, $tags] = $this->parseActionDocBlock($docBlock);
+
+        if ($this->config['autoTags'] && empty($tags)) {
+            $className = $actionInstance->getDeclaringClass()->getShortName();
+            $tags = [substr($className, 0, strpos($className, 'Controller'))];
+        }
 
         $path = $this->getRouteUri();
 
@@ -183,6 +189,7 @@ class Generator
             'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
+            'tags' => $tags,
         ];
 
         $this->addActionDefinitions();
@@ -283,7 +290,7 @@ class Generator
     private function parseActionDocBlock(string $docBlock): array
     {
         if (empty($docBlock) || !$this->config['parseDocBlock']) {
-            return [false, '', ''];
+            return [false, '', '', []];
         }
 
         try {
@@ -294,9 +301,17 @@ class Generator
             $summary = $parsedComment->getSummary();
             $description = (string) $parsedComment->getDescription();
 
-            return [$isDeprecated, $summary, $description];
+            /** @var Generic $actionTag */
+            $actionTag = collect($parsedComment->getTagsByName('tags'))->first();
+            if ($actionTag !== null && $actionTag->getDescription() !== null) {
+                $tags = explode(' ', $actionTag->getDescription()->getBodyTemplate());
+            } else {
+                $tags = [];
+            }
+
+            return [$isDeprecated, $summary, $description, $tags];
         } catch (\Exception $e) {
-            return [false, '', ''];
+            return [false, '', '', []];
         }
     }
 

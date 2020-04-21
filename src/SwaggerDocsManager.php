@@ -103,7 +103,7 @@ class SwaggerDocsManager
 
         $fileName = $this->generateSwaggerFileName($version, $format);
 
-        return sprintf("%s/%s", config('app.url'), $fileName);
+        return sprintf('%s/%s', config('app.url'), $fileName);
     }
 
     /**
@@ -158,6 +158,7 @@ class SwaggerDocsManager
         $version['description'] = $this->_config['description'];
         $version['schemes'] = $this->_config['schemes'];
         $version['parseDocBlock'] = $this->_config['parseDocBlock'];
+        $version['autoTags'] = $this->_config['autoTags'];
         $version['parseSecurity'] = $this->_config['parseSecurity'];
         $version['generateExampleData'] = $this->_config['generateExampleData'];
         $version['parseModelRelationships'] = $this->_config['parseModelRelationships'];

@@ -23,6 +23,7 @@ class SwaggerDocsManagerTest extends TestCase
             'description' => '',
             'schemes' => [],
             'parseDocBlock' => true,
+            'autoTags' => false,
             'parseSecurity' => true,
             'generateExampleData' => true,
             'parseModelRelationships' => true,
@@ -68,6 +69,7 @@ class SwaggerDocsManagerTest extends TestCase
             'title' => '',
             'description' => '',
             'parseDocBlock' => true,
+            'autoTags' => false,
             'parseSecurity' => true,
             'generateExampleData' => true,
             'parseModelRelationships' => true,
@@ -151,7 +153,8 @@ class SwaggerDocsManagerTest extends TestCase
     /**
      * @dataProvider provideInvalidFileNames
      */
-    public function testChangeFileNameGeneratorReturningInvalidFileName($invalidFileName): void {
+    public function testChangeFileNameGeneratorReturningInvalidFileName($invalidFileName): void
+    {
         $this->expectException(RuntimeException::class);
 
         SwaggerDocsManager::setFileNameGenerator(

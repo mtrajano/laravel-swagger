@@ -14,6 +14,9 @@ class UserController extends Controller
         return json_encode([['first_name' => 'John'], ['first_name' => 'Jack']]);
     }
 
+    /**
+     * @tags user show
+     */
     public function show(UserShowRequest $request, $id)
     {
         return json_encode(['first_name' => 'John']);
