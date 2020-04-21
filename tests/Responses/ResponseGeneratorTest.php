@@ -151,8 +151,8 @@ class ResponseGeneratorTest extends TestCase
                 [
                     '204' => [
                         'description' => 'No Content',
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'customers.destroy',
