@@ -29,9 +29,11 @@ class SuccessResponseGenerator
     public function generate(): array
     {
         $methodMappingHttpCode = [
+            'options' => 204,
             'get' => 200,
             'post' => 201,
             'put' => 204,
+            'patch' => 204,
             'delete' => 204,
         ];
 

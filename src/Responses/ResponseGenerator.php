@@ -22,7 +22,7 @@ class ResponseGenerator
         $this->errorDefinitions = $errorDefinitions;
     }
 
-    public function generate()
+    public function generate(): array
     {
         $generators = $this->getGenerators();
 

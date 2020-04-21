@@ -40,6 +40,9 @@ class ResponseGeneratorTest extends TestCase
         parent::getEnvironmentSetUp($app);
 
         $app['router']
+            ->options('/customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@options')
+            ->name('customers.options');
+        $app['router']
             ->get('/customers', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@index')
             ->name('customers.index')
             ->middleware('auth');
@@ -49,6 +52,9 @@ class ResponseGeneratorTest extends TestCase
         $app['router']
             ->put('/customers/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@update')
             ->name('customers.update');
+        $app['router']
+            ->patch('/customers/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@upsert')
+            ->name('customers.upsert');
         $app['router']
             ->delete('/customers/{id}', 'Mtrajano\LaravelSwagger\Tests\Stubs\Controllers\CustomerController@destroy')
             ->name('customers.destroy');
@@ -63,6 +69,14 @@ class ResponseGeneratorTest extends TestCase
     public function provideRoutesToGenerateResponse()
     {
         return [
+            [
+                'customers.options',
+                [
+                    '204' => [
+                        'description' => 'No Content',
+                    ],
+                ],
+            ],
             [
                 'customers.index',
                 [
@@ -133,6 +147,14 @@ class ResponseGeneratorTest extends TestCase
                 ],
             ],
             [
+                'customers.upsert',
+                [
+                    '204' => [
+                        'description' => 'No Content',
+                    ]
+                ]
+            ],
+            [
                 'customers.destroy',
                 [
                     '204' => [
@@ -176,18 +198,14 @@ class ResponseGeneratorTest extends TestCase
 
     /**
      * @dataProvider provideRoutesToGenerateResponse
-     * @param string $routeName
-     * @param array $response
      */
-    public function testGeneratedResponses(
-        string $routeName,
-        array $response
-    ) {
+    public function testGeneratedResponses(string $routeName, array $expectedResponses)
+    {
         $route = new Route($this->getLaravelRouter()->getRoutes()->getByName($routeName));
 
-        $this->generateResponsesFromRoute($route);
+        $responses = $this->generateResponsesFromRoute($route);
 
-        $this->assertEquals($response, $this->responses);
+        $this->assertEquals($expectedResponses, $responses);
     }
 
     public function testGeneratedResponsesChangingConfig()
@@ -218,7 +236,8 @@ class ResponseGeneratorTest extends TestCase
         config(['laravel-swagger.versions.0.errors_definitions' => $newErrorDefinitions]);
 
         $routeName = 'customers.update';
-        $response = [
+
+        $expectedResponses = [
             '204' => [
                 'description' => 'No Content',
             ],
@@ -250,12 +269,12 @@ class ResponseGeneratorTest extends TestCase
 
         $route = new Route($this->getLaravelRouter()->getRoutes()->getByName($routeName));
 
-        $this->generateResponsesFromRoute($route);
+        $responses = $this->generateResponsesFromRoute($route);
 
-        $this->assertEquals($response, $this->responses);
+        $this->assertEquals($expectedResponses, $responses);
     }
 
-    public function testGeneratedResponsesWhenHttpCodeHasNotHandler()
+    public function testGeneratedResponsesWhenHttpCodeHasNotHandler(): void
     {
         $this->expectException(RuntimeException::class);
 
@@ -286,13 +305,11 @@ class ResponseGeneratorTest extends TestCase
         return app('router');
     }
 
-    private function generateResponsesFromRoute(Route $route)
+    private function generateResponsesFromRoute(Route $route): array
     {
-        $config = (
-            new SwaggerDocsManager(config('laravel-swagger'))
-        )->getLastestVersionConfig();
+        $config = (new SwaggerDocsManager(config('laravel-swagger')))->getLastestVersionConfig();
 
-        $this->responses = (
+        return (
             new ResponseGenerator($route, $config['errors_definitions'])
         )->generate();
     }
