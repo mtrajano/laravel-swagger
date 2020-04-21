@@ -208,7 +208,7 @@ class Route
 
         $docBlock = $this->_docParserFactory->create($docBlock);
 
-        $values = array_map(function($tag) {
+        $values = array_map(function ($tag) {
             return (string) $tag;
         }, $docBlock->getTagsByName($tag));
 
