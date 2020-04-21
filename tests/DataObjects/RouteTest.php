@@ -2,9 +2,9 @@
 
 namespace Mtrajano\LaravelSwagger\Tests\DataObjects;
 
+use Illuminate\Database\Eloquent\Model as LaravelModel;
 use Illuminate\Routing\Controller as LaravelController;
 use Illuminate\Routing\Route as LaravelRoute;
-use Illuminate\Database\Eloquent\Model as LaravelModel;
 use Mtrajano\LaravelSwagger\DataObjects;
 use Mtrajano\LaravelSwagger\LaravelSwaggerException;
 use Mtrajano\LaravelSwagger\Tests\TestCase;
@@ -22,7 +22,7 @@ class RouteTest extends TestCase
         $this->_laravel_route = $this->createMock(LaravelRoute::class);
         $this->_laravel_route
             ->method('gatherMiddleware')
-            ->willReturnCallback(function() {
+            ->willReturnCallback(function () {
                 return $this->_laravel_middleware;
             });
 
@@ -56,7 +56,6 @@ class RouteTest extends TestCase
         $app['router']
             ->get('/model-route-class', 'Mtrajano\LaravelSwagger\Tests\DataObjects\ModelRoute@delete')
             ->name('model-route-class');
-
     }
 
     public function testGetOriginalUriDoesNotPrefixIfPrefixedAlready(): void
@@ -91,7 +90,7 @@ class RouteTest extends TestCase
         $this->_laravel_middleware = [
             'signed',
             'auth:api',
-            'throttle:60,1'
+            'throttle:60,1',
         ];
 
         $this->_route = new DataObjects\Route($this->_laravel_route);
@@ -104,7 +103,7 @@ class RouteTest extends TestCase
     /**
      * @todo test with actual laravel route
      */
-    public function testGetAction():  void
+    public function testGetAction(): void
     {
         $this->_laravel_route
             ->method('getActionName')
