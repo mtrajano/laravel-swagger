@@ -45,7 +45,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Parse summary and descriptions
+    | Generate tags from controller name
+    |--------------------------------------------------------------------------
+    |
+    | If true creates a tag for an action from its controller name.
+    | (e.g. Methods in the UserController will be tagged with "User")
+    | This option does not overwrite any user specified tags on methods.
+    | Add "@tags tagName1 tagName2" to a methods phpDoc to use custom tags
+    |
+    */
+
+    'autoTags' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Parse security
     |--------------------------------------------------------------------------
     |
     | Tries to parse your middleware and defines the security definitions of

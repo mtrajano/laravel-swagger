@@ -291,6 +291,7 @@ EOD;
         $this->assertEquals('', $paths['/users/{id}']['get']['summary']);
         $this->assertEquals(false, $paths['/users/{id}']['get']['deprecated']);
         $this->assertEquals('', $paths['/users/{id}']['get']['description']);
+        $this->assertEquals(['user', 'show'], $paths['/users/{id}']['get']['tags']);
 
         $this->assertEquals('', $paths['/users/details']['get']['summary']);
         $this->assertEquals(true, $paths['/users/details']['get']['deprecated']);
