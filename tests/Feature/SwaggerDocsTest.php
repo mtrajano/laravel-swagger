@@ -20,6 +20,7 @@ class SwaggerDocsTest extends TestCase
             'host' => env('APP_URL'),
             'schemes' => [],
             'parseDocBlock' => true,
+            'autoTags' => false,
             'parseSecurity' => true,
             'generateExampleData' => true,
             'parseModelRelationships' => true,
