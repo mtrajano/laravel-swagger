@@ -1,4 +1,5 @@
 <?php
+
 namespace Mtrajano\LaravelSwagger\Responses;
 
 class ResponseGenerator implements ResponseGeneratorInterface
