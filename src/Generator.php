@@ -15,7 +15,6 @@ class Generator
 
     protected $config;
     protected $routeFilter;
-    /** @var Responses\ResponseGeneratorInterface */
     protected $responseGenerator;
     protected $docs;
     protected $route;

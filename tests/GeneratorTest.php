@@ -2,14 +2,18 @@
 
 namespace Mtrajano\LaravelSwagger\Tests;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Mtrajano\LaravelSwagger\Generator;
 use Mtrajano\LaravelSwagger\LaravelSwaggerException;
+use Mtrajano\LaravelSwagger\Responses\ResponseGeneratorInterface;
 
 class GeneratorTest extends TestCase
 {
     protected $config;
 
     protected $generator;
+
+    protected $responseGenerator;
 
     protected $endpoints = [
         '/users',
@@ -34,8 +38,16 @@ class GeneratorTest extends TestCase
     {
         parent::setUp();
 
+        try {
+            $this->responseGenerator = $this->app->make(ResponseGeneratorInterface::class);
+        } catch (BindingResolutionException $e) {
+            $this->responseGenerator = null;
+        }
+
         $this->generator = new Generator(
-            $this->config = config('laravel-swagger')
+            $this->config = config('laravel-swagger'),
+            null,
+            $this->responseGenerator
         );
     }
 
@@ -285,7 +297,8 @@ EOD;
     {
         $this->generator = new Generator(
             $this->config,
-            $routeFilter
+            $routeFilter,
+            $this->responseGenerator
         );
 
         $docs = $this->generator->generate();
@@ -309,6 +322,6 @@ EOD;
     {
         $config = array_merge($this->config, $config);
 
-        return (new Generator($config))->generate();
+        return (new Generator($config, null, $this->responseGenerator))->generate();
     }
 }
