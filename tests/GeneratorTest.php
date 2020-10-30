@@ -197,6 +197,9 @@ Data is validated [see description here](https://example.com) so no bad data can
 Please read the documentation for more information
 EOD;
 
+        //Allow running tests on windows
+        $expectedPostDescription = str_replace(PHP_EOL, "\n", $expectedPostDescription);
+
         $this->assertArrayHasKey('summary', $paths['/users']['get']);
         $this->assertArrayHasKey('description', $paths['/users']['get']);
         $this->assertArrayHasKey('responses', $paths['/users']['get']);
