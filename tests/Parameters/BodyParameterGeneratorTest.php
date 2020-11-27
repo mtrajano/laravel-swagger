@@ -48,7 +48,7 @@ class BodyParameterGeneratorTest extends TestCase
     public function testDataTypes($bodyParameters)
     {
         //Just testing types here
-        $properties = array_map(function($property) {
+        $properties = array_map(function ($property) {
             if (!array_key_exists('type', $property)) {
                 return [];
             }
