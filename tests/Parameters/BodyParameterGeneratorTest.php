@@ -52,6 +52,7 @@ class BodyParameterGeneratorTest extends TestCase
             if (!array_key_exists('type', $property)) {
                 return [];
             }
+
             return ['type' => $property['type']];
         }, $bodyParameters['schema']['properties']);
 
@@ -86,7 +87,6 @@ class BodyParameterGeneratorTest extends TestCase
             ],
         ], $bodyParameters['schema']['properties']);
     }
-
 
     public function testDateFormatInBody()
     {
