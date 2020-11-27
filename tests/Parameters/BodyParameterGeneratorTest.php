@@ -47,6 +47,14 @@ class BodyParameterGeneratorTest extends TestCase
      */
     public function testDataTypes($bodyParameters)
     {
+        //Just testing types here
+        $properties = array_map(function($property) {
+            if (!array_key_exists('type', $property)) {
+                return [];
+            }
+            return ['type' => $property['type']];
+        }, $bodyParameters['schema']['properties']);
+
         $this->assertEquals([
             'id'            => ['type' => 'integer'],
             'email'         => ['type' => 'string'],
@@ -55,7 +63,7 @@ class BodyParameterGeneratorTest extends TestCase
             'picture'       => ['type' => 'string'],
             'is_validated'  => ['type' => 'boolean'],
             'score'         => ['type' => 'number'],
-        ], $bodyParameters['schema']['properties']);
+        ], $properties);
     }
 
     public function testNoRequiredParameters()
@@ -75,6 +83,21 @@ class BodyParameterGeneratorTest extends TestCase
             'account_type' => [
                 'type' => 'integer',
                 'enum' => [1, 2],
+            ],
+        ], $bodyParameters['schema']['properties']);
+    }
+
+
+    public function testDateFormatInBody()
+    {
+        $bodyParameters = $this->getBodyParameters([
+            'account_type' => 'date',
+        ]);
+
+        $this->assertEquals([
+            'account_type' => [
+                'type' => 'string',
+                'format' => 'date',
             ],
         ], $bodyParameters['schema']['properties']);
     }
