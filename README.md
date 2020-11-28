@@ -1,5 +1,7 @@
 # Laravel Swagger
 
+**Please note this package is deprecated and is no longer being maintained. For the time being I will accept bug fix prs but will try to avoid adding any large features to it. If you are interested in taking over the project please shoot me an email and we can work it out.**
+
 Laravel Swagger scans your Laravel project's endpoints and auto generates a Swagger 2.0 documentation for you.
 
 [![Build Status](https://travis-ci.org/mtrajano/laravel-swagger.svg?branch=master)](https://travis-ci.org/mtrajano/laravel-swagger)
