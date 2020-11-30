@@ -6,6 +6,14 @@ use Illuminate\Console\Command;
 
 class GenerateSwaggerDoc extends Command
 {
+    protected $responseGenerator;
+
+    public function __construct(Responses\ResponseGeneratorInterface $responseGenerator = null)
+    {
+        parent::__construct();
+        $this->responseGenerator = $responseGenerator;
+    }
+
     /**
      * The name and signature of the console command.
      *
@@ -34,7 +42,7 @@ class GenerateSwaggerDoc extends Command
         $filter = $this->option('filter') ?: null;
         $file = $this->option('output') ?: null;
 
-        $docs = (new Generator($config, $filter))->generate();
+        $docs = (new Generator($config, $filter, $this->responseGenerator))->generate();
 
         $formattedDocs = (new FormatterManager($docs))
             ->setFormat($this->option('format'))

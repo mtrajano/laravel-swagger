@@ -15,16 +15,18 @@ class Generator
 
     protected $config;
     protected $routeFilter;
+    protected $responseGenerator;
     protected $docs;
     protected $route;
     protected $method;
     protected $docParser;
     protected $hasSecurityDefinitions;
 
-    public function __construct($config, $routeFilter = null)
+    public function __construct($config, $routeFilter = null, Responses\ResponseGeneratorInterface $responseGenerator = null)
     {
         $this->config = $config;
         $this->routeFilter = $routeFilter;
+        $this->responseGenerator = $responseGenerator ?: new Responses\ResponseGenerator();
         $this->docParser = DocBlockFactory::createInstance();
         $this->hasSecurityDefinitions = false;
     }
@@ -137,18 +139,21 @@ class Generator
             'summary' => $summary,
             'description' => $description,
             'deprecated' => $isDeprecated,
-            'responses' => [
-                '200' => [
-                    'description' => 'OK',
-                ],
-            ],
         ];
 
+        $this->addResponseDefinition();
         $this->addActionParameters();
 
         if ($this->hasSecurityDefinitions) {
             $this->addActionScopes();
         }
+    }
+
+    protected function addResponseDefinition()
+    {
+        $actionInstance = $this->getActionClassInstance();
+        $responses = $this->responseGenerator->getResponses($this->route->uri(), $this->method, $actionInstance);
+        $this->docs['paths'][$this->route->uri()][$this->method]['responses'] = $responses;
     }
 
     protected function addActionParameters()

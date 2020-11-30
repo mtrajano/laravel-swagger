@@ -2,14 +2,18 @@
 
 namespace Mtrajano\LaravelSwagger\Tests;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Mtrajano\LaravelSwagger\Generator;
 use Mtrajano\LaravelSwagger\LaravelSwaggerException;
+use Mtrajano\LaravelSwagger\Responses\ResponseGeneratorInterface;
 
 class GeneratorTest extends TestCase
 {
     protected $config;
 
     protected $generator;
+
+    protected $responseGenerator;
 
     protected $endpoints = [
         '/users',
@@ -34,8 +38,16 @@ class GeneratorTest extends TestCase
     {
         parent::setUp();
 
+        try {
+            $this->responseGenerator = $this->app->make(ResponseGeneratorInterface::class);
+        } catch (BindingResolutionException $e) {
+            $this->responseGenerator = null;
+        }
+
         $this->generator = new Generator(
-            $this->config = config('laravel-swagger')
+            $this->config = config('laravel-swagger'),
+            null,
+            $this->responseGenerator
         );
     }
 
@@ -197,6 +209,9 @@ Data is validated [see description here](https://example.com) so no bad data can
 Please read the documentation for more information
 EOD;
 
+        //Allow running tests on windows
+        $expectedPostDescription = str_replace(PHP_EOL, "\n", $expectedPostDescription);
+
         $this->assertArrayHasKey('summary', $paths['/users']['get']);
         $this->assertArrayHasKey('description', $paths['/users']['get']);
         $this->assertArrayHasKey('responses', $paths['/users']['get']);
@@ -282,7 +297,8 @@ EOD;
     {
         $this->generator = new Generator(
             $this->config,
-            $routeFilter
+            $routeFilter,
+            $this->responseGenerator
         );
 
         $docs = $this->generator->generate();
@@ -306,6 +322,6 @@ EOD;
     {
         $config = array_merge($this->config, $config);
 
-        return (new Generator($config))->generate();
+        return (new Generator($config, null, $this->responseGenerator))->generate();
     }
 }
