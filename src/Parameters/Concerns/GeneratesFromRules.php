@@ -46,6 +46,15 @@ trait GeneratesFromRules
         return current(explode('.', $param));
     }
 
+    protected function getFormatValue(array $paramRules)
+    {
+        if (in_array('date', $paramRules)) {
+            return 'date';
+        }
+
+        return false;
+    }
+
     protected function getEnumValues(array $paramRules)
     {
         $in = $this->getInParameter($paramRules);

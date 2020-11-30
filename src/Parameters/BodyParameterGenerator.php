@@ -105,6 +105,10 @@ class BodyParameterGenerator implements ParameterGenerator
             $propObj['enum'] = $enums;
         }
 
+        if ($format = $this->getFormatValue($rules)) {
+            $propObj['format'] = $format;
+        }
+
         if ($type === 'array') {
             $propObj['items'] = [];
         } elseif ($type === 'object') {
