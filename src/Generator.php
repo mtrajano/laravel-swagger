@@ -190,13 +190,9 @@ class Generator
         $parameters = $action_instance->getParameters();
 
         foreach ($parameters as $parameter) {
-            $class = $parameter->getClass();
-
-            if (!$class) {
-                continue;
-            }
-
-            $class_name = $class->getName();
+            $class_name = $name = $parameter->getType() && !$parameter->getType()->isBuiltin()
+                ? new \ReflectionClass($parameter->getType()->getName())
+                : null;
 
             if (is_subclass_of($class_name, FormRequest::class)) {
                 return (new $class_name)->rules();
