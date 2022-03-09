@@ -29,8 +29,9 @@ class SwaggerServiceProvider extends ServiceProvider
             $source, 'laravel-swagger'
         );
 
-        $this->app->bind(GeneratorContract::class, function ($app) {
+        $this->app->bind(GeneratorContract::class, function () {
             $class = config('laravel-swagger.generatorClass');
+
             return new $class(config('laravel-swagger'));
         });
     }

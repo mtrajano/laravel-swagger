@@ -32,6 +32,7 @@ class Generator implements GeneratorContract
     public function setRouteFilter($routeFilter)
     {
         $this->routeFilter = $routeFilter;
+
         return $this;
     }
 
