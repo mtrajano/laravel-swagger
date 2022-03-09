@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 class GenerateSwaggerDoc extends Command
 {
     /**
-     * @var GeneratorContract $generator
+     * @var GeneratorContract
      */
     private $generator;
 
