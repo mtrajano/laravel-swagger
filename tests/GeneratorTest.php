@@ -273,8 +273,8 @@ EOD;
     }
 
     /**
-     * @param string|null $routeFilter
-     * @param array $expectedRoutes
+     * @param  string|null  $routeFilter
+     * @param  array  $expectedRoutes
      *
      * @dataProvider filtersRoutesProvider
      */
