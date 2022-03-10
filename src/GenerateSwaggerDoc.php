@@ -7,6 +7,11 @@ use Illuminate\Console\Command;
 class GenerateSwaggerDoc extends Command
 {
     /**
+     * @var GeneratorContract
+     */
+    private $generator;
+
+    /**
      * The name and signature of the console command.
      *
      * @var string
@@ -23,6 +28,12 @@ class GenerateSwaggerDoc extends Command
      */
     protected $description = 'Automatically generates a swagger documentation file for this application';
 
+    public function __construct(GeneratorContract $generator)
+    {
+        $this->generator = $generator;
+        parent::__construct();
+    }
+
     /**
      * Execute the console command.
      *
@@ -30,11 +41,10 @@ class GenerateSwaggerDoc extends Command
      */
     public function handle()
     {
-        $config = config('laravel-swagger');
         $filter = $this->option('filter') ?: null;
         $file = $this->option('output') ?: null;
 
-        $docs = (new Generator($config, $filter))->generate();
+        $docs = $this->generator->setRouteFilter($filter)->generate();
 
         $formattedDocs = (new FormatterManager($docs))
             ->setFormat($this->option('format'))

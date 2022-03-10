@@ -82,4 +82,15 @@ return [
     'parseSecurity' => true,
 
     'authFlow' => 'accessCode',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Overrides
+    |--------------------------------------------------------------------------
+    |
+    | Allow overriding the generator class with a custom implementation
+    |
+    */
+
+    'generatorClass' => Mtrajano\LaravelSwagger\Generator::class,
 ];

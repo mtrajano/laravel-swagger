@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
 
-class Generator
+class Generator implements GeneratorContract
 {
     const SECURITY_DEFINITION_NAME = 'OAuth2';
     const OAUTH_TOKEN_PATH = '/oauth/token';
@@ -27,6 +27,13 @@ class Generator
         $this->routeFilter = $routeFilter;
         $this->docParser = DocBlockFactory::createInstance();
         $this->hasSecurityDefinitions = false;
+    }
+
+    public function setRouteFilter($routeFilter)
+    {
+        $this->routeFilter = $routeFilter;
+
+        return $this;
     }
 
     public function generate()
