@@ -305,7 +305,7 @@ class Generator implements GeneratorContract
         $resolver = $this->getMiddlewareResolver($middleware->name());
 
         return $resolver === 'Laravel\Passport\Http\Middleware\CheckScopes' ||
-               $resolver === 'Laravel\Passport\Http\Middleware\CheckForAnyScope';
+            $resolver === 'Laravel\Passport\Http\Middleware\CheckForAnyScope';
     }
 
     private function getMiddlewareResolver(string $middleware)
